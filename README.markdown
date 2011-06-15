@@ -13,7 +13,7 @@ prggmr is an event processing engine developed to bring developers a powerful ev
 * Stateful events
 * Chaining events
 * High performance
-    * ### Current benchmarks are allow prggmr to handle roughly
+    *  Current benchmarks allow prggmr to handle roughly
     * ~ 300,000 event fires per second
     * ~ 100,000 subscriptions per second
 * High test coverage
