@@ -1,13 +1,10 @@
 # prggmr
 
-lightweight, intuitive event-processing library for PHP 5.3+ applications
+high-performance event processing engine for PHP 5.3
 
 ## Introduction
 
-prggmr implements a fast event-processing engine for use with developing
-event driven applications in PHP 5.3+. It's incredibly simple, is driven by
-a robust engine that allows for event chaining, halting, states,
-asynchronous execution and robust subscriptions.
+prggmr is an event processing engine developed to bring developers a powerful event layer to their application development.
 
 ## Features
 
@@ -15,7 +12,10 @@ asynchronous execution and robust subscriptions.
 * Robust event subscription
 * Stateful events
 * Chaining events
-* High performance oriented
+* High performance
+    * ### Current benchmarks are allow prggmr to handle roughly
+    * ~ 300,000 event fires per second
+    * ~ 100,000 subscriptions per second
 * High test coverage
 * ZERO configuration
 * Priority based subscription
@@ -41,7 +41,7 @@ The following will install prggmr to your include path, again replace if yours d
     cd /usr/local/lib/php
     git clone git@github.com:nwhitingx/prggmr.git
 
-prggmr can now be included using 
+prggmr can now be included using
 
     require 'prggmr/lib/prggmr.php';
 
