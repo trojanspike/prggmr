@@ -43,7 +43,7 @@ class Engine extends Singleton {
      *
      * @var  object  SplObjectStorage
      */
-    private $_storage = null;
+    public $_storage = null;
 
     /**
      * Construction inits our blank object storage, nothing else.
@@ -103,7 +103,7 @@ class Engine extends Singleton {
             return $this->queue($signal)->enqueue($subscription, $priority);
         }
     }
-	
+
 	/**
     * Removes a subscription from the queue.
     *
@@ -144,18 +144,19 @@ class Engine extends Singleton {
             }
             $this->_storage->next();
         }
-		
+
 		if (!$generate) return false;
-		
+
         if (!$obj) {
             $signal = new Signal($signal);
         }
 
-        $obj = new Queue($signal);
+        $queue = new Queue($signal);
 
         // new queue
-        $this->_storage->attach($obj);
-        return $obj;
+        $this->_storage->attach(new Queue($signal));
+        $this->_storage->attach(new \stdClass());
+        return $queue;
     }
 
     /**
@@ -189,7 +190,7 @@ class Engine extends Singleton {
         if (false === $compare) {
             return false;
         }
-		
+
 		if (null !== $vars) {
 			if (!is_array($vars)) {
 				$vars = array($vars);
