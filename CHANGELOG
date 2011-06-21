@@ -1,10 +1,15 @@
-0.2.0
+0.1.2 ( Performance Release )
+-----------------------------------
+- Engine no longer uses an SplObjectStorage for queue storage
+- Added _indexStorage and _storage arrays to engine, these are used for queue storage
+
+0.1.1
 -----------------------------------
 - Added the SignalInterface interface
 - Added the Signal object
 - Added the Subscription object
 - Added the Queue object
-- Removed benchmark utility 
+- Removed benchmark utility
 - Removed data object
 - Removed functions file
 - Removed the autoloaders

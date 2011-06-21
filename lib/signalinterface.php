@@ -26,7 +26,7 @@ namespace prggmr;
  * to fire a subscription queue.
  */
 interface SignalInterface {
-    
+
     /**
      * Compares the event signal given aganist itself.
      *
@@ -36,4 +36,11 @@ interface SignalInterface {
      *          return results found via the match.
      */
     public function compare($signal);
+
+    /**
+     * Returns if this signal returns an indexable value.
+     *
+     * @return  boolean
+     */
+    public function canIndex();
 }

@@ -29,18 +29,18 @@ namespace prggmr;
 class Signal implements SignalInterface {
 
     /**
-     * The event signal.
-     *
-     * @var  string
-     */
-    protected $_signal = null;
-
-    /**
      * Chain signal
      *
      * @var  mixed
      */
     protected $_chain = null;
+
+    /**
+     * Identifier for signal.
+     *
+     * @var  string|integer
+     */
+    protected $_id = null;
 
     /**
      * Constructs a new signal object.
@@ -52,7 +52,6 @@ class Signal implements SignalInterface {
      */
     public function __construct($signal, $chain = null)
     {
-        if (is_object($signal)) $signal = spl_object_hash($signal);
         $this->_chain = $chain;
         $this->_signal = $signal;
     }
@@ -67,7 +66,6 @@ class Signal implements SignalInterface {
      */
     public function compare($signal)
     {
-        if (is_object($signal)) $signal = spl_object_hash($signal);
         return ($this->_signal === $signal);
     }
 
@@ -101,5 +99,15 @@ class Signal implements SignalInterface {
     public function setChain($signal)
     {
         $this->_chain = $signal;
+    }
+
+    /**
+     * Returns if this signal returns an indexable value.
+     *
+     * @return  boolean
+     */
+    public function canIndex()
+    {
+        return Engine::canIndex($this->_signal);
     }
 }

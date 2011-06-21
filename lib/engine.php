@@ -35,24 +35,37 @@ use \SplObjectStorage,
  *
  * The engine still supports the main methods of bubbling and subscripting
  * only it now performs almost no logic other than type checking.
+ *
+ * As of v0.1.2 the engine uses 2 different storages, indexed and non-indexed
+ * for performance. Indexable signals (integers and strings) are placed in
+ * the indexed storage and allow for index based lookups, non-indexable
+ * signals (objects, floats, booleans, arrays and non-indexable Signal objects)
+ * are placed in the non-indexed storage and require loop through lookups.
  */
 class Engine extends Singleton {
 
     /**
-     * The storage of Queues.
+     * An indexed storage of Queues.
      *
-     * @var  object  SplObjectStorage
+     * @var  array
+     */
+    public $_indexStorage = null;
+
+    /**
+     * A non index storage of Queue
+     *
+     * @var  array
      */
     public $_storage = null;
 
     /**
-     * Construction inits our blank object storage, nothing else.
+     * Construction inits our empty storage array.
      *
      * @return  void
      */
     public function __construct(/* ... */)
     {
-        $this->_storage = new \SplObjectStorage();
+        $this->_storage = array();
     }
 
     /**
@@ -135,27 +148,37 @@ class Engine extends Singleton {
     public function queue($signal, $generate = true)
     {
         $obj = (is_object($signal) && $signal instanceof Signal);
-
-        $this->_storage->rewind();
-        while($this->_storage->valid()) {
-            if (($obj && $this->_storage->current()->getSignal() === $signal) ||
-                ($this->_storage->current()->getSignal(true) === $signal)) {
-                return $this->_storage->current();
+        $indexable = false;
+        if (static::canIndex($signal)) {
+            $index = ($obj) ? $signal->getSignal() : $signal;
+            if (isset($this->_indexStorage[$index])) {
+                return $this->_indexStorage[$index];
             }
-            $this->_storage->next();
+            $indexable = true;
+        } else {
+            $length = count($this->_storage);
+            for($i=0;$i!=$length;$i++) {
+                if (($obj && $this->_storage[$i]->getSignal() === $signal) ||
+                ($this->_storage[$i]->getSignal(true) === $signal)) {
+                    return $this->_storage[$i];
+                }
+            }
         }
 
 		if (!$generate) return false;
 
-        if (!$obj) {
+        if (!(is_object($signal) && $signal instanceof Signal)) {
             $signal = new Signal($signal);
         }
 
         $queue = new Queue($signal);
 
         // new queue
-        $this->_storage->attach(new Queue($signal));
-        $this->_storage->attach(new \stdClass());
+        if ($indexable) {
+            $this->_indexStorage[$index] = $queue;
+        } else {
+            $this->_storage[] = $queue;
+        }
         return $queue;
     }
 
@@ -173,23 +196,26 @@ class Engine extends Singleton {
      */
     public function fire($signal, $vars = null, $event = null)
     {
-		$compare = false;
-        $this->_storage->rewind();
-        while($this->_storage->valid()) {
-			// compare the signal given with the queue signal ..
-			// TODO: Currently this allows for the first signal match to be used
-			// this should allow for either it to continue on with itself until
-			// it finds the signal it wants based on some crazy algorithm that
-			// has yet to be written OR use every signal it compares with
-            if (false !== ($compare = $this->_storage->current()->getSignal()->compare($signal))) {
-                break;
+        $obj = (is_object($signal) && $signal instanceof Signal);
+        $queue = false;
+        // extra vars returned from a signal compare
+        $compare = false;
+        if (static::canIndex($signal)) {
+            $index = ($obj) ? $signal->getSignal() : $signal;
+            if (isset($this->_indexStorage[$index])) {
+                $queue = $this->_indexStorage[$index];
             }
-            $this->_storage->next();
+        } else {
+            $length = count($this->_storage);
+            for($i=0;$i!=$length;$i++) {
+                if (false !== ($compare = $this->_storage[$i]->getSignal()->compare($signal))) {
+                    $queue = $this->_storage[$i];
+                    break;
+                }
+            }
         }
 
-        if (false === $compare) {
-            return false;
-        }
+        if (!$queue) return false;
 
 		if (null !== $vars) {
 			if (!is_array($vars)) {
@@ -197,7 +223,6 @@ class Engine extends Singleton {
 			}
 		}
 
-        $queue = $this->_storage->current();
 		// rewinds and prioritizes the queue
         $queue->rewind();
 
@@ -220,7 +245,7 @@ class Engine extends Singleton {
             $vars = array_merge(array(&$event), $vars);
         }
 
-        if ($compare !== true) {
+        if ($compare !== false) {
             // allow for array return
             if (is_array($compare)) {
                 $vars = array_merge($vars, $compare);
@@ -278,7 +303,8 @@ class Engine extends Singleton {
      */
     public function flush(/* ... */)
     {
-        $this->_storage = new \SplObjectStorage();
+        $this->_storage = array();
+        $this->_indexStorage = array();
     }
 
     /**
@@ -288,6 +314,21 @@ class Engine extends Singleton {
      */
     public function count()
     {
-        return $this->_storage->count();
+        return count($this->_storage) + count($this->_indexStorage);
+    }
+
+    /**
+     * Returns if the provided param is indexable in a php array.
+     *
+     * @param  mixed  $param
+     *
+     * @return  boolean
+     */
+    public static function canIndex($param)
+    {
+        if (is_object($param) && $param instanceof Signal) {
+            return $param->canIndex();
+        }
+        return is_int($param) || is_string($param);
     }
 }

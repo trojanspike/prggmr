@@ -43,7 +43,11 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     public function assertEvent($event, $params, $expected)
     {
         $event = $this->engine->fire($event, $params);
-        $this->assertEquals($expected, $event->getData());
+        if (false !== $event) {
+            $this->assertEquals($expected, $event->getData());
+        } else {
+            var_dump($expected);
+        }
     }
 
     /**
@@ -266,14 +270,14 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         });
         $this->assertEvent('halt', array(), array('Hello'));
     }
-    
+
     /**
      * Test event chaining
      */
     public function testEventChain()
     {
         $this->engine->subscribe(array('test', 'chain_link_1'), function($event){
-           $event->setData('one'); 
+           $event->setData('one');
         });
         $this->engine->subscribe(array('chain_link_1', 'chain_link_2'), function($event){
             $event->setData('two');
@@ -288,13 +292,13 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array('two'), $event->getChain()->getData());
         $this->assertEquals(array('three'), $event->getChain()->getChain()->getData());
     }
-    
+
     public function testEventQueueEmptyFire()
     {
         $this->assertEquals(0, $this->engine->count());
         $this->assertFalse($this->engine->fire('test'));
     }
-    
+
     public function testQueue()
     {
         $this->assertEquals(0, $this->engine->count());
@@ -302,7 +306,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\prggmr\Queue', $this->engine->queue('test'));
         $this->assertFalse($this->engine->queue('none', false));
     }
-    
+
     public function testIdentifier()
     {
         $this->assertEquals(0, $this->engine->count());
@@ -320,7 +324,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->engine->queue('test')->locate(null));
         $this->assertTrue($this->engine->queue('test')->locate(false));
     }
-    
+
     public function testDequeue()
     {
         $this->assertEquals(0, $this->engine->count());
@@ -338,7 +342,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->engine->dequeue(new stdClass(), 'test'));
         $this->assertFalse($this->engine->dequeue(true, 'test'));
     }
-    
+
     public function testPriority()
     {
         $this->assertEquals(0, $this->engine->count());
@@ -349,7 +353,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
             $event->setData('two');
         }, 10);
         $this->engine->subscribe('test', function($event){
-           $event->setData('three'); 
+           $event->setData('three');
         }, 'sub_3', 1);
         $this->engine->subscribe('test', function($event){
             $event->setData('four');
@@ -362,7 +366,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
             'three', 'two', 'one', 'four', 'five'
         ));
     }
-    
+
     /**
      * @expectedException InvalidArgumentException
      */
@@ -370,7 +374,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->subscribe('test', 'asdf');
     }
-    
+
     public function testfireEventParam()
     {
         $this->engine->subscribe('test', function($event){
@@ -383,31 +387,24 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array('one'), $this->engine->fire('test', array(), false)->getData());
         $this->assertEquals(array('one'), $this->engine->fire('test', array(), 1.25)->getData());
     }
-    
+
     public function testfireVarParam()
     {
         $this->engine->subscribe('test', function($event, $param){
+            var_dump($param);
             $event->setData($param);
         });
         $this->assertEquals(array(1.25), $this->engine->fire('test', 1.25)->getData());
         $this->assertEquals(array(1), $this->engine->fire('test', 1)->getData());
         $this->assertEquals(array('string'), $this->engine->fire('test', 'string')->getData());
-        try {
-            $this->assertEquals(array(), $this->engine->fire('test', array())->getData());
-        } catch (\RuntimeException $e) {
-            $this->addToAssertionCount(1);
-        }
+        $this->assertEquals(array(true), $this->engine->fire('test', array())->getData());
         $this->assertEquals(array(true), $this->engine->fire('test', true)->getData());
         $this->assertEquals(array(false), $this->engine->fire('test', false)->getData());
-        try {
-            $this->assertEquals(array(), $this->engine->fire('test', null)->getData());
-        } catch (\RuntimeException $e) {
-            $this->addToAssertionCount(1);
-        }
+        $this->assertEquals(array(true), $this->engine->fire('test', null)->getData());
         $obj = new \stdClass();
         $this->assertEquals(array($obj), $this->engine->fire('test', $obj)->getData());
     }
-    
+
     /**
      * @expectedException InvalidArgumentException
      */
@@ -415,5 +412,17 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->subscribe('test', function($event){});
         $this->engine->fire('test', array(), new stdClass());
+    }
+
+    public function testcanIndex()
+    {
+        $this->assertTrue(\prggmr\Engine::canIndex(1));
+        $this->assertTrue(\prggmr\Engine::canIndex('string'));
+        $this->assertTrue(\prggmr\Engine::canIndex(new \prggmr\Signal('test')));
+        $this->assertFalse(\prggmr\Engine::canIndex(1.0));
+        $this->assertFalse(\prggmr\Engine::canIndex(new \stdClass()));
+        $this->assertFalse(\prggmr\Engine::canIndex(true));
+        $this->assertFalse(\prggmr\Engine::canIndex(false));
+        $this->assertFalse(\prggmr\Engine::canIndex(array()));
     }
 }

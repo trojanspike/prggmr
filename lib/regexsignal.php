@@ -71,4 +71,15 @@ class RegexSignal extends Signal {
         }
         return false;
     }
+
+    /**
+     * Returns if this signal returns an indexable value.
+     * Regex signals cannot be index, this return false always.
+     *
+     * @return  boolean
+     */
+    public function canIndex()
+    {
+        return false;
+    }
 }
