@@ -28,17 +28,11 @@ include_once 'bootstrap.php';
 
 class SubscriptionTest extends \PHPUnit_Framework_TestCase
 {
-    public function testIdentifier()
-    {
-        $sub = new \prggmr\Subscription(function(){}, 'helloworld');
-        $this->assertEquals('helloworld', $sub->getIdentifier());
-    }
-
     public function testFire()
     {
         $sub = new \prggmr\Subscription(function(){
             return 'helloworld';
-        }, 'helloworld');
+        });
         $this->assertEquals('helloworld', $sub->fire());
     }
 
@@ -51,7 +45,7 @@ class SubscriptionTest extends \PHPUnit_Framework_TestCase
             throw new \Exception(
                 'I am an exception'
             );
-        }, 'helloworld');
+        });
         $sub->fire();
     }
 
@@ -59,17 +53,25 @@ class SubscriptionTest extends \PHPUnit_Framework_TestCase
     {
         $sub = new \prggmr\Subscription(function($param1){
             return $param1;
-        }, 'helloworld');
+        });
         $this->assertEquals('helloworld', $sub->fire('helloworld'));
 
         $sub = new \prggmr\Subscription(function($param1){
             return $param1;
-        }, 'helloworld');
+        });
         $this->assertEquals('helloworld', $sub->fire(array('helloworld')));
 
         $sub = new \prggmr\Subscription(function($param1, $param2){
             return $param1.$param2;
-        }, 'helloworld');
+        });
         $this->assertEquals('helloworld', $sub->fire('hello', 'world'));
+    }
+    
+    public function testExhausting()
+    {
+        $sub = new \prggmr\Subscription(function(){;}, 1);
+        $this->assertFalse($sub->isExhausted());
+        $sub->fire();
+        $this->assertTrue($sub->isExhausted());
     }
 }

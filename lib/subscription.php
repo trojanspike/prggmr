@@ -46,6 +46,27 @@ class Subscription {
     protected $_function = null;
 
     /**
+     * Count before a subscription is exhausted.
+     *
+     * @var  string
+     */
+    protected $_limit = 0;
+     
+    /**
+     * The exhaust limit
+     *
+     * @var  integer
+     */
+    protected $_count = 0;
+    
+    /**
+     * Flag determaining if the subscription has exhausted.
+     *
+     * @var  boolean
+     */
+    protected $_exhausted = null;
+    
+    /**
      * String identifier for this subscription
      *
      * @var  string
@@ -57,14 +78,14 @@ class Subscription {
      * Constructs a new subscription object.
      *
      * @param  mixed  $function  A callable variable.
-     *
-     * @return  \prggmr\Queue
+     * @param  integer  $exhaust  Count to set subscription exhaustion.
+     * @param  string  $identifier  String identifier of this subscription
      */
-    public function __construct($function, $identifier = null)
+    public function __construct($function, $exhaust = 0, $identifier = null)
     {
-        if (null === $identifier) $identifier = rand(100000,999999);
         $this->_function = $function;
-        $this->_identifier = (string) $identifier;
+        $this->_identifier = null;
+        $this->_limit = $exhaust;
     }
 
     /**
@@ -79,6 +100,10 @@ class Subscription {
      */
     public function fire($params = null)
     {
+        // test for exhaustion
+        if ($this->isExhausted()) return false;
+        $this->_count++;
+        
         if (count(func_get_args()) >= 2) {
             $params = func_get_args();
         } else {
@@ -95,7 +120,58 @@ class Subscription {
         }
     }
 
-     /**
+    /**
+     * Returns the number of times this subcription is to fire before exhaustion
+     * 0 = infinite.
+     *
+     * @return  integer
+     */
+    public function limit(/* ... */)
+    {
+        return $this->_limit;
+    }
+    
+    /**
+     * Returns the number of times a subscription has fired.
+     *
+     * @return  integer
+     */
+    public function count()
+    {
+        return $this->_count;
+    }
+    
+    /**
+     * Determains if the subscription has exhausted.
+     *
+     * @return  boolean
+     */
+    public function isExhausted()
+    {
+        if (null === $this->_exhausted) {
+            
+            $limit = $this->limit();
+            $count = $this->count();
+            
+            if (!is_int($limit)) {
+                $this->_exhausted = false;
+                return false;
+            }
+            
+            if (0 === ($limit || $count)) return false;
+            
+            if ($this->count() >= $limit) {
+                $this->_exhausted = true;
+                return true;
+            }
+            
+            return false;
+        } else {
+            return $this->_exhausted;
+        }
+    }
+    
+    /**
      * Returns the identifier.
      *
      * @return  string

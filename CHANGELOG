@@ -1,3 +1,10 @@
+0.2.0
+-----------------------------------
+- Added Server class
+- Engine now dumps exhausted events.
+- Added subscription exhaustion.
+- Added the emit and on functions, mirrored functions of subscribe, fire.
+
 0.1.2 ( Performance Release )
 -----------------------------------
 - Engine no longer uses an SplObjectStorage for queue storage

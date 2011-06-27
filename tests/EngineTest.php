@@ -58,7 +58,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
      */
     public function testSubscribe()
     {
-        $this->engine->subscribe('subscriber', function($event){}, array('name' => 'testSubscribe'));
+        $this->engine->subscribe('subscriber', function($event){}, array('identifer' => 'testSubscribe'));
         $this->assertTrue($this->engine->count() == 1);
     }
 
@@ -73,7 +73,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->subscribe('subscribe-parameter-single', function($event, $param1){
             $event->setData($param1);
-        }, 'testEventSingleParameter');
+        }, array('identifier' => 'testEventSingleParameter'));
         $this->assertEvent('subscribe-parameter-single', array('helloworld'), array('helloworld'));
     }
 
@@ -88,7 +88,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->subscribe('multiparam', function($event, $param1, $param2){
             $event->setData($param1.$param2);
-        }, array('name' => 'testEventWithMultipleParameter'));
+        }, array('identifier' => 'testEventWithMultipleParameter'));
         $this->assertEvent('multiparam', array('hello', 'world'), array('helloworld'));
     }
 
@@ -104,7 +104,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $signal = new \prggmr\RegexSignal('regexparam/([a-z]+)');
         $this->engine->subscribe($signal, function($event, $param){
             $event->setData($param);
-        }, array('name' => 'testEventSingleRegexParameter'));
+        }, array('identifier' => 'testEventSingleRegexParameter'));
         $this->assertEvent('regexparam/helloworld', array(), array('helloworld'));
     }
 
@@ -120,7 +120,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $signal = new \prggmr\RegexSignal('multiregexparam/([a-z]+)/([a-z]+)');
         $this->engine->subscribe($signal, function($event, $param1, $param2){
             $event->setData($param1.$param2);
-        }, array('name' => 'testEventWithMultipleRegexParameter'));
+        }, array('identifier' => 'testEventWithMultipleRegexParameter'));
         $this->assertEvent('multiregexparam/hello/world', array(), array('helloworld'));
     }
 
@@ -137,7 +137,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $signal = new \prggmr\RegexSignal('multiparam2/([a-z]+)/([a-z]+)');
         $this->engine->subscribe($signal, function($event, $param1, $param2, $regex1, $regex2){
             $event->setData($param1.$param2.$regex1.$regex2);
-        }, array('name' => 'testEventWithMultipleRegexAndMultipleSuppliedParamters'));
+        }, array('identifier' => 'testEventWithMultipleRegexAndMultipleSuppliedParamters'));
         $this->assertEvent('multiparam2/wor/ld', array('hel','lo'), array('helloworld'));
     }
 
@@ -152,7 +152,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->subscribe(new \prggmr\RegexSignal('simpleregex/:name'), function($event, $name){
             $event->setData($name);
-        }, array('name' => 'testRegexEventWithSimpleRegex'));
+        }, array('identifier' => 'testRegexEventWithSimpleRegex'));
         $this->assertEvent('simpleregex/helloworld', array(), array('helloworld'));
     }
 
@@ -167,7 +167,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->subscribe(new \prggmr\RegexSignal('multisimpleregex/:name/:slug'), function($event, $name, $slug){
             $event->setData($name.$slug);
-        }, array('name' => 'testEventWithMultipleSimpleRegex'));
+        }, array('identifier' => 'testEventWithMultipleSimpleRegex'));
         $this->assertEvent('multisimpleregex/hello/world', array(), array('helloworld'));
     }
 
@@ -183,7 +183,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->subscribe(new \prggmr\RegexSignal('multisimpleregexparamsupplied/:name/:slug'), function($event, $param1, $param2, $name, $slug){
             $event->setData($name.$param1.$slug.$param2);
-        }, array('name' => 'testEventWithMultipleSimpleRegexAndSuppliedParameters'));
+        }, array('identifier' => 'testEventWithMultipleSimpleRegexAndSuppliedParameters'));
         $this->assertEvent('multisimpleregexparamsupplied/hel/wor', array('lo','ld'), array('helloworld'));
     }
 
@@ -199,7 +199,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->subscribe(new \prggmr\RegexSignal('simpleandregex/:name/([a-z]+)'), function($event, $param1, $param2){
             $event->setData($param1.$param2);
-        }, array('name' => 'testEventWithSimpleRegexAndRegexParameters'));
+        }, array('identifier' => 'testEventWithSimpleRegexAndRegexParameters'));
         $this->assertEvent('simpleandregex/hello/world', array(), array('helloworld'));
     }
 
@@ -215,7 +215,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->subscribe(new \prggmr\RegexSignal('simpleregexsupplied/:name/([a-z]+)'), function($event, $param1, $param2, $param3){
             $event->setData($param2.$param1.$param3);
-        }, array('name' => 'testEventWithSimpleRegexRegexAndSuppliedParameters'));
+        }, array('identifier' => 'testEventWithSimpleRegexRegexAndSuppliedParameters'));
         $this->assertEvent('simpleregexsupplied/hel/ld', array('lowor'), array('helloworld'));
     }
 
@@ -276,12 +276,12 @@ class EngineTest extends \PHPUnit_Framework_TestCase
      */
     public function testEventChain()
     {
-        $this->engine->subscribe(array('test', 'chain_link_1'), function($event){
+        $this->engine->subscribe('test', function($event){
            $event->setData('one');
-        });
-        $this->engine->subscribe(array('chain_link_1', 'chain_link_2'), function($event){
+        }, array('chain' => 'chain_link_1'));
+        $this->engine->subscribe('chain_link_1', function($event){
             $event->setData('two');
-        });
+        }, array('chain' => 'chain_link_2'));
         $this->engine->subscribe('chain_link_2', function($event){
             $event->setData('three');
         });
@@ -310,12 +310,12 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     public function testIdentifier()
     {
         $this->assertEquals(0, $this->engine->count());
-        $this->engine->subscribe('test', function(){}, 'test_sub');
-        $this->engine->subscribe('test', function(){}, 1);
-        $this->engine->subscribe('test', function(){}, 1.25);
-        $this->engine->subscribe('test', function(){}, false);
-        $this->engine->subscribe('test', function(){}, true);
-        $this->engine->subscribe('test', function(){}, null);
+        $this->engine->subscribe('test', function(){}, array('identifier' => 'test_sub'));
+        $this->engine->subscribe('test', function(){}, array('identifier' => 1));
+        $this->engine->subscribe('test', function(){}, array('identifier' => 1.25));
+        $this->engine->subscribe('test', function(){}, array('identifier' => false));
+        $this->engine->subscribe('test', function(){}, array('identifier' => true));
+        $this->engine->subscribe('test', function(){}, array('identifier' => null));
         $this->assertEquals(6, $this->engine->queue('test')->count());
         $this->assertTrue($this->engine->queue('test')->locate('test_sub'));
         $this->assertTrue($this->engine->queue('test')->locate(1.25));
@@ -328,8 +328,8 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     public function testDequeue()
     {
         $this->assertEquals(0, $this->engine->count());
-        $this->engine->subscribe('test', function(){}, 'test_sub');
-        $this->engine->subscribe('test', function(){}, 'test_sub_1');
+        $this->engine->subscribe('test', function(){}, array('identifier' => 'test_sub'));
+        $this->engine->subscribe('test', function(){}, array('identifier' => 'test_sub_1'));
         $this->assertTrue($this->engine->queue('test')->locate('test_sub'));
         $this->assertTrue($this->engine->queue('test')->locate('test_sub_1'));
         $this->engine->dequeue('test', 'test_sub');
@@ -351,16 +351,16 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         });
         $this->engine->subscribe('test', function($event){
             $event->setData('two');
-        }, 10);
+        }, array('priority' => 10));
         $this->engine->subscribe('test', function($event){
            $event->setData('three');
-        }, 'sub_3', 1);
+        }, array('priority' => 1));
         $this->engine->subscribe('test', function($event){
             $event->setData('four');
-        }, '123');
+        }, array('priority' => '123'));
         $this->engine->subscribe('test', function($event){
             $event->setData('five');
-        }, array('asd'));
+        }, array('priority' => array('asd')));
         $this->assertTrue($this->engine->queue('test')->locate('sub_3'));
         $this->assertEvent('test', array(), array(
             'three', 'two', 'one', 'four', 'five'

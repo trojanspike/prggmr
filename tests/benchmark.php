@@ -1,11 +1,11 @@
 <?php
-require 'lib/prggmr.php';
+require '../lib/prggmr.php';
 ini_set('memory_limit', '500M');
 $microtime = function() {
     $time = explode(" ", microtime());
     return $time[0] + $time[1];
 };
-$length = 1; // number of seconds to run
+$length = 20; // number of seconds to run
 $engine = \prggmr\Engine::instance();
 $sub = 0;
 $true = true;

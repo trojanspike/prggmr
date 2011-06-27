@@ -71,10 +71,6 @@ class Engine extends Singleton {
     /**
      * Attaches a new subscription to a signal queue.
      *
-     * NOTE: Passing an array as the signal parameter should be done only
-     *       once per subscription que as each time a new Queue is created.
-     *
-     *
      * @param  mixed  $signal  Signal the subscription will attach to, this
      *         can be a Signal object, the signal representation or an array
      *         for a chained signal.
@@ -82,21 +78,35 @@ class Engine extends Singleton {
      * @param  mixed  $subscription  Subscription closure that will trigger on
      *         fire or a Subscription object.
      *
-     * @param  mixed  $identifier  String identifier for this subscription, if
-     *         an integer is provided it will be treated as the priority.
-     *
      * @param  mixed  $priority  Priority of this subscription within the Queue
+     *
+     * @param  array  $config  Array of configuration parameters.
+     *
+     * 		   Options:
+     *
+     * 		   'identifier': string identifier for subscription.
+     * 		   
+     * 		   'priority':   priority to fire this subcription
+     * 		   
+     * 		   'chain':      signal to chain on fire
+     * 		   
+     * 		   'exhaust':    number of times to fire subscription before
+     * 		   				 exhaustion
      *
      * @throws  InvalidArgumentException  Thrown when an invalid callback is
      *          provided.
      *
      * @return  void
      */
-    public function subscribe($signal, $subscription, $identifier = null, $priority = null)
+    public function subscribe($signal, $subscription, $config = array())
     {
-        if (is_int($identifier)) {
-            $priority = $identifier;
-        }
+		$defaults = array(
+					'identifier' => null,
+					'priority'   => null,
+					'chain'      => null,
+					'exhaust'    => 0
+				);
+		$config = array_merge($defaults, $config);
 
         if (!$subscription instanceof Subscription) {
             if (!is_callable($subscription)) {
@@ -104,17 +114,17 @@ class Engine extends Singleton {
                     'subscription callback is not a valid callback'
                 );
             }
-            $subscription = new Subscription($subscription, $identifier);
+            $subscription = new Subscription($subscription, $config['identifier'], $config['exhaust']);
         }
-
-        if (is_array($signal) && isset($signal[0]) && isset($signal[1])) {
-            $queue = $this->queue($signal[0]);
-			$chain = $this->queue($signal[1]);
-            $queue->getSignal()->setChain($signal[1]);
-            return $queue->enqueue($subscription, $priority);
-        } else {
-            return $this->queue($signal)->enqueue($subscription, $priority);
-        }
+		
+		$queue = $this->queue($signal);
+		$queue->enqueue($subscription, $config['priority']);
+		
+		if (null !== $config['chain']) {
+			$queue->getSignal()->setChain($signal);
+		}
+		
+        return $queue;
     }
 
 	/**
@@ -266,6 +276,9 @@ class Engine extends Singleton {
                     )
                 );
             }
+			if ($queue->current()->isExhausted()) {
+				$queue->dequeue($queue->current());
+			}
             $queue->next();
         }
 
