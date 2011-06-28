@@ -22,7 +22,21 @@ namespace prggmr;
  */
 
 /**
- * The server object is a php socket server which runs either a tcp or http
- * server capable of transmitting and triggering events and data.
+ * The server object is a php server capable of running as either a tcp or http
+ * server.
+ *
+ * This class is experimental and recommended for use by the highly daring!
  */
-class Server {}
+class Server {
+    
+    // server socket resource
+    protected $_server = null;
+    
+    // client socket resource
+    protected $_client = null;
+    
+    public function __construct($connect) {
+        
+    }
+    
+}
