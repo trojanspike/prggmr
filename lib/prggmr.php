@@ -25,7 +25,6 @@ define('PRGGMR_VERSION', '0.1.1');
 $dir = dirname(realpath(__FILE__));
 
 // start'er up
-require $dir.'/singleton.php';
 require $dir.'/engine.php';
 require $dir.'/signalinterface.php';
 require $dir.'/signal.php';
@@ -36,3 +35,31 @@ require $dir.'/event.php';
 require $dir.'/api.php';
 require $dir.'/queue.php';
 require $dir.'/subscription.php';
+
+/**
+ * The prggmr object is a singleton which allows for a global engine api.
+ */
+class Prggmr extends Engine {
+	
+	/**
+     * @var  object|null  Instanceof the singleton
+     */
+    private static $_instance = null;
+	
+	/**
+     * Returns instance of the Prggmr api.
+     */
+    final public static function instance(/* ... */)
+    {
+        if (null === static::$_instance) {
+			static::$_instance = new self();
+		}
+
+        return self::$_instance;
+    }
+
+    /**
+     * Disallow cloning
+     */
+    final private function __clone(){}
+}
