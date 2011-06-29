@@ -20,7 +20,6 @@
  * @copyright  Copyright (c), 2010 Nickolas Whiting
  */
 
-
 /**
 * Attaches a new subscription to a signal queue.
 *
@@ -50,7 +49,7 @@
 */
 function subscribe($signal, $subscription, $config = array())
 {
-	return \prggmr\Engine::instance()->subscribe($signal, $subscription, $config);
+	return Prggmr::instance()->subscribe($signal, $subscription, $config);
 }
 
 /**
@@ -82,7 +81,7 @@ function subscribe($signal, $subscription, $config = array())
 */
 function on($signal, $subscription, $config = array())
 {
-	return \prggmr\Engine::instance()->subscribe($signal, $subscription, $config);
+	return Prggmr::instance()->subscribe($signal, $subscription, $config);
 }
 
 /**
@@ -108,7 +107,7 @@ function on($signal, $subscription, $config = array())
 function once($signal, $subscription, $config = array())
 {
 	$config['exhaust'] = 1;
-	return \prggmr\Engine::instance()->subscribe($signal, $subscription, $config);
+	return Prggmr::instance()->subscribe($signal, $subscription, $config);
 }
 
 /**
@@ -125,7 +124,7 @@ function once($signal, $subscription, $config = array())
 */
 function fire($signal, $vars = null, $event = null)
 {
-	return \prggmr\Engine::instance()->fire($signal, $vars, $event);
+	return Prggmr::instance()->fire($signal, $vars, $event);
 }
 
 /**
@@ -142,5 +141,5 @@ function fire($signal, $vars = null, $event = null)
 */
 function emit($signal, $vars = null, $event = null)
 {
-	return \prggmr\Engine::instance()->fire($signal, $vars, $event);
+	return Prggmr::instance()->fire($signal, $vars, $event);
 }

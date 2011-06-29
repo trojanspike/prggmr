@@ -27,22 +27,13 @@ use \SplObjectStorage,
     \InvalidArgumentException;
 
 /**
- * The engine object rewritten serves now as much less the workhorse
- * of the system and rather the moderator as it technically should.
- *
- * The engine is responsible for ensuring all data passed into the system
- * meets the specifications allowing it to be intrepreted by each module.
- *
- * The engine still supports the main methods of bubbling and subscripting
- * only it now performs almost no logic other than type checking.
- *
  * As of v0.1.2 the engine uses 2 different storages, indexed and non-indexed
  * for performance. Indexable signals (integers and strings) are placed in
  * the indexed storage and allow for index based lookups, non-indexable
  * signals (objects, floats, booleans, arrays and non-indexable Signal objects)
  * are placed in the non-indexed storage and require loop through lookups.
  */
-class Engine extends Singleton {
+class Engine {
 
     /**
      * An indexed storage of Queues.
@@ -206,10 +197,11 @@ class Engine extends Singleton {
      */
     public function fire($signal, $vars = null, $event = null)
     {
-        $obj = (is_object($signal) && $signal instanceof Signal);
         $queue = false;
         // extra vars returned from a signal compare
         $compare = false;
+		// unlike the queue method this lookup does not attempt to index
+		// do any signal comparisons
         if (static::canIndex($signal)) {
             $index = ($obj) ? $signal->getSignal() : $signal;
             if (isset($this->_indexStorage[$index])) {
@@ -264,7 +256,7 @@ class Engine extends Singleton {
             }
         }
 
-		// the main loop
+		// the queue loop
         while($queue->valid()) {
             if ($event->isHalted()) break;
             $queue->current()->fire($vars);
