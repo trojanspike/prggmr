@@ -53,10 +53,16 @@ class RegexSignalTest extends SignalTest
         ), $signal->compare('added.user.7.administration'));
     }
 
-    public function testRegexNoMatches()
+    public function testRegexNoVarReturn()
     {
         $signal = new \prggmr\RegexSignal('regular.[\w_-]+');
         $this->assertTrue($signal->compare('regular.test'));
+    }
+
+    public function testRegexNoMatch()
+    {
+        $signal = new \prggmr\RegexSignal('regular.expre.no[\w_-]+');
+        $this->assertFalse($signal->compare('nothing'));
     }
 
     public function testRegexMatchesCombination()

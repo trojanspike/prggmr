@@ -37,13 +37,13 @@ class RegexSignal extends Signal {
      *
      * @return  void
      */
-    public function __construct($signal, $chain = null)
+    public function __construct($signal)
     {
         $regex = preg_replace('#:([\w]+)#i', 'fix\(?P<$1>[\w_-]+fix\)', $signal);
         $regex = str_replace('fix\(', '(', $regex);
         $regex = str_replace('fix\)', ')', $regex);
         $regex = '#' . $regex . '$#i';
-        parent::__construct($regex, $chain);
+        parent::__construct($regex);
     }
 
     /**

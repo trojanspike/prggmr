@@ -20,7 +20,7 @@
  * @copyright  Copyright (c), 2010 Nickolas Whiting
  */
 
-define('PRGGMR_VERSION', '0.1.1');
+define('PRGGMR_VERSION', '0.2.0');
 
 $dir = dirname(realpath(__FILE__));
 
@@ -29,8 +29,6 @@ require $dir.'/engine.php';
 require $dir.'/signalinterface.php';
 require $dir.'/signal.php';
 require $dir.'/regexsignal.php';
-require $dir.'/adapterinterface.php';
-require $dir.'/adapter.php';
 require $dir.'/event.php';
 require $dir.'/api.php';
 require $dir.'/queue.php';
@@ -39,13 +37,13 @@ require $dir.'/subscription.php';
 /**
  * The prggmr object is a singleton which allows for a global engine api.
  */
-class Prggmr extends Engine {
-	
+class Prggmr extends \prggmr\Engine {
+
 	/**
      * @var  object|null  Instanceof the singleton
      */
     private static $_instance = null;
-	
+
 	/**
      * Returns instance of the Prggmr api.
      */
@@ -59,7 +57,12 @@ class Prggmr extends Engine {
     }
 
     /**
-     * Disallow cloning
+     * Returns the current version of prggmr.
+     *
+     * @return  string
      */
-    final private function __clone(){}
+    final public static function version(/* ... */)
+    {
+        return PRGGMR_VERSION;
+    }
 }

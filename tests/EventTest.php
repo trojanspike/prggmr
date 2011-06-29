@@ -57,7 +57,7 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $this->event->setState(\prggmr\Event::STATE_ACTIVE, 'This is a test');
         $this->assertEquals('This is a test', $this->event->getStateMessage());
     }
-    
+
     /**
      * Test event subscription set
      */
@@ -67,12 +67,22 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $this->event->setSignal(new \prggmr\Signal('test'));
         $this->assertEquals('test', $this->event->getSignal()->signal());
     }
-    
+
     public function testEventData()
     {
         $this->assertEquals(0, count($this->event->getData()));
         $this->event->setData('test');
         $this->assertEquals(1, count($this->event->getData()));
         $this->assertEquals(array('test'), $this->event->getData());
+        $this->event->setData('test', 'test');
+        $data = $this->event->getData();
+        $this->assertEquals('test', $data['test']);
+    }
+
+    public function testEventHalt()
+    {
+        $this->assertFalse($this->event->isHalted());
+        $this->event->halt();
+        $this->assertTrue($this->event->isHalted());
     }
 }

@@ -23,91 +23,81 @@
 /**
 * Attaches a new subscription to a signal queue.
 *
-* @param  mixed  $signal  Signal the subscription will attach to.
+* @param  mixed  $signal  Signal the subscription will attach to, this
+*         can be a Signal object, the signal representation or an array
+*         for a chained signal.
 *
-* @param  mixed  $subscription  PHP callable.
+* @param  mixed  $subscription  Subscription closure that will trigger on
+*         fire or a Subscription object.
 *
-* @param  mixed  $priority  Priority of this subscription within the Queue
+* @param  string  $identifier  String identifier of this subscription.
 *
-* @param  array  $config  Array of configuration parameters.
+* @param  integer $priority  Priority of the subscription
 *
-* 		   Options:
+* @param  mixed  $chain  Chain signal
 *
-* 		   'identifier': string identifier for subscription.
-* 		   
-* 		   'priority':   priority to fire this subcription
-* 		   
-* 		   'chain':      signal to chain on fire
-* 		   
-* 		   'exhaust':    number of times to fire subscription before
-* 		   				 exhaustion
+* @param  integer  $exhaust  Count to set subscription exhaustion.
 *
 * @throws  InvalidArgumentException  Thrown when an invalid callback is
 *          provided.
 *
 * @return  void
 */
-function subscribe($signal, $subscription, $config = array())
+function subscribe($signal, $subscription, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
 {
-	return Prggmr::instance()->subscribe($signal, $subscription, $config);
+	return Prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, $exhaust);
 }
 
 /**
-* Attaches a new subscription to a signal queue.
+* Attaches a new subscription to a signal queue with an exhaust rate of 1.
 *
-* @param  mixed  $signal  Signal the subscription will attach to.
+* @param  mixed  $signal  Signal the subscription will attach to, this
+*         can be a Signal object, the signal representation or an array
+*         for a chained signal.
 *
-* @param  mixed  $subscription  PHP callable.
+* @param  mixed  $subscription  Subscription closure that will trigger on
+*         fire or a Subscription object.
 *
-* @param  mixed  $priority  Priority of this subscription within the Queue
+* @param  string  $identifier  String identifier of this subscription.
 *
-* @param  array  $config  Array of configuration parameters.
+* @param  integer $priority  Priority of the subscription
 *
-* 		   Options:
-*
-* 		   'identifier': string identifier for subscription.
-* 		   
-* 		   'priority':   priority to fire this subcription
-* 		   
-* 		   'chain':      signal to chain on fire
-* 		   
-* 		   'exhaust':    number of times to fire subscription before
-* 		   				 exhaustion
+* @param  mixed  $chain  Chain signal
 *
 * @throws  InvalidArgumentException  Thrown when an invalid callback is
 *          provided.
 *
 * @return  void
 */
-function on($signal, $subscription, $config = array())
+function once($signal, $subscription, $identifier = null, $priority = null, $chain = null)
 {
-	return Prggmr::instance()->subscribe($signal, $subscription, $config);
+	return Prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, 1);
 }
 
 /**
-* Subscribe to a function once and exhaust.
-*
-* @param  mixed  $signal  Signal the subscription will attach to.
-*
-* @param  mixed  $subscription  PHP callable.
-*
-* @param  array  $config  Array of configuration parameters.
-*
-* 		   Options:
-*
-* 		   'identifier': string identifier for subscription.
-* 		   
-* 		   'priority':   priority to fire this subcription
-* 		   
-* 		   'chain':      signal to chain on fire
-*
-* @throws  InvalidArgumentException  Thrown when an invalid callback is
-*          provided.
-*/
-function once($signal, $subscription, $config = array())
+ * Creates a signal chain.
+ *
+ * @param  mixed  $singal  Signal which triggers the chain
+ * @param  mixed  $chain  Signal to be chained
+ *
+ * @return  void
+ */
+function chain($signal, $chain)
 {
-	$config['exhaust'] = 1;
-	return Prggmr::instance()->subscribe($signal, $subscription, $config);
+    return Prggmr::instance()->queue($signal)->getSignal()->setChain($chain);
+}
+
+/**
+ * Removes a signal chain.
+ *
+ * @param  mixed  $singal  Signal which contains the chain
+ * @param  mixed  $chain  Signal to be removed
+ *
+ * @return  void
+ */
+function dechain($signal, $chain)
+{
+    return Prggmr::instance()->queue($signal)->getSignal()->delChain($chain);
 }
 
 /**
@@ -123,23 +113,6 @@ function once($signal, $subscription, $config = array())
 * @return  object  Event
 */
 function fire($signal, $vars = null, $event = null)
-{
-	return Prggmr::instance()->fire($signal, $vars, $event);
-}
-
-/**
-* Fires an event signal.
-*
-* @param  mixed  $signal  The event signal, this can be the signal object
-*         or the signal representation.
-*
-* @param  array  $vars  Array of variables to pass the subscribers
-*
-* @param  object  $event  Event
-*
-* @return  object  Event
-*/
-function emit($signal, $vars = null, $event = null)
 {
 	return Prggmr::instance()->fire($signal, $vars, $event);
 }

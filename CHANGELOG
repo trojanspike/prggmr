@@ -1,16 +1,25 @@
-0.2.0
+v0.2.1 ( June 29th, 2011 )
 -----------------------------------
+- Removed Adapter and AdapterInterface
+- Added chain, dechain, once API functions
+- Engine->subscribe() param list changed to signal, subscription, identifier,
+  priority, chain, exhaust.
+- Signal->getChain() now returns an array or null
+- Event->getChain() now returns an array or null
+- Chains are now stored as array to allow for unlimited chains within a signal
+- Prggmr class added
+- Engine no longer implements a singleton
 - Added Server class
-- Engine now dumps exhausted events.
+- Engine now removes exhausted events.
 - Added subscription exhaustion.
-- Added the emit and on functions, mirrored functions of subscribe, fire.
 
-0.1.2 ( Performance Release )
+v0.1.2 ( June 21st, 2011 )
 -----------------------------------
 - Engine no longer uses an SplObjectStorage for queue storage
-- Added _indexStorage and _storage arrays to engine, these are used for queue storage
+- Added _indexStorage and _storage arrays to engine, these are used for queue
+  storage
 
-0.1.1
+v0.1.1 ( May 30th, 2011 )
 -----------------------------------
 - Added the SignalInterface interface
 - Added the Signal object
@@ -37,3 +46,7 @@
 - Event is no longer a child of Adapter
 - RegexSignal object added which supports event naming of "hello/:world" and any regex string
 - New api implemented (fire, subscribe) removed benchmark, bubble
+
+v0.1.0 ( March 9th, 2011 )
+-----------------------------------
+- Inital Release

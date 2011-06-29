@@ -46,13 +46,11 @@ class Signal implements SignalInterface {
      * Constructs a new signal object.
      *
      * @param  mixed  $signal  Event signal
-     * @param  mixed  $chain  An additional signal for a chain
      *
      * @return  \prggmr\Queue
      */
-    public function __construct($signal, $chain = null)
+    public function __construct($signal)
     {
-        $this->_chain = $chain;
         $this->_signal = $signal;
     }
 
@@ -98,7 +96,32 @@ class Signal implements SignalInterface {
      */
     public function setChain($signal)
     {
-        $this->_chain = $signal;
+        if (null === $this->_chain) {
+            $this->_chain = array();
+        }
+        $this->_chain[] = $signal;
+    }
+
+    /**
+     * Removes a signal chain.
+     *
+     * @param  mixed  $signal  Chain signal
+     *
+     * @return  void
+     */
+    public function delChain($signal)
+    {
+        // does it exist?
+        if (null === $this->_chain) return null;
+        if (null === ($key = array_search($signal, $this->_chain))) return null;
+        unset($this->_chain[$key]);
+        if (0 === count($this->_chain)) {
+            $this->_chain = null;
+        } else {
+            // reindex the array starting at 0
+            // relly should be a better way to do this
+            $this->_chain = array_values($this->_chain);
+        }
     }
 
     /**

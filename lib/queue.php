@@ -96,8 +96,8 @@ class Queue extends \SplObjectStorage {
     public function enqueue(Subscription $subscription, $priority = 100)
     {
         $this->dirty = true;
-        if (null === $priority) $priority = 100;
-        $priority = (integer) $priority;
+        if (null === $priority || !is_int($priority)) $priority = 100;
+        $priority = $priority;
         parent::attach($subscription, $priority);
     }
 

@@ -216,13 +216,16 @@ class Event
      */
     public function setChain(Event $chain)
     {
-        $this->_chain = $chain;
+        if (null === $this->_chain) {
+            $this->_chain = array();
+        }
+        $this->_chain[] = $chain;
     }
 
     /**
-     * Returns the chained Event object if exists.
+     * Returns the chained events array.
      *
-     * @return  mixed  Event object, null if no chain exists.
+     * @return  mixed  array, null if no chain exists.
      */
     public function getChain()
     {

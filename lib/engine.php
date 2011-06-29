@@ -22,8 +22,7 @@ namespace prggmr;
  */
 
 
-use \SplObjectStorage,
-    \Closure,
+use \Closure,
     \InvalidArgumentException;
 
 /**
@@ -69,52 +68,37 @@ class Engine {
      * @param  mixed  $subscription  Subscription closure that will trigger on
      *         fire or a Subscription object.
      *
-     * @param  mixed  $priority  Priority of this subscription within the Queue
+     * @param  string  $identifier  String identifier of this subscription.
      *
-     * @param  array  $config  Array of configuration parameters.
+     * @param  integer $priority  Priority of the subscription
      *
-     * 		   Options:
+     * @param  mixed  $chain  Chain signal
      *
-     * 		   'identifier': string identifier for subscription.
-     * 		   
-     * 		   'priority':   priority to fire this subcription
-     * 		   
-     * 		   'chain':      signal to chain on fire
-     * 		   
-     * 		   'exhaust':    number of times to fire subscription before
-     * 		   				 exhaustion
+     * @param  integer  $exhaust  Count to set subscription exhaustion.
      *
      * @throws  InvalidArgumentException  Thrown when an invalid callback is
      *          provided.
      *
      * @return  void
      */
-    public function subscribe($signal, $subscription, $config = array())
+    public function subscribe($signal, $subscription, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
     {
-		$defaults = array(
-					'identifier' => null,
-					'priority'   => null,
-					'chain'      => null,
-					'exhaust'    => 0
-				);
-		$config = array_merge($defaults, $config);
-
         if (!$subscription instanceof Subscription) {
             if (!is_callable($subscription)) {
                 throw new \InvalidArgumentException(
                     'subscription callback is not a valid callback'
                 );
             }
-            $subscription = new Subscription($subscription, $config['identifier'], $config['exhaust']);
+            $subscription = new Subscription($subscription, $identifier, $exhaust);
         }
-		
+
 		$queue = $this->queue($signal);
-		$queue->enqueue($subscription, $config['priority']);
-		
-		if (null !== $config['chain']) {
-			$queue->getSignal()->setChain($signal);
+		$queue->enqueue($subscription, $priority);
+
+		if (null !== $chain) {
+			$queue->getSignal()->setChain($chain);
 		}
-		
+
         return $queue;
     }
 
@@ -151,7 +135,7 @@ class Engine {
         $obj = (is_object($signal) && $signal instanceof Signal);
         $indexable = false;
         if (static::canIndex($signal)) {
-            $index = ($obj) ? $signal->getSignal() : $signal;
+            $index = ($obj) ? $signal->signal() : $signal;
             if (isset($this->_indexStorage[$index])) {
                 return $this->_indexStorage[$index];
             }
@@ -200,14 +184,16 @@ class Engine {
         $queue = false;
         // extra vars returned from a signal compare
         $compare = false;
-		// unlike the queue method this lookup does not attempt to index
-		// do any signal comparisons
+		// index lookup
         if (static::canIndex($signal)) {
             $index = ($obj) ? $signal->getSignal() : $signal;
             if (isset($this->_indexStorage[$index])) {
                 $queue = $this->_indexStorage[$index];
             }
-        } else {
+        }
+        // non-index lookup - this is done on all signals
+        // if an indexed signal is not found
+        if (false === $queue) {
             $length = count($this->_storage);
             for($i=0;$i!=$length;$i++) {
                 if (false !== ($compare = $this->_storage[$i]->getSignal()->compare($signal))) {
@@ -229,7 +215,7 @@ class Engine {
         $queue->rewind();
 
         if (!is_object($event)) {
-            $event = new Event($queue->getSignal());
+            $event = new Event();
         } elseif (!$event instanceof Event) {
             throw new \InvalidArgumentException(
                 sprintf(
@@ -241,7 +227,7 @@ class Engine {
         $event->setSignal($queue->getSignal());
         $event->setState(Event::STATE_ACTIVE);
 
-        if (count($vars) === 0) {
+        if (0 === count($vars)) {
             $vars = array(&$event);
         } else {
             $vars = array_merge(array(&$event), $vars);
@@ -281,9 +267,11 @@ class Engine {
                 unset($vars[0]);
                 $vars = array_merge($vars, $event->getData());
             }
-            $chain = $this->fire($chain, $vars);
-            if (false !== $chain) {
-                $event->setChain($chain);
+            foreach ($chain as $_chain) {
+                $link = $this->fire($_chain, $vars);
+                if (false !== $chain) {
+                    $event->setChain($link);
+                }
             }
         }
 
@@ -291,16 +279,6 @@ class Engine {
         $event->setState(Event::STATE_INACTIVE);
 
         return $event;
-    }
-
-    /**
-     * Returns the current version of prggmr.
-     *
-     * @return  string
-     */
-    public static function version(/* ... */)
-    {
-        return PRGGMR_VERSION;
     }
 
     /**

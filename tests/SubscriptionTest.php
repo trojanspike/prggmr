@@ -36,6 +36,12 @@ class SubscriptionTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('helloworld', $sub->fire());
     }
 
+    public function testIdentifier()
+    {
+        $sub = new \prggmr\Subscription(function(){;}, 'test');
+        $this->assertEquals('test', $sub->getIdentifier());
+    }
+
     /**
      * @expectedException RuntimeException
      */
@@ -66,12 +72,31 @@ class SubscriptionTest extends \PHPUnit_Framework_TestCase
         });
         $this->assertEquals('helloworld', $sub->fire('hello', 'world'));
     }
-    
+
     public function testExhausting()
     {
-        $sub = new \prggmr\Subscription(function(){;}, 1);
+        $sub = new \prggmr\Subscription(function(){;}, null, 1);
+        $this->assertEquals(1, $sub->limit());
+        $this->assertEquals(0, $sub->count());
         $this->assertFalse($sub->isExhausted());
         $sub->fire();
+         $this->assertEquals(1, $sub->count());
         $this->assertTrue($sub->isExhausted());
+        $sub = new \prggmr\Subscription(function(){;}, null, 10);
+        for($i=0;$i!=9;$i++) {
+            $sub->fire();
+            $this->assertFalse($sub->isExhausted());
+        }
+        $sub->fire();
+        $this->assertTrue($sub->isExhausted());
+        $sub = new \prggmr\Subscription(function(){;}, null, 0);
+        $this->assertFalse($sub->isExhausted());
+        while(true) {
+            $sub->fire();
+            if ($sub->count() >= 25) {
+                break;
+            }
+        }
+        $this->assertFalse($sub->isExhausted());
     }
 }

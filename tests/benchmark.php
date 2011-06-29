@@ -5,8 +5,8 @@ $microtime = function() {
     $time = explode(" ", microtime());
     return $time[0] + $time[1];
 };
-$length = 20; // number of seconds to run
-$engine = \prggmr\Engine::instance();
+$length = 1; // number of seconds to run
+$engine = new \prggmr\Engine();
 $sub = 0;
 $true = true;
 $start = $microtime();

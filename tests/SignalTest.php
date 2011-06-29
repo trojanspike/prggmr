@@ -93,4 +93,18 @@ class SignalTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($signal->compare(100.2));
         $this->assertFalse($signal->compare('100.2'));
     }
+
+    public function testChains()
+    {
+        $signal = new \prggmr\Signal('test');
+        $this->assertNull($signal->getChain());
+        $signal->setChain('chain_1');
+        $this->assertEquals(array('chain_1'), $signal->getChain());
+        $signal->setChain('chain_2');
+        $this->assertEquals(array('chain_1', 'chain_2'), $signal->getChain());
+        $signal->delChain('chain_1');
+        $this->assertEquals(array('chain_2'), $signal->getChain());
+        $signal->delChain('chain_2');
+        $this->assertNull($signal->getChain());
+    }
 }

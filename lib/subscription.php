@@ -51,40 +51,40 @@ class Subscription {
      * @var  string
      */
     protected $_limit = 0;
-     
+
     /**
      * The exhaust limit
      *
      * @var  integer
      */
     protected $_count = 0;
-    
+
     /**
      * Flag determaining if the subscription has exhausted.
      *
      * @var  boolean
      */
     protected $_exhausted = null;
-    
+
     /**
      * String identifier for this subscription
      *
      * @var  string
      */
      protected $_identifier = null;
-     
+
 
     /**
      * Constructs a new subscription object.
      *
      * @param  mixed  $function  A callable variable.
+     * @param  string  $identifier  String identifier of this subscription.
      * @param  integer  $exhaust  Count to set subscription exhaustion.
-     * @param  string  $identifier  String identifier of this subscription
      */
-    public function __construct($function, $exhaust = 0, $identifier = null)
+    public function __construct($function, $identifier = null, $exhaust = 0)
     {
         $this->_function = $function;
-        $this->_identifier = null;
+        $this->_identifier = $identifier;
         $this->_limit = $exhaust;
     }
 
@@ -103,7 +103,7 @@ class Subscription {
         // test for exhaustion
         if ($this->isExhausted()) return false;
         $this->_count++;
-        
+
         if (count(func_get_args()) >= 2) {
             $params = func_get_args();
         } else {
@@ -130,7 +130,7 @@ class Subscription {
     {
         return $this->_limit;
     }
-    
+
     /**
      * Returns the number of times a subscription has fired.
      *
@@ -140,7 +140,7 @@ class Subscription {
     {
         return $this->_count;
     }
-    
+
     /**
      * Determains if the subscription has exhausted.
      *
@@ -149,28 +149,28 @@ class Subscription {
     public function isExhausted()
     {
         if (null === $this->_exhausted) {
-            
+
             $limit = $this->limit();
             $count = $this->count();
-            
-            if (!is_int($limit)) {
+
+            if (!is_int($limit) || 0 === $limit) {
                 $this->_exhausted = false;
                 return false;
             }
-            
-            if (0 === ($limit || $count)) return false;
-            
+
+            if (0 === $count) return false;
+
             if ($this->count() >= $limit) {
                 $this->_exhausted = true;
                 return true;
             }
-            
+
             return false;
         } else {
             return $this->_exhausted;
         }
     }
-    
+
     /**
      * Returns the identifier.
      *

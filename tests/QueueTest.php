@@ -66,7 +66,7 @@ class QueueTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(!$this->queue->dequeue($sub));
         $this->assertEquals(0, $this->queue->count());
     }
-    
+
     public function testPriorityFlag()
     {
         $this->assertFalse($this->queue->dirty);
@@ -75,7 +75,7 @@ class QueueTest extends \PHPUnit_Framework_TestCase
         $this->queue->rewind();
         $this->assertFalse($this->queue->dirty);
     }
-    
+
     public function testPriority()
     {
         $this->queue->enqueue(new \prggmr\Subscription(function(){}, 'test1'), 100);
@@ -103,5 +103,31 @@ class QueueTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $this->queue->key());
         $this->queue->rewind();
         $this->assertEquals(0, $this->queue->key());
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testAttachException()
+    {
+        $this->queue->attach();
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testDetachException()
+    {
+        $this->queue->detach();
+    }
+
+    public function testFlush()
+    {
+        $this->queue->enqueue(new \prggmr\Subscription(function(){;}));
+        $this->queue->enqueue(new \prggmr\Subscription(function(){;}));
+        $this->queue->enqueue(new \prggmr\Subscription(function(){;}));
+        $this->assertEquals(3, $this->queue->count());
+        $this->queue->flush();
+        $this->assertEquals(0, $this->queue->count());
     }
 }
