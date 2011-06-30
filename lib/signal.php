@@ -28,109 +28,109 @@ namespace prggmr;
  */
 class Signal implements SignalInterface {
 
-    /**
-     * Chain signal
-     *
-     * @var  mixed
-     */
-    protected $_chain = null;
+	/**
+	 * Chain signal
+	 *
+	 * @var  mixed
+	 */
+	protected $_chain = null;
 
-    /**
-     * Identifier for signal.
-     *
-     * @var  string|integer
-     */
-    protected $_id = null;
+	/**
+	 * Identifier for signal.
+	 *
+	 * @var  string|integer
+	 */
+	protected $_id = null;
 
-    /**
-     * Constructs a new signal object.
-     *
-     * @param  mixed  $signal  Event signal
-     *
-     * @return  \prggmr\Queue
-     */
-    public function __construct($signal)
-    {
-        $this->_signal = $signal;
-    }
+	/**
+	 * Constructs a new signal object.
+	 *
+	 * @param  mixed  $signal  Event signal
+	 *
+	 * @return  \prggmr\Queue
+	 */
+	public function __construct($signal)
+	{
+		$this->_signal = $signal;
+	}
 
-    /**
-     * Compares the event signal given with itself.
-     *
-     * @param  mixed  $signal  Signal to compare
-     *
-     * @return  mixed  False on failure. True if matches. String/Array
-     *          return results found via the match.
-     */
-    public function compare($signal)
-    {
-        return ($this->_signal === $signal);
-    }
+	/**
+	 * Compares the event signal given with itself.
+	 *
+	 * @param  mixed  $signal  Signal to compare
+	 *
+	 * @return  mixed  False on failure. True if matches. String/Array
+	 *          return results found via the match.
+	 */
+	public function compare($signal)
+	{
+		return ($this->_signal === $signal);
+	}
 
-    /**
-     * Returns the signal.
-     *
-     * @return  mixed  Event signal.
-     */
-    public function signal(/* ... */)
-    {
-        return $this->_signal;
-    }
+	/**
+	 * Returns the signal.
+	 *
+	 * @return  mixed  Event signal.
+	 */
+	public function signal(/* ... */)
+	{
+		return $this->_signal;
+	}
 
-    /**
-     * Returns the signal chain.
-     *
-     * @return  mixed
-     */
-    public function getChain(/* ... */)
-    {
-        return $this->_chain;
-    }
+	/**
+	 * Returns the signal chain.
+	 *
+	 * @return  mixed
+	 */
+	public function getChain(/* ... */)
+	{
+		return $this->_chain;
+	}
 
-    /**
-     * Sets the signal chain
-     *
-     * @param  mixed  $signal  Chain signal
-     *
-     * @return  void
-     */
-    public function setChain($signal)
-    {
-        if (null === $this->_chain) {
-            $this->_chain = array();
-        }
-        $this->_chain[] = $signal;
-    }
+	/**
+	 * Sets the signal chain
+	 *
+	 * @param  mixed  $signal  Chain signal
+	 *
+	 * @return  void
+	 */
+	public function setChain($signal)
+	{
+		if (null === $this->_chain) {
+			$this->_chain = array();
+		}
+		$this->_chain[] = $signal;
+	}
 
-    /**
-     * Removes a signal chain.
-     *
-     * @param  mixed  $signal  Chain signal
-     *
-     * @return  void
-     */
-    public function delChain($signal)
-    {
-        // does it exist?
-        if (null === $this->_chain) return null;
-        if (null === ($key = array_search($signal, $this->_chain))) return null;
-        unset($this->_chain[$key]);
-        if (0 === count($this->_chain)) {
-            $this->_chain = null;
-        } else {
-            // reindex the array starting at 0
-            // relly should be a better way to do this
-            $this->_chain = array_values($this->_chain);
-        }
-    }
+	/**
+	 * Removes a signal chain.
+	 *
+	 * @param  mixed  $signal  Chain signal
+	 *
+	 * @return  void
+	 */
+	public function delChain($signal)
+	{
+		// does it exist?
+		if (null === $this->_chain) return null;
+		if (null === ($key = array_search($signal, $this->_chain))) return null;
+		unset($this->_chain[$key]);
+		if (0 === count($this->_chain)) {
+			$this->_chain = null;
+		} else {
+			// reindex the array starting at 0
+			// relly should be a better way to do this
+			$this->_chain = array_values($this->_chain);
+		}
+	}
 
-    /**
-     * Returns if this signal returns an indexable value.
-     *
-     * @return  boolean
-     */
-    public function canIndex()
-    {
-        return Engine::canIndex($this->_signal);
-    }
+	/**
+	 * Returns if this signal returns an indexable value.
+	 *
+	 * @return  boolean
+	 */
+	public function canIndex()
+	{
+		return Engine::canIndex($this->_signal);
+	}
 }

@@ -84,7 +84,7 @@ function once($signal, $subscription, $identifier = null, $priority = null, $cha
  */
 function chain($signal, $chain)
 {
-    return Prggmr::instance()->queue($signal)->getSignal()->setChain($chain);
+	return Prggmr::instance()->queue($signal)->getSignal()->setChain($chain);
 }
 
 /**
@@ -97,7 +97,7 @@ function chain($signal, $chain)
  */
 function dechain($signal, $chain)
 {
-    return Prggmr::instance()->queue($signal)->getSignal()->delChain($chain);
+	return Prggmr::instance()->queue($signal)->getSignal()->delChain($chain);
 }
 
 /**
@@ -115,4 +115,101 @@ function dechain($signal, $chain)
 function fire($signal, $vars = null, $event = null)
 {
 	return Prggmr::instance()->fire($signal, $vars, $event);
+}
+
+/**
+ * Calls an event at the specified intervals of time in microseconds.
+ *
+ * @param  mixed  $subscription  Subscription closure that will trigger on
+ *         fire or a Subscription object.
+ *
+ * @param  integer  $interval  Interval of time in microseconds to run
+ *
+ * @param  mixed  $vars  Variables to pass the interval.
+ *
+ * @param  string  $identifier  Identifier of this subscription.
+ *
+ * @param  integer  $exhaust  Count to set subscription exhaustion.
+ *
+ * @throws  InvalidArgumentException  Thrown when an invalid callback or
+ * 			interval is provided.
+ *
+ * @return  object  Subscription
+ */
+function setInterval($subscription, $interval, $vars = null, $identifier = null, $exhaust = 0)
+{
+    return Prggmr::instance()->setInterval($subscription, $interval, $vars, $identifier, $exhaust);
+}
+
+/**
+ * Calls an event after the specified amount of time in microseconds.
+ *
+ * @param  mixed  $subscription  Subscription closure that will trigger on
+ *         fire or a Subscription object.
+ *
+ * @param  integer  $interval  Interval of time in microseconds to run
+ *
+ * @param  mixed  $vars  Variables to pass the timeout.
+ *
+ * @param  string  $identifier  Identifier of this subscription.
+ *
+ * @param  integer  $exhaust  Count to set subscription exhaustion.
+ *
+ * @throws  InvalidArgumentException  Thrown when an invalid callback or
+ * 			interval is provided.
+ *
+ * @return  object  Subscription
+ */
+function setTimeout($subscription, $interval, $vars = null, $identifier = null)
+{
+    // This simply uses set interval and sets an exhaustion rate of 1 ...
+    return Prggmr::instance()->setTimeout($subscription, $interval, $vars, $identifier);
+}
+
+/**
+ * Clears an interval set by setInterval.
+ *
+ * @param  mixed  $subscription  Subscription object of the interval or
+ * 		   identifer.
+ *
+ * @return  void
+ */
+function clearInterval($subscription)
+{
+    return Prggmr::instance()->clearInterval($subscription);
+}
+
+/**
+ * Clears a timeout set by setTimeout.
+ *
+ * @param  mixed  $subscription  Subscription object of the timeout or
+ * 		   identifer.
+ *
+ * @return  void
+ */
+function clearTimeout($subscription)
+{
+    return Prggmr::instance()->clearTimeout($subscription);
+}
+
+/**
+ * Starts daemon mode.
+ *
+ * @param  boolean  $reset  Resets all timers to begin at daemon start.
+ *
+ * @return  void
+ */
+function prggmrd($reset = false)
+{
+    return Prggmr::instance()->daemon();
+}
+
+/**
+ * Sends the engine the shutdown signal while in daemon mode.
+ *
+ * @return  void
+ */
+function prggmrd_shutdown()
+{
+    return Prggmr::instance()->shutdown();
 }

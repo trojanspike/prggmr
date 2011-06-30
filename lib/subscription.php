@@ -22,8 +22,8 @@ namespace prggmr;
  */
 
 use \Closure,
-    \Exception,
-    \RuntimeException;
+	\Exception,
+	\RuntimeException;
 
 /**
  * The subscriber object is the main object responsible for holding our event
@@ -39,145 +39,145 @@ use \Closure,
  */
 class Subscription {
 
-    /**
-     * The lambda function that will execute when this subscription is
-     * triggered.
-     */
-    protected $_function = null;
+	/**
+	 * The lambda function that will execute when this subscription is
+	 * triggered.
+	 */
+	protected $_function = null;
 
-    /**
-     * Count before a subscription is exhausted.
-     *
-     * @var  string
-     */
-    protected $_limit = 0;
+	/**
+	 * Count before a subscription is exhausted.
+	 *
+	 * @var  string
+	 */
+	protected $_limit = 0;
 
-    /**
-     * The exhaust limit
-     *
-     * @var  integer
-     */
-    protected $_count = 0;
+	/**
+	 * The exhaust limit
+	 *
+	 * @var  integer
+	 */
+	protected $_count = 0;
 
-    /**
-     * Flag determaining if the subscription has exhausted.
-     *
-     * @var  boolean
-     */
-    protected $_exhausted = null;
+	/**
+	 * Flag determaining if the subscription has exhausted.
+	 *
+	 * @var  boolean
+	 */
+	protected $_exhausted = null;
 
-    /**
-     * String identifier for this subscription
-     *
-     * @var  string
-     */
-     protected $_identifier = null;
+	/**
+	 * String identifier for this subscription
+	 *
+	 * @var  string
+	 */
+	 protected $_identifier = null;
 
 
-    /**
-     * Constructs a new subscription object.
-     *
-     * @param  mixed  $function  A callable variable.
-     * @param  string  $identifier  Identifier of this subscription.
-     * @param  integer  $exhaust  Count to set subscription exhaustion.
-     */
-    public function __construct($function, $identifier = null, $exhaust = 0)
-    {
-        $this->_function = $function;
-        $this->_identifier = $identifier;
-        $this->_limit = $exhaust;
-    }
+	/**
+	 * Constructs a new subscription object.
+	 *
+	 * @param  mixed  $function  A callable variable.
+	 * @param  string  $identifier  Identifier of this subscription.
+	 * @param  integer  $exhaust  Count to set subscription exhaustion.
+	 */
+	public function __construct($function, $identifier = null, $exhaust = 0)
+	{
+		$this->_function = $function;
+		$this->_identifier = $identifier;
+		$this->_limit = $exhaust;
+	}
 
-    /**
-     * Fires this subscriptions function.
-     * Allowing for the first parameter as an array of parameters or
-     * by passing them directly.
-     *
-     * @param  array  $params  Array of parameters to pass.
-     *
-     * @throws  RuntimeException  When exception thrown within the closure.
-     * @return  mixed  Results of the function
-     */
-    public function fire($params = null)
-    {
-        // test for exhaustion
-        if ($this->isExhausted()) return false;
-        $this->_count++;
+	/**
+	 * Fires this subscriptions function.
+	 * Allowing for the first parameter as an array of parameters or
+	 * by passing them directly.
+	 *
+	 * @param  array  $params  Array of parameters to pass.
+	 *
+	 * @throws  RuntimeException  When exception thrown within the closure.
+	 * @return  mixed  Results of the function
+	 */
+	public function fire($params = null)
+	{
+		// test for exhaustion
+		if ($this->isExhausted()) return false;
+		$this->_count++;
 
-        if (count(func_get_args()) >= 2) {
-            $params = func_get_args();
-        } else {
-            // force array
-            if (!is_array($params)) {
-                $params = array($params);
-            }
-        }
+		if (count(func_get_args()) >= 2) {
+			$params = func_get_args();
+		} else {
+			// force array
+			if (!is_array($params)) {
+				$params = array($params);
+			}
+		}
 
-        try {
-            return call_user_func_array($this->_function, $params);
-        } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage());
-        }
-    }
+		try {
+			return call_user_func_array($this->_function, $params);
+		} catch (\Exception $e) {
+			throw new \RuntimeException($e->getMessage());
+		}
+	}
 
-    /**
-     * Returns the number of times this subcription is to fire before exhaustion
-     * 0 = infinite.
-     *
-     * @return  integer
-     */
-    public function limit(/* ... */)
-    {
-        return $this->_limit;
-    }
+	/**
+	 * Returns the number of times this subcription is to fire before exhaustion
+	 * 0 = infinite.
+	 *
+	 * @return  integer
+	 */
+	public function limit(/* ... */)
+	{
+		return $this->_limit;
+	}
 
-    /**
-     * Returns the number of times a subscription has fired.
-     *
-     * @return  integer
-     */
-    public function count()
-    {
-        return $this->_count;
-    }
+	/**
+	 * Returns the number of times a subscription has fired.
+	 *
+	 * @return  integer
+	 */
+	public function count()
+	{
+		return $this->_count;
+	}
 
-    /**
-     * Determains if the subscription has exhausted.
-     *
-     * @return  boolean
-     */
-    public function isExhausted()
-    {
-        if (null === $this->_exhausted) {
+	/**
+	 * Determains if the subscription has exhausted.
+	 *
+	 * @return  boolean
+	 */
+	public function isExhausted()
+	{
+		if (null === $this->_exhausted) {
 
-            $limit = $this->limit();
-            $count = $this->count();
+			$limit = $this->limit();
+			$count = $this->count();
 
-            if (!is_int($limit) || 0 === $limit) {
-                $this->_exhausted = false;
-                return false;
-            }
+			if (!is_int($limit) || 0 === $limit) {
+				$this->_exhausted = false;
+				return false;
+			}
 
-            if (0 === $count) return false;
+			if (0 === $count) return false;
 
-            if ($this->count() >= $limit) {
-                $this->_exhausted = true;
-                return true;
-            }
+			if ($this->count() >= $limit) {
+				$this->_exhausted = true;
+				return true;
+			}
 
-            return false;
-        } else {
-            return $this->_exhausted;
-        }
-    }
+			return false;
+		} else {
+			return $this->_exhausted;
+		}
+	}
 
-    /**
-     * Returns the identifier.
-     *
-     * @return  string
-     */
-    public function getIdentifier(/* ... */)
-    {
-        return $this->_identifier;
-    }
+	/**
+	 * Returns the identifier.
+	 *
+	 * @return  string
+	 */
+	public function getIdentifier(/* ... */)
+	{
+		return $this->_identifier;
+	}
 }

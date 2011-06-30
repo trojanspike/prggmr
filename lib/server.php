@@ -28,15 +28,15 @@ namespace prggmr;
  * This class is experimental and recommended for use by the highly daring!
  */
 class Server {
-    
-    // server socket resource
-    protected $_server = null;
-    
-    // client socket resource
-    protected $_client = null;
-    
-    public function __construct($connect) {
-        
-    }
-    
+
+	// server socket resource
+	protected $_server = null;
+
+	// client socket resource
+	protected $_client = null;
+
+	public function __construct($connect) {
+
+	}
+
 }

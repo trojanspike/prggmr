@@ -28,83 +28,83 @@ include_once 'bootstrap.php';
 
 class SignalTest extends \PHPUnit_Framework_TestCase
 {
-    public function testSignal()
-    {
-        $signal = new \prggmr\Signal('helloworld');
-        $this->assertEquals('helloworld', $signal->signal());
-    }
+	public function testSignal()
+	{
+		$signal = new \prggmr\Signal('helloworld');
+		$this->assertEquals('helloworld', $signal->signal());
+	}
 
-    public function testStringSignal()
-    {
-        $signal = new \prggmr\Signal('helloworld');
-        $this->assertTrue($signal->compare('helloworld'));
-        $this->assertFalse($signal->compare('HelloWorld'));
-    }
+	public function testStringSignal()
+	{
+		$signal = new \prggmr\Signal('helloworld');
+		$this->assertTrue($signal->compare('helloworld'));
+		$this->assertFalse($signal->compare('HelloWorld'));
+	}
 
-    public function testArraySignal()
-    {
-        $signal = new \prggmr\Signal(array(
-            0 => 'helloworld'
-        ));
-        $this->assertTrue($signal->compare(array(
-            0 => 'helloworld'
-        )));
-        $this->assertFalse($signal->compare(array(
-            0 => 'HellOworld'
-        )));
-    }
+	public function testArraySignal()
+	{
+		$signal = new \prggmr\Signal(array(
+			0 => 'helloworld'
+		));
+		$this->assertTrue($signal->compare(array(
+			0 => 'helloworld'
+		)));
+		$this->assertFalse($signal->compare(array(
+			0 => 'HellOworld'
+		)));
+	}
 
-    public function testObjectSignal()
-    {
-        $obj = new \stdClass();
-        $obj->hello = 'world';
-        $signal = new \prggmr\Signal($obj);
-        $this->assertTrue($signal->compare($obj));
-        $obj = new \stdClass();
-        $obj->hello = 'wORld';
-        $this->assertFalse($signal->compare($obj));
-    }
+	public function testObjectSignal()
+	{
+		$obj = new \stdClass();
+		$obj->hello = 'world';
+		$signal = new \prggmr\Signal($obj);
+		$this->assertTrue($signal->compare($obj));
+		$obj = new \stdClass();
+		$obj->hello = 'wORld';
+		$this->assertFalse($signal->compare($obj));
+	}
 
-    public function testTrueSignal()
-    {
-        $signal = new \prggmr\Signal(true);
-        $this->assertTrue($signal->compare(true));
-        $this->assertFalse($signal->compare(1));
-        $this->assertFalse($signal->compare(''));
-    }
+	public function testTrueSignal()
+	{
+		$signal = new \prggmr\Signal(true);
+		$this->assertTrue($signal->compare(true));
+		$this->assertFalse($signal->compare(1));
+		$this->assertFalse($signal->compare(''));
+	}
 
-    public function testFalseSignal()
-    {
-        $signal = new \prggmr\Signal(false);
-        $this->assertTrue($signal->compare(false));
-         $this->assertFalse($signal->compare(0));
-    }
+	public function testFalseSignal()
+	{
+		$signal = new \prggmr\Signal(false);
+		$this->assertTrue($signal->compare(false));
+		 $this->assertFalse($signal->compare(0));
+	}
 
-    public function testIntegerSignal()
-    {
-        $signal = new \prggmr\Signal(100);
-        $this->assertTrue($signal->compare(100));
-        $this->assertFalse($signal->compare('100'));
-    }
+	public function testIntegerSignal()
+	{
+		$signal = new \prggmr\Signal(100);
+		$this->assertTrue($signal->compare(100));
+		$this->assertFalse($signal->compare('100'));
+	}
 
-    public function testFloatSignal()
-    {
-        $signal = new \prggmr\Signal(100.2);
-        $this->assertTrue($signal->compare(100.2));
-        $this->assertFalse($signal->compare('100.2'));
-    }
+	public function testFloatSignal()
+	{
+		$signal = new \prggmr\Signal(100.2);
+		$this->assertTrue($signal->compare(100.2));
+		$this->assertFalse($signal->compare('100.2'));
+	}
 
-    public function testChains()
-    {
-        $signal = new \prggmr\Signal('test');
-        $this->assertNull($signal->getChain());
-        $signal->setChain('chain_1');
-        $this->assertEquals(array('chain_1'), $signal->getChain());
-        $signal->setChain('chain_2');
-        $this->assertEquals(array('chain_1', 'chain_2'), $signal->getChain());
-        $signal->delChain('chain_1');
-        $this->assertEquals(array('chain_2'), $signal->getChain());
-        $signal->delChain('chain_2');
-        $this->assertNull($signal->getChain());
-    }
+	public function testChains()
+	{
+		$signal = new \prggmr\Signal('test');
+		$this->assertNull($signal->getChain());
+		$signal->setChain('chain_1');
+		$this->assertEquals(array('chain_1'), $signal->getChain());
+		$signal->setChain('chain_2');
+		$this->assertEquals(array('chain_1', 'chain_2'), $signal->getChain());
+		$signal->delChain('chain_1');
+		$this->assertEquals(array('chain_2'), $signal->getChain());
+		$signal->delChain('chain_2');
+		$this->assertNull($signal->getChain());
+	}
 }

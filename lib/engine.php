@@ -23,7 +23,7 @@ namespace prggmr;
 
 
 use \Closure,
-    \InvalidArgumentException;
+	\InvalidArgumentException;
 
 /**
  * As of v0.1.2 the engine uses 2 different storages, indexed and non-indexed
@@ -47,28 +47,28 @@ class Engine {
      * @var  array
      */
     protected $_storage = null;
-	
-	/**
-	 * Timer based events
-	 *
-	 * @var array
-	 */
-	protected $_timers = array();
-	
-	/**
-	 * Current engine state.
-	 *
-	 * @var  integer
-	 */
-	protected $_state = null;
-	
-	/**
-	 * Engine states.
-	 */
-	const RUNNING  = 0x64;
-	const DAEMON   = 0x65;
-	const SHUTDOWN = 0x66;
-	const ERROR    = 0x67;
+
+    /**
+     * Timer based events
+     *
+     * @var array
+     */
+    protected $_timers = array();
+
+    /**
+     * Current engine state.
+     *
+     * @var  integer
+     */
+    protected $_state = null;
+
+    /**
+     * Engine states.
+     */
+    const RUNNING  = 0x64;
+    const DAEMON   = 0x65;
+    const SHUTDOWN = 0x66;
+    const ERROR    = 0x67;
 
     /**
      * Construction inits our empty storage array and sets default state.
@@ -78,8 +78,8 @@ class Engine {
     public function __construct(/* ... */)
     {
         $this->_storage = array();
-		$this->_indexStorage = array();
-		$this->_state = Engine::RUNNING;
+        $this->_indexStorage = array();
+        $this->_state = Engine::RUNNING;
     }
 
     /**
@@ -116,17 +116,17 @@ class Engine {
             $subscription = new Subscription($subscription, $identifier, $exhaust);
         }
 
-		$queue = $this->queue($signal);
-		$queue->enqueue($subscription, $priority);
+        $queue = $this->queue($signal);
+        $queue->enqueue($subscription, $priority);
 
-		if (null !== $chain) {
-			$queue->getSignal()->setChain($chain);
-		}
+        if (null !== $chain) {
+            $queue->getSignal()->setChain($chain);
+        }
 
         return $subscription;
     }
 
-	/**
+    /**
     * Removes a subscription from the queue.
     *
     * @param  mixed  $signal  Signal the subscription is attached to, this
@@ -140,10 +140,10 @@ class Engine {
     */
     public function dequeue($signal, $subscription)
     {
-		$queue = $this->queue($signal, false);
-		if (false === $queue) return false;
-		return $queue->dequeue($subscription);
-	}
+        $queue = $this->queue($signal, false);
+        if (false === $queue) return false;
+        return $queue->dequeue($subscription);
+    }
 
     /**
      * Locates a Queue object in storage, if not found one is created.
@@ -174,7 +174,7 @@ class Engine {
             }
         }
 
-		if (!$generate) return false;
+        if (!$generate) return false;
 
         if (!(is_object($signal) && $signal instanceof Signal)) {
             $signal = new Signal($signal);
@@ -208,7 +208,7 @@ class Engine {
         $queue = false;
         // extra vars returned from a signal compare
         $compare = false;
-		// index lookup
+        // index lookup
         if (static::canIndex($signal)) {
             $index = ($obj) ? $signal->getSignal() : $signal;
             if (isset($this->_indexStorage[$index])) {
@@ -229,13 +229,13 @@ class Engine {
 
         if (!$queue) return false;
 
-		if (null !== $vars) {
-			if (!is_array($vars)) {
-				$vars = array($vars);
-			}
-		}
+        if (null !== $vars) {
+            if (!is_array($vars)) {
+                $vars = array($vars);
+            }
+        }
 
-		// rewinds and prioritizes the queue
+        // rewinds and prioritizes the queue
         $queue->rewind();
 
         if (!is_object($event)) {
@@ -266,25 +266,25 @@ class Engine {
             }
         }
 
-		// the queue loop
+        // the queue loop
         while($queue->valid()) {
             if ($event->isHalted()) break;
             $queue->current()->fire($vars);
             if ($event->getState() == Event::STATE_ERROR) {
-				if ($this->getState() === Engine::DAEMON) {
-					$queue->dequeue($queue->current());
-				} else {
-					throw new \RuntimeException(
-						sprintf(
-							'Event execution failed with message "%s"',
-							$event->getStateMessage()
-						)
-					);
-				}
+                if ($this->getState() === Engine::DAEMON) {
+                    $queue->dequeue($queue->current());
+                } else {
+                    throw new \RuntimeException(
+                        sprintf(
+                            'Event execution failed with message "%s"',
+                            $event->getStateMessage()
+                        )
+                    );
+                }
             }
-			if ($queue->current()->isExhausted()) {
-				$queue->dequeue($queue->current());
-			}
+            if ($queue->current()->isExhausted()) {
+                $queue->dequeue($queue->current());
+            }
             $queue->next();
         }
 
@@ -316,7 +316,7 @@ class Engine {
     {
         $this->_storage = array();
         $this->_indexStorage = array();
-		$this->_timers = array();
+        $this->_timers = array();
     }
 
     /**
@@ -343,11 +343,11 @@ class Engine {
         }
         return is_int($param) || is_string($param);
     }
-	
-	/**
-	 * Calls an event at the specified intervals of time in microseconds.
-	 *
-	 * @param  mixed  $subscription  Subscription closure that will trigger on
+
+    /**
+     * Calls an event at the specified intervals of time in microseconds.
+     *
+     * @param  mixed  $subscription  Subscription closure that will trigger on
      *         fire or a Subscription object.
      *
      * @param  integer  $interval  Interval of time in microseconds to run
@@ -362,10 +362,10 @@ class Engine {
      * 			interval is provided.
      *
      * @return  object  Subscription
-	 */
-	public function setInterval($subscription, $interval, $vars = null, $identifier = null, $exhaust = 0)
-	{
-		if (!$subscription instanceof Subscription) {
+     */
+    public function setInterval($subscription, $interval, $vars = null, $identifier = null, $exhaust = 0)
+    {
+        if (!$subscription instanceof Subscription) {
             if (!is_callable($subscription)) {
                 throw new \InvalidArgumentException(
                     'subscription callback is not a valid callback'
@@ -373,23 +373,23 @@ class Engine {
             }
             $subscription = new Subscription($subscription, $identifier, $exhaust);
         }
-		
-		if (!is_int($interval)) {
-			throw new \InvalidArgumentException(
-				sprintf(
-					'invalid time interval expected integer recieved %s',
-					gettype($interval)
-				)
-			);
-		}
-		
-		$this->_timers[] = array($subscription, $interval, $this->getMilliseconds() + $interval, $vars);
-	}
-	
-	/**
-	 * Calls an event after the specified amount of time in microseconds.
-	 *
-	 * @param  mixed  $subscription  Subscription closure that will trigger on
+
+        if (!is_int($interval)) {
+            throw new \InvalidArgumentException(
+                sprintf(
+                    'invalid time interval expected integer recieved %s',
+                    gettype($interval)
+                )
+            );
+        }
+
+        $this->_timers[] = array($subscription, $interval, $this->getMilliseconds() + $interval, $vars);
+    }
+
+    /**
+     * Calls an event after the specified amount of time in microseconds.
+     *
+     * @param  mixed  $subscription  Subscription closure that will trigger on
      *         fire or a Subscription object.
      *
      * @param  integer  $interval  Interval of time in microseconds to run
@@ -404,132 +404,126 @@ class Engine {
      * 			interval is provided.
      *
      * @return  object  Subscription
-	 */
-	public function setTimeout($subscription, $interval, $vars = null, $identifier = null)
-	{
-		// This simply uses set interval and sets an exhaustion rate of 1 ...
-		return $this->setInterval($subscription, $interval, $vars = null, $identifier, 1);
-	}
-	
-	/**
-	 * Clears an interval set by setInterval.
-	 *
-	 * @param  mixed  $subscription  Subscription object of the interval or
-	 * 		   identifer.
-	 *
-	 * @return  void
-	 */
-	public function clearInterval($subscription)
-	{
-		$timers = count($this->_timers);
-		$obj = (is_object($signal) && $signal instanceof Subscription);
-		foreach($this->_timers as $_index => $_timer) {
-			if (($obj && $_timer === $subscription) ||
-				($_timer->getIdentifier() === $subscription)) {
-				unset($this->_timers[$_index]);
-				$this->_timers = array_values($this->_timers);
-				break;
-			}
-		}
-	}
-	
-	/**
-	 * Clears a timeout set by setTimeout.
-	 * 
-	 * @param  mixed  $subscription  Subscription object of the timeout or
-	 * 		   identifer.
-	 *
-	 * @return  void
-	 */
-	public function clearTimeout($subscription)
-	{
-		$this->clearInterval($subscription);
-	}
-	
-	/**
-	 * Returns the current time in microseconds.
-	 *
-	 * @return  integer
-	 */
-	public function getMilliseconds()
-	{
-		return round(microtime(true) * 1000);
-	}
-	
-	/**
-	 * Returns the current engine state.
-	 *
-	 * @return  integer
-	 */
-	public function getState()
-	{
-		return $this->_state;
-	}
-	
-	/**
-	 * Starts daemon mode.
-	 *
-	 * @param  boolean  $reset  Resets all timers to begin at daemon start.
-	 *
-	 * @return  void
-	 */
-	public function daemon($reset = false)
-	{
-		if ($reset) {
-			$timers = count($this->_timers);
-			foreach($this->_timers as $_index => $_timer) {
-				$this->_timers[$_index][2] = $this->getMilliseconds() + $this->_timers[$_index][1];
-			}
-		}
-		while(true) {
-			usleep(100);
-			if (($this->getState() === Engine::SHUTDOWN)||
-				($this->getState() ===  Engine::ERROR)) {
-				$this->flush();
-				break;
-			}
-			$timers = count($this->_timers);
-			foreach($this->_timers as $_index => $_timer) {
-				if ($this->getMilliseconds() >= $_timer[2]) {
-					$event = new Event();
-					$vars = $_timer[3];
-					if (null !== $vars) {
-						if (!is_array($vars)) {
-							$vars = array($vars);
-						}
-					} else {
-						$vars = array();
-					}
-					if (0 === count($vars)) {
-						$vars = array(&$event);
-					} else {
-						if (!$vars[0] instanceof Event) {
-							$vars = array_merge(array(&$event), $vars);
-						}
-					}
-					$_timer[0]->fire($vars);
-					if (($event->getState() === Event::STATE_ERROR) ||
-						($event->isHalted())) {
-						unset($this->_timers[$_index]);
-					} else {
-						$this->_timers[$_index][3] = $vars;
-						$this->_timers[$_index][2] = $this->getMilliseconds() + $_timer[1];
-						if ($_timer[0]->isExhausted()) {
-							unset($this->_timers[$_index]);
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Sends the engine the shutdown signal while in daemon mode.
-	 *
-	 * @return  void
-	 */
-	public function shutdown()
-	{
-		$this->_state = Engine::SHUTDOWN;
-	}
+     */
+    public function setTimeout($subscription, $interval, $vars = null, $identifier = null)
+    {
+        // This simply uses set interval and sets an exhaustion rate of 1 ...
+        return $this->setInterval($subscription, $interval, $vars, $identifier, 1);
+    }
+
+    /**
+     * Clears an interval set by setInterval.
+     *
+     * @param  mixed  $subscription  Subscription object of the interval or
+     * 		   identifer.
+     *
+     * @return  void
+     */
+    public function clearInterval($subscription)
+    {
+        $timers = count($this->_timers);
+        $obj = (is_object($signal) && $signal instanceof Subscription);
+        foreach($this->_timers as $_index => $_timer) {
+            if (($obj && $_timer[0] === $subscription) ||
+                ($_timer[0]->getIdentifier() === $subscription)) {
+                unset($this->_timers[$_index]);
+                break;
+            }
+        }
+    }
+
+    /**
+     * Clears a timeout set by setTimeout.
+     *
+     * @param  mixed  $subscription  Subscription object of the timeout or
+     * 		   identifer.
+     *
+     * @return  void
+     */
+    public function clearTimeout($subscription)
+    {
+        $this->clearInterval($subscription);
+    }
+
+    /**
+     * Returns the current time in microseconds.
+     *
+     * @return  integer
+     */
+    public function getMilliseconds()
+    {
+        return round(microtime(true) * 1000);
+    }
+
+    /**
+     * Returns the current engine state.
+     *
+     * @return  integer
+     */
+    public function getState()
+    {
+        return $this->_state;
+    }
+
+    /**
+     * Starts daemon mode.
+     *
+     * @param  boolean  $reset  Resets all timers to begin at daemon start.
+     *
+     * @return  void
+     */
+    public function daemon($reset = false)
+    {
+        if ($reset) {
+            $timers = count($this->_timers);
+            foreach($this->_timers as $_index => $_timer) {
+                $this->_timers[$_index][2] = $this->getMilliseconds() + $this->_timers[$_index][1];
+            }
+        }
+        while(true) {
+            usleep(100);
+            if (($this->getState() === Engine::SHUTDOWN)||
+                ($this->getState() ===  Engine::ERROR)) {
+                $this->flush();
+                break;
+            }
+            foreach($this->_timers as $_index => $_timer) {
+                if ($this->getMilliseconds() >= $_timer[2]) {
+                    $vars = $_timer[3];
+                    if (null !== $vars) {
+                        if (!is_array($vars)) {
+                            $vars = array($vars);
+                        } else {
+                            if (isset($vars[0]) && !$vars[0] instanceof Event) {
+                                array_unshift($vars, new Event());
+                            }
+                        }
+                    } else {
+                        $vars = array(new Event());
+                    }
+                    $_timer[0]->fire(&$vars);
+                    if (($vars[0]->getState() === Event::STATE_ERROR) ||
+                        ($vars[0]->isHalted())) {
+                        unset($this->_timers[$_index]);
+                    } else {
+                        $this->_timers[$_index][3] = $vars;
+                        $this->_timers[$_index][2] = $this->getMilliseconds() + $_timer[1];
+                        if ($_timer[0]->isExhausted()) {
+                            unset($this->_timers[$_index]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Sends the engine the shutdown signal while in daemon mode.
+     *
+     * @return  void
+     */
+    public function shutdown()
+    {
+        $this->_state = Engine::SHUTDOWN;
+    }
 }

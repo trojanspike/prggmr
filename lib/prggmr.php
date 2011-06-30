@@ -40,29 +40,29 @@ require $dir.'/subscription.php';
 class Prggmr extends \prggmr\Engine {
 
 	/**
-     * @var  object|null  Instanceof the singleton
-     */
-    private static $_instance = null;
+	 * @var  object|null  Instanceof the singleton
+	 */
+	private static $_instance = null;
 
 	/**
-     * Returns instance of the Prggmr api.
-     */
-    final public static function instance(/* ... */)
-    {
-        if (null === static::$_instance) {
+	 * Returns instance of the Prggmr api.
+	 */
+	final public static function instance(/* ... */)
+	{
+		if (null === static::$_instance) {
 			static::$_instance = new self();
 		}
 
-        return self::$_instance;
-    }
+		return self::$_instance;
+	}
 
-    /**
-     * Returns the current version of prggmr.
-     *
-     * @return  string
-     */
-    final public static function version(/* ... */)
-    {
-        return PRGGMR_VERSION;
-    }
+	/**
+	 * Returns the current version of prggmr.
+	 *
+	 * @return  string
+	 */
+	final public static function version(/* ... */)
+	{
+		return PRGGMR_VERSION;
+	}
 }
