@@ -39,23 +39,47 @@ class Engine {
      *
      * @var  array
      */
-    public $_indexStorage = null;
+    protected $_indexStorage = null;
 
     /**
      * A non index storage of Queue
      *
      * @var  array
      */
-    public $_storage = null;
+    protected $_storage = null;
+	
+	/**
+	 * Timer based events
+	 *
+	 * @var array
+	 */
+	protected $_timers = array();
+	
+	/**
+	 * Current engine state.
+	 *
+	 * @var  integer
+	 */
+	protected $_state = null;
+	
+	/**
+	 * Engine states.
+	 */
+	const RUNNING  = 0x64;
+	const DAEMON   = 0x65;
+	const SHUTDOWN = 0x66;
+	const ERROR    = 0x67;
 
     /**
-     * Construction inits our empty storage array.
+     * Construction inits our empty storage array and sets default state.
      *
      * @return  void
      */
     public function __construct(/* ... */)
     {
         $this->_storage = array();
+		$this->_indexStorage = array();
+		$this->_state = Engine::RUNNING;
     }
 
     /**
@@ -68,7 +92,7 @@ class Engine {
      * @param  mixed  $subscription  Subscription closure that will trigger on
      *         fire or a Subscription object.
      *
-     * @param  string  $identifier  String identifier of this subscription.
+     * @param  string  $identifier  Identifier of this subscription.
      *
      * @param  integer $priority  Priority of the subscription
      *
@@ -79,7 +103,7 @@ class Engine {
      * @throws  InvalidArgumentException  Thrown when an invalid callback is
      *          provided.
      *
-     * @return  void
+     * @return  object  Subscription
      */
     public function subscribe($signal, $subscription, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
     {
@@ -99,7 +123,7 @@ class Engine {
 			$queue->getSignal()->setChain($chain);
 		}
 
-        return $queue;
+        return $subscription;
     }
 
 	/**
@@ -247,12 +271,16 @@ class Engine {
             if ($event->isHalted()) break;
             $queue->current()->fire($vars);
             if ($event->getState() == Event::STATE_ERROR) {
-                throw new \RuntimeException(
-                    sprintf(
-                        'Event execution failed with message "%s"',
-                        $event->getStateMessage()
-                    )
-                );
+				if ($this->getState() === Engine::DAEMON) {
+					$queue->dequeue($queue->current());
+				} else {
+					throw new \RuntimeException(
+						sprintf(
+							'Event execution failed with message "%s"',
+							$event->getStateMessage()
+						)
+					);
+				}
             }
 			if ($queue->current()->isExhausted()) {
 				$queue->dequeue($queue->current());
@@ -288,6 +316,7 @@ class Engine {
     {
         $this->_storage = array();
         $this->_indexStorage = array();
+		$this->_timers = array();
     }
 
     /**
@@ -314,4 +343,193 @@ class Engine {
         }
         return is_int($param) || is_string($param);
     }
+	
+	/**
+	 * Calls an event at the specified intervals of time in microseconds.
+	 *
+	 * @param  mixed  $subscription  Subscription closure that will trigger on
+     *         fire or a Subscription object.
+     *
+     * @param  integer  $interval  Interval of time in microseconds to run
+     *
+     * @param  mixed  $vars  Variables to pass the interval.
+     *
+     * @param  string  $identifier  Identifier of this subscription.
+     *
+     * @param  integer  $exhaust  Count to set subscription exhaustion.
+     *
+     * @throws  InvalidArgumentException  Thrown when an invalid callback or
+     * 			interval is provided.
+     *
+     * @return  object  Subscription
+	 */
+	public function setInterval($subscription, $interval, $vars = null, $identifier = null, $exhaust = 0)
+	{
+		if (!$subscription instanceof Subscription) {
+            if (!is_callable($subscription)) {
+                throw new \InvalidArgumentException(
+                    'subscription callback is not a valid callback'
+                );
+            }
+            $subscription = new Subscription($subscription, $identifier, $exhaust);
+        }
+		
+		if (!is_int($interval)) {
+			throw new \InvalidArgumentException(
+				sprintf(
+					'invalid time interval expected integer recieved %s',
+					gettype($interval)
+				)
+			);
+		}
+		
+		$this->_timers[] = array($subscription, $interval, $this->getMilliseconds() + $interval, $vars);
+	}
+	
+	/**
+	 * Calls an event after the specified amount of time in microseconds.
+	 *
+	 * @param  mixed  $subscription  Subscription closure that will trigger on
+     *         fire or a Subscription object.
+     *
+     * @param  integer  $interval  Interval of time in microseconds to run
+     *
+     * @param  mixed  $vars  Variables to pass the timeout.
+     *
+     * @param  string  $identifier  Identifier of this subscription.
+     *
+     * @param  integer  $exhaust  Count to set subscription exhaustion.
+     *
+     * @throws  InvalidArgumentException  Thrown when an invalid callback or
+     * 			interval is provided.
+     *
+     * @return  object  Subscription
+	 */
+	public function setTimeout($subscription, $interval, $vars = null, $identifier = null)
+	{
+		// This simply uses set interval and sets an exhaustion rate of 1 ...
+		return $this->setInterval($subscription, $interval, $vars = null, $identifier, 1);
+	}
+	
+	/**
+	 * Clears an interval set by setInterval.
+	 *
+	 * @param  mixed  $subscription  Subscription object of the interval or
+	 * 		   identifer.
+	 *
+	 * @return  void
+	 */
+	public function clearInterval($subscription)
+	{
+		$timers = count($this->_timers);
+		$obj = (is_object($signal) && $signal instanceof Subscription);
+		foreach($this->_timers as $_index => $_timer) {
+			if (($obj && $_timer === $subscription) ||
+				($_timer->getIdentifier() === $subscription)) {
+				unset($this->_timers[$_index]);
+				$this->_timers = array_values($this->_timers);
+				break;
+			}
+		}
+	}
+	
+	/**
+	 * Clears a timeout set by setTimeout.
+	 * 
+	 * @param  mixed  $subscription  Subscription object of the timeout or
+	 * 		   identifer.
+	 *
+	 * @return  void
+	 */
+	public function clearTimeout($subscription)
+	{
+		$this->clearInterval($subscription);
+	}
+	
+	/**
+	 * Returns the current time in microseconds.
+	 *
+	 * @return  integer
+	 */
+	public function getMilliseconds()
+	{
+		return round(microtime(true) * 1000);
+	}
+	
+	/**
+	 * Returns the current engine state.
+	 *
+	 * @return  integer
+	 */
+	public function getState()
+	{
+		return $this->_state;
+	}
+	
+	/**
+	 * Starts daemon mode.
+	 *
+	 * @param  boolean  $reset  Resets all timers to begin at daemon start.
+	 *
+	 * @return  void
+	 */
+	public function daemon($reset = false)
+	{
+		if ($reset) {
+			$timers = count($this->_timers);
+			foreach($this->_timers as $_index => $_timer) {
+				$this->_timers[$_index][2] = $this->getMilliseconds() + $this->_timers[$_index][1];
+			}
+		}
+		while(true) {
+			usleep(100);
+			if (($this->getState() === Engine::SHUTDOWN)||
+				($this->getState() ===  Engine::ERROR)) {
+				$this->flush();
+				break;
+			}
+			$timers = count($this->_timers);
+			foreach($this->_timers as $_index => $_timer) {
+				if ($this->getMilliseconds() >= $_timer[2]) {
+					$event = new Event();
+					$vars = $_timer[3];
+					if (null !== $vars) {
+						if (!is_array($vars)) {
+							$vars = array($vars);
+						}
+					} else {
+						$vars = array();
+					}
+					if (0 === count($vars)) {
+						$vars = array(&$event);
+					} else {
+						if (!$vars[0] instanceof Event) {
+							$vars = array_merge(array(&$event), $vars);
+						}
+					}
+					$_timer[0]->fire($vars);
+					if (($event->getState() === Event::STATE_ERROR) ||
+						($event->isHalted())) {
+						unset($this->_timers[$_index]);
+					} else {
+						$this->_timers[$_index][3] = $vars;
+						$this->_timers[$_index][2] = $this->getMilliseconds() + $_timer[1];
+						if ($_timer[0]->isExhausted()) {
+							unset($this->_timers[$_index]);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Sends the engine the shutdown signal while in daemon mode.
+	 *
+	 * @return  void
+	 */
+	public function shutdown()
+	{
+		$this->_state = Engine::SHUTDOWN;
+	}
 }

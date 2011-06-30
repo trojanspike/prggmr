@@ -78,7 +78,7 @@ class Subscription {
      * Constructs a new subscription object.
      *
      * @param  mixed  $function  A callable variable.
-     * @param  string  $identifier  String identifier of this subscription.
+     * @param  string  $identifier  Identifier of this subscription.
      * @param  integer  $exhaust  Count to set subscription exhaustion.
      */
     public function __construct($function, $identifier = null, $exhaust = 0)

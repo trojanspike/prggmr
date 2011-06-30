@@ -1,5 +1,10 @@
-v0.2.1 ( June 29th, 2011 )
+v0.2.0 ( June 29th, 2011 )
 -----------------------------------
+- Added shutdown method to Engine
+- Added Engine daemon mode which allows an engine to run as a daemon
+- Added Engine states (RUNNING, ERROR, DAEMON)
+- Added getState method to Engine
+- Added setInterval, setTimeout, clearInterval, clearTimeout methods to Engine
 - Removed Adapter and AdapterInterface
 - Added chain, dechain, once API functions
 - Engine->subscribe() param list changed to signal, subscription, identifier,
