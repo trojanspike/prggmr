@@ -83,6 +83,9 @@ class Subscription {
 	 */
 	public function __construct($function, $identifier = null, $exhaust = 0)
 	{
+		if (null === $identifier) {
+			$identifier = rand(0, 100000);
+		}
 		$this->_function = $function;
 		$this->_identifier = $identifier;
 		$this->_limit = $exhaust;

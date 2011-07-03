@@ -16,6 +16,7 @@ Prggmr::instance()->setTimeout(function(){
     }, 1000, null, 'testInterval');
 
     Prggmr::instance()->setTimeout(function(){
+        //pcntl_fork();
         echo "Shutting down the daemon\n";
         Prggmr::instance()->shutdown();
     }, 1000 * 11);

@@ -34,6 +34,11 @@ require $dir.'/api.php';
 require $dir.'/queue.php';
 require $dir.'/subscription.php';
 
+// debugging mode disable by default
+if (!defined('PRGGMR_DEBUG')) {
+	define('PRGGMR_DEBUG', false);
+}
+
 /**
  * The prggmr object is a singleton which allows for a global engine api.
  */

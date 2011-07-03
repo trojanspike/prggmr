@@ -69,6 +69,13 @@ class Engine {
     const DAEMON   = 0x65;
     const SHUTDOWN = 0x66;
     const ERROR    = 0x67;
+	
+	/**
+	 * Engine stacktrace.
+	 *
+	 * @var  array
+	 */
+	protected $_stacktrace = array();
 
     /**
      * Construction inits our empty storage array and sets default state.
@@ -268,23 +275,9 @@ class Engine {
 
         // the queue loop
         while($queue->valid()) {
+			$subscription = $queue->current();
             if ($event->isHalted()) break;
-            $queue->current()->fire($vars);
-            if ($event->getState() == Event::STATE_ERROR) {
-                if ($this->getState() === Engine::DAEMON) {
-                    $queue->dequeue($queue->current());
-                } else {
-                    throw new \RuntimeException(
-                        sprintf(
-                            'Event execution failed with message "%s"',
-                            $event->getStateMessage()
-                        )
-                    );
-                }
-            }
-            if ($queue->current()->isExhausted()) {
-                $queue->dequeue($queue->current());
-            }
+            
             $queue->next();
         }
 
@@ -516,6 +509,68 @@ class Engine {
             }
         }
     }
+	
+	/**
+	 * Keeps a running record of an event stacktrace which is built
+	 * in reverse when an error is encountered.
+	 *
+	 * This method is a debugging method and highly recommended
+	 * aganist use while in a production environment as it is quite
+	 * an expensive call.
+	 *
+	 * @param  object  $event  Event which is called.
+	 * @param  boolean  $return  Return the stacktrace for the event
+	 *
+	 * @return  void
+	 */
+	protected function _stacktrace($event, $return = false)
+	{
+		// debug setting
+		if (!PRGGMR_DEBUG) return null;
+		$hash = spl_object_hash($event);
+		if ($return) return $this->_stacktrace[$hash];
+		// we have to return the entire trace ... which may be expensive
+		// but until php5.4 there isnt much that can be done except
+		// running a debug mode
+		$this->_stacktrace[$hash][] = end(
+			debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
+		);
+	}
+	
+	/**
+	 * Fires a subscription.
+	 *
+	 * @param  object  $signal  Signal
+     *
+     * @param  object  $subscription  Subscription
+     * 
+     * @param  array  $vars  Array of variables to pass the subscribers
+     *
+     * @param  object  $event  Event
+     *
+     * @return  object  Event
+	 */
+	protected function _fire($signal, $subscription, $vars, $event)
+	{
+		// [TODO]
+		// should there be a object validation check here
+		// leave out for now put it on the todo list
+		$this->_stacktrace($event);
+		$result = $subscription->fire($vars);
+		if ($event->getState() == Event::STATE_ERROR) {
+			if ($this->getState() === Engine::DAEMON) {
+				$this->dequeue($signal, $subscription);
+			} else {
+				throw new EngineException(
+					$this->_stacktrace($event, true)
+				);
+			}
+		}
+		if ($signal->isExhausted()) {
+			$this->dequeue($signal, $subscription);
+		}
+		return $event;
+	}
 
     /**
      * Sends the engine the shutdown signal while in daemon mode.
@@ -526,4 +581,22 @@ class Engine {
     {
         $this->_state = Engine::SHUTDOWN;
     }
+}
+
+class EngineException extends Exception {
+	
+	protected $_engineTrace = array();
+	
+	public function __construct($msg)
+	{
+		if (is_array($msg)) {
+			$this->_engineTrace = $msg;
+		}
+		parent::construct('prggmr Engine encountered an unrecoverable error');
+	}
+	
+	public function getTrace()
+	{
+		return array_merge($this->getTrace(), $this->_engineTrace);
+	}
 }
