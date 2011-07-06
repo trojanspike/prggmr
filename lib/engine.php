@@ -277,7 +277,7 @@ class Engine {
         while($queue->valid()) {
 			$subscription = $queue->current();
             if ($event->isHalted()) break;
-            
+            $this->_fire($queue->getSignal(), $subscription, &$vars, $event);
             $queue->next();
         }
 
@@ -494,7 +494,11 @@ class Engine {
                     } else {
                         $vars = array(new Event());
                     }
-                    $_timer[0]->fire(&$vars);
+                    try {
+                        $this->_fire(null, $_timer[0], &$vars, &$vars[0]);
+                    } catch (EngineException $e) {
+                        unset($this->_timers[$_index]);
+                    }
                     if (($vars[0]->getState() === Event::STATE_ERROR) ||
                         ($vars[0]->isHalted())) {
                         unset($this->_timers[$_index]);
@@ -555,18 +559,21 @@ class Engine {
 		// [TODO]
 		// should there be a object validation check here
 		// leave out for now put it on the todo list
-		$this->_stacktrace($event);
-		$result = $subscription->fire($vars);
+        $event->setSubscription($subscription);
+        $result = $subscription->fire($vars);
+        if (false === $result) {
+            $event->halt();
+        }
 		if ($event->getState() == Event::STATE_ERROR) {
-			if ($this->getState() === Engine::DAEMON) {
+			if ($this->getState() === Engine::DAEMON && null !== $signal) {
 				$this->dequeue($signal, $subscription);
 			} else {
-				throw new EngineException(
-					$this->_stacktrace($event, true)
+				throw new Exception(
+					
 				);
 			}
 		}
-		if ($signal->isExhausted()) {
+		if ($subscription->isExhausted()) {
 			$this->dequeue($signal, $subscription);
 		}
 		return $event;
@@ -581,22 +588,4 @@ class Engine {
     {
         $this->_state = Engine::SHUTDOWN;
     }
-}
-
-class EngineException extends Exception {
-	
-	protected $_engineTrace = array();
-	
-	public function __construct($msg)
-	{
-		if (is_array($msg)) {
-			$this->_engineTrace = $msg;
-		}
-		parent::construct('prggmr Engine encountered an unrecoverable error');
-	}
-	
-	public function getTrace()
-	{
-		return array_merge($this->getTrace(), $this->_engineTrace);
-	}
 }

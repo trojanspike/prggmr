@@ -70,6 +70,13 @@ class Event
 	 * @var  object  Signal
 	 */
 	protected $_signal = null;
+    
+    /**
+	 * Subscription event is within.
+	 *
+	 * @var  object  Subscription
+	 */
+	protected $_subscription = null;
 
 	/**
 	 * Message associated with the current event state.
@@ -157,11 +164,21 @@ class Event
 	 * has data previously attatched by a subscriber in the same stack to
 	 * avoid overwritting results.
 	 *
-	 * @return  mixed  Results of
+	 * @param  mixed  $key  Index key of specific data to return.
+	 *
+	 * @return  mixed
 	 */
-	public function getData(/* ... */)
+	public function getData($key = null)
 	{
-		return $this->_data;
+        if ($null !== $key) {
+            if (isset($this->_data[$key])) {
+                return $this->_data[$key];
+            } else {
+                return false;
+            }
+        } else {
+            return $this->_data;
+        }
 	}
 
 	/**
@@ -186,6 +203,18 @@ class Event
 
 		return true;
 	}
+    
+    /**
+	 * Sets the signal this event represents.
+	 *
+	 * @param  object  $signal  Signal
+	 *
+	 * @return  void
+	 */
+	public function setSignal($signal)
+	{
+		$this->_signal = $signal;
+	}
 
 	/**
 	 * Returns the event subscription string this event will bubble upon.
@@ -198,16 +227,26 @@ class Event
 	}
 
 	/**
-	 * Sets the signal this event represents.
+	 * Sets the subscription this event is within.
 	 *
-	 * @param  object  $signal  Signal
+	 * @param  object  $subscription  Subscription
 	 *
 	 * @return  void
 	 */
-	public function setSignal($signal)
+	public function setSubscription($subscription)
 	{
-		$this->_signal = $signal;
+		$this->_subscription = $subscription;
 	}
+    
+    /**
+	 * Returns the event subscription string this event will bubble upon.
+	 *
+	 * @return  string
+	 */
+	public function getSubscription(/* ... */)
+	{
+		return $this->_subscription;
+    }
 
 	/**
 	 * Sets the chained event.
