@@ -496,6 +496,23 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->engine->setInterval(function(){;}, 0.0);
     }
 	
+	public function testEventHaltInDaemon()
+	{
+		$count = 1;
+		$this->engine->setTimeout(function($event, $engine){
+			$engine->engine->shutdown();
+		}, 200, &$this);
+        $this->engine->setInterval(function($event, $count) {
+            echo ".";
+            $count++;
+			if ($count == 2) {
+				$event->halt();
+			}
+        }, 50, array(&$count), 'intervalTest');
+		$this->engine->daemon();
+		$this->assertEquals(2, $count);
+	}
+	
 	public function testClearTimeout()
 	{
 		$count = 0;

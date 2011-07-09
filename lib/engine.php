@@ -183,10 +183,10 @@ class Engine {
                 ($this->_storage[$i]->getSignal(true) === $signal)) {
                     return $this->_storage[$i];
                 }
-			// this is skipped
-			// @codeCoverageIgnoreStart
+            // this is skipped
+            // @codeCoverageIgnoreStart
             }
-			// @codeCoverageIgnoreEnd
+            // @codeCoverageIgnoreEnd
         }
 
         if (!$generate) return false;
@@ -239,10 +239,10 @@ class Engine {
                     $queue = $this->_storage[$i];
                     break;
                 }
-			// this is skipped
-			// @codeCoverageIgnoreStart
+            // this is skipped
+            // @codeCoverageIgnoreStart
             }
-			// @codeCoverageIgnoreEnd
+            // @codeCoverageIgnoreEnd
         }
 
         if (!$queue) return false;
@@ -294,7 +294,7 @@ class Engine {
 
         // the chain
         if (!$event->isHalted() &&
-			null !== ($chain = $queue->getSignal()->getChain())) {
+            null !== ($chain = $queue->getSignal()->getChain())) {
             if (null !== ($data = $event->getData())) {
                 // remove the current event from the vars
                 unset($vars[0]);
@@ -332,6 +332,16 @@ class Engine {
     public function count()
     {
         return count($this->_storage) + count($this->_indexStorage);
+    }
+    
+    /**
+     * Returns the number of timers in the engine.
+     *
+     * @return integer
+     */
+    public function countTimers()
+    {
+        return count($this->_timers);
     }
 
     /**
@@ -490,7 +500,7 @@ class Engine {
         // but after that the daemon will run indefinitly
         if (null !== $timeout && is_int($timeout)) {
             // this is a required hack ... i know
-			// php 5.4 will hopefully provide a fix
+            // php 5.4 will hopefully provide a fix
             $engine = $this;
             $this->setTimeout(function() use ($engine) {
                 $engine->shutdown();
@@ -503,10 +513,10 @@ class Engine {
                 break;
             }
             foreach($this->_timers as $_index => $_timer) {
-				if (!isset($this->_timers[$_index])) {
-					continue;
-				}
-				if ($this->getMilliseconds() >= $_timer[2]) {
+                if (!isset($this->_timers[$_index])) {
+                    continue;
+                }
+                if ($this->getMilliseconds() >= $_timer[2]) {
                     $vars = $_timer[3];
                     if (null !== $vars) {
                         if (!is_array($vars)) {
@@ -522,7 +532,9 @@ class Engine {
                     if (!$vars[0] instanceof Event) {
                         array_unshift($vars, new Event());
                     }
-                    $this->_fire(null, $_timer[0], &$vars, &$vars[0]);
+                    if (!$vars[0]->isHalted()){
+                        $this->_fire(null, $_timer[0], &$vars);
+                    }
                     if (isset($this->_timers[$_index])) {
                         $this->_timers[$_index][3] = $vars;
                         $this->_timers[$_index][2] = $this->getMilliseconds() + $_timer[1];
@@ -535,8 +547,8 @@ class Engine {
         }
     }
     
-	// @codeCoverageIgnoreStart
-	
+    // @codeCoverageIgnoreStart
+    
     /**
      * ===== EXPERIMENTAL ======
      *
@@ -568,8 +580,8 @@ class Engine {
             debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
         );
     }
-	
-	// @codeCoverageIgnoreEnd
+    
+    // @codeCoverageIgnoreEnd
     
     /**
      * Fires a subscription.
@@ -578,34 +590,29 @@ class Engine {
      *
      * @param  object  $subscription  Subscription
      * 
-     * @param  array  $vars  Array of variables to pass the subscribers
-     *
-     * @param  object  $event  Event
+     * @param  array  $vars  Array of variables to pass the subscribers.
      *
      * @return  object  Event
      */
-    protected function _fire($signal, $subscription, $vars, $event)
+    protected function _fire($signal, $subscription, $vars)
     {
         // TODO Is an additional object validation required at this point?
-		if ($event->isHalted()) {
-			return null;
-		}
-        $event->setSubscription($subscription);
+        $vars[0]->setSubscription($subscription);
         $result = $subscription->fire($vars);
         if (false === $result) {
-            $event->halt();
+            $vars[0]->halt();
         }
-        if ($event->getState() == Event::STATE_ERROR) {
+        if ($vars[0]->getState() == Event::STATE_ERROR) {
             if ($this->getState() === Engine::DAEMON) {
                 $this->clearInterval($subscription);
             } else {
-				$this->dequeue($signal, $subscription);
+                $this->dequeue($signal, $subscription);
             }
         }
         if ($subscription->isExhausted()) {
             $this->dequeue($signal, $subscription);
         }
-        return $event;
+        return $vars[0];
     }
 
     /**
