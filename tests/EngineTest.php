@@ -244,15 +244,14 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->engine->count() == 0);
     }
 
-    /**
-     * @expectedException RuntimeException
-     */
     public function testEngineErrorState()
     {
         $this->engine->subscribe('stateerrortest', function($event){
             $event->setState(\prggmr\Event::STATE_ERROR);
-        }, 'exception_test');
-        $event = $this->engine->fire('stateerrortest');
+        }, 'error_state_test');
+        $this->engine->fire('stateerrortest');
+		$sub = $this->engine->queue('stateerrortest', false)->locate('error_state_test');
+		$this->assertFalse($sub);
     }
 
     /**
@@ -265,9 +264,8 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->engine->subscribe('halt', function($event){
             $event->setData('Hello');
         });
-        // this halts it :)
         $this->engine->subscribe('halt', function(){
-            //return false;
+            return false;
         });
         $this->engine->subscribe('halt', function(){
             return 'World';
@@ -465,20 +463,18 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->flush();
         $count = 1;
+		$this->engine->setTimeout(function($event, $unit){
+			$unit->engine->clearInterval('intervalTest');
+			$unit->addToAssertionCount(1);
+		}, 5000, &$this, 'clearInterval');
         $this->engine->setInterval(function($event, $count, $unit) {
             echo ".";
             $count++;
             $unit->addToAssertionCount(1);
-            if ($count >= 5) {
-                $unit->engine->setTimeout(function($event, $unit){
-                    $unit->engine->clearInterval('intervalTest');
-                    $unit->addToAssertionCount(1);
-                }, 1000, &$unit);
-            }
         }, 1000, array(&$count, &$this), 'intervalTest');
         $this->engine->setTimeout(function($event, $unit){
             $unit->engine->shutdown();
-        }, 1000 * 7, &$unit, 'shutdown');
+        }, 1000 * 7, &$this, 'shutdown');
         $this->engine->daemon();
         $this->assertEquals(\prggmr\Engine::SHUTDOWN, $this->engine->getState());
         $this->assertEquals(5, $count);
@@ -499,4 +495,16 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->setInterval(function(){;}, 0.0);
     }
+	
+	public function testClearTimeout()
+	{
+		$count = 0;
+		$this->engine->setTimeout(function($event) use (&$count){
+			echo ".";
+			$count++;
+		}, 200, null, 'timeout_clear');
+		$this->engine->clearTimeout('timeout_clear');
+		$this->engine->daemon(false, 300);
+		$this->assertEquals(0, $count);
+	}
 }

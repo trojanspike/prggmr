@@ -125,23 +125,32 @@ class ApiTest extends EngineTest
 
     public function testTimersAndDaemon()
     {
-        //Prggmr::instance()->flush();
-        //$count = 1;
-        //setInterval(function($event, $count, $unit) {
-        //    echo ".";
-        //    $count++;
-        //    $unit->addToAssertionCount(1);
-        //    if ($count >= 5) {
-        //        setTimeout(function($event, $unit){
-        //            clearInterval('intervalTest');
-        //        }, 1000, &$unit);
-        //    }
-        //}, 1000, array(&$count, &$this), 'intervalTest');
-        //setTimeout(function($event, $unit){
-        //    prggmrd_shutdown();
-        //}, 1000 * 7, &$unit);
-        //prggmrd(true);
-        //$this->assertEquals(\prggmr\Engine::SHUTDOWN, Prggmr::instance()->getState());
-        //$this->assertEquals(5, $count);
+        Prggmr::instance()->flush();
+        $count = 1;
+		setTimeout(function($event){
+			clearInterval('intervalTest');
+		}, 5000);
+        setInterval(function($event, $count, $unit) {
+            echo ".";
+            $count++;
+            $unit->addToAssertionCount(1);
+        }, 1000, array(&$count, &$this), 'intervalTest');
+        setTimeout(function($event){
+            prggmrd_shutdown();
+        }, 1000 * 7);
+        prggmrd(true);
+        $this->assertEquals(\prggmr\Engine::SHUTDOWN, Prggmr::instance()->getState());
+        $this->assertEquals(5, $count);
     }
+	
+	public function testClearTimeout()
+	{
+		$count = 0;
+		setTimeout(function($event){
+			$count++;
+		}, 2000, null, 'timeout_clear');
+		clearTimeout('timeout_clear');
+		prggmrd(false, 3000);
+		$this->assertEquals(0, $count);
+	}
 }

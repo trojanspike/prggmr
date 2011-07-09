@@ -98,5 +98,7 @@ class SubscriptionTest extends \PHPUnit_Framework_TestCase
             }
         }
         $this->assertFalse($sub->isExhausted());
+		$sub = new \prggmr\Subscription(function(){;}, null, 'a');
+		$this->assertEquals(0, $sub->limit());
     }
 }

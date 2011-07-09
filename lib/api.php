@@ -196,12 +196,13 @@ function clearTimeout($subscription)
  * Starts daemon mode.
  *
  * @param  boolean  $reset  Resets all timers to begin at daemon start.
+ * @param  integer  $timeout  Number of milliseconds to run the daemon. 
  *
  * @return  void
  */
-function prggmrd($reset = false)
+function prggmrd($reset = false, $timeout = null)
 {
-    return Prggmr::instance()->daemon();
+    return Prggmr::instance()->daemon($reset, $timeout);
 }
 
 /**

@@ -123,7 +123,11 @@ class Subscription {
         try {
             return call_user_func_array($this->_function, $params);
         } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage());
+            throw new \RuntimeException(sprintf(
+				'Subscription %s failed with error %s',
+				$this->getIdentifier(),
+				$e->getMessage()
+			));
         }
     }
 

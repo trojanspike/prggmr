@@ -110,7 +110,7 @@ class QueueTest extends \PHPUnit_Framework_TestCase
      */
     public function testAttachException()
     {
-        $this->queue->attach();
+        $this->queue->attach(new stdClass());
     }
 
     /**
@@ -118,7 +118,7 @@ class QueueTest extends \PHPUnit_Framework_TestCase
      */
     public function testDetachException()
     {
-        $this->queue->detach();
+        $this->queue->detach(new stdClass());
     }
 
     public function testFlush()

@@ -183,7 +183,10 @@ class Engine {
                 ($this->_storage[$i]->getSignal(true) === $signal)) {
                     return $this->_storage[$i];
                 }
+			// this is skipped
+			// @codeCoverageIgnoreStart
             }
+			// @codeCoverageIgnoreEnd
         }
 
         if (!$generate) return false;
@@ -236,7 +239,10 @@ class Engine {
                     $queue = $this->_storage[$i];
                     break;
                 }
+			// this is skipped
+			// @codeCoverageIgnoreStart
             }
+			// @codeCoverageIgnoreEnd
         }
 
         if (!$queue) return false;
@@ -287,7 +293,8 @@ class Engine {
         }
 
         // the chain
-        if (null !== ($chain = $queue->getSignal()->getChain())) {
+        if (!$event->isHalted() &&
+			null !== ($chain = $queue->getSignal()->getChain())) {
             if (null !== ($data = $event->getData())) {
                 // remove the current event from the vars
                 unset($vars[0]);
@@ -483,6 +490,7 @@ class Engine {
         // but after that the daemon will run indefinitly
         if (null !== $timeout && is_int($timeout)) {
             // this is a required hack ... i know
+			// php 5.4 will hopefully provide a fix
             $engine = $this;
             $this->setTimeout(function() use ($engine) {
                 $engine->shutdown();
@@ -490,20 +498,21 @@ class Engine {
         }
         while(true) {
             usleep(100);
-            if (($this->getState() === Engine::SHUTDOWN)||
-                ($this->getState() ===  Engine::ERROR)) {
-                $this->flush();
+            if ($this->getState() === Engine::SHUTDOWN||
+                $this->getState() ===  Engine::ERROR) {
                 break;
             }
             foreach($this->_timers as $_index => $_timer) {
-                if ($this->getMilliseconds() >= $_timer[2]) {
+				if (!isset($this->_timers[$_index])) {
+					continue;
+				}
+				if ($this->getMilliseconds() >= $_timer[2]) {
                     $vars = $_timer[3];
                     if (null !== $vars) {
                         if (!is_array($vars)) {
                             $vars = array($vars);
                         } else {
                             if (isset($vars[0]) && !$vars[0] instanceof Event) {
-                                echo 'IM HERE Step 1 '.$_timer[0]->getIdentifier();
                                 array_unshift($vars, new Event());
                             }
                         }
@@ -511,18 +520,10 @@ class Engine {
                         $vars = array(new Event());
                     }
                     if (!$vars[0] instanceof Event) {
-                        echo 'IM HERE Step 2 '.$_timer[0]->getIdentifier();
                         array_unshift($vars, new Event());
                     }
-                    try {
-                        $this->_fire(null, $_timer[0], &$vars, &$vars[0]);
-                    } catch (EngineException $e) {
-                        unset($this->_timers[$_index]);
-                    }
-                    if (($vars[0]->getState() === Event::STATE_ERROR) ||
-                        ($vars[0]->isHalted())) {
-                        unset($this->_timers[$_index]);
-                    } else {
+                    $this->_fire(null, $_timer[0], &$vars, &$vars[0]);
+                    if (isset($this->_timers[$_index])) {
                         $this->_timers[$_index][3] = $vars;
                         $this->_timers[$_index][2] = $this->getMilliseconds() + $_timer[1];
                         if ($_timer[0]->isExhausted()) {
@@ -534,6 +535,8 @@ class Engine {
         }
     }
     
+	// @codeCoverageIgnoreStart
+	
     /**
      * ===== EXPERIMENTAL ======
      *
@@ -559,12 +562,14 @@ class Engine {
         $hash = spl_object_hash($event);
         if ($return) return $this->_stacktrace[$hash];
         // we have to return the entire trace ... which may be expensive
-        // but until php5.4 there isnt much that can be done except
+        // but until php 5.4 there isnt much that can be done except
         // running a debug mode
         $this->_stacktrace[$hash][] = end(
             debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
         );
     }
+	
+	// @codeCoverageIgnoreEnd
     
     /**
      * Fires a subscription.
@@ -581,28 +586,20 @@ class Engine {
      */
     protected function _fire($signal, $subscription, $vars, $event)
     {
-        if (!$event instanceof Event ||
-            !$subscription instanceof Subscription) {
-            // return null not false as it causes the engine to stop running
-            throw new \InvalidArgumentException(
-                sprintf(
-                    'Subscription %s shit itself',
-                    $subscription->getIdentifier()
-                )
-            );
-        }
+        // TODO Is an additional object validation required at this point?
+		if ($event->isHalted()) {
+			return null;
+		}
         $event->setSubscription($subscription);
         $result = $subscription->fire($vars);
         if (false === $result) {
             $event->halt();
         }
         if ($event->getState() == Event::STATE_ERROR) {
-            if ($this->getState() === Engine::DAEMON && null !== $signal) {
-                $this->dequeue($signal, $subscription);
+            if ($this->getState() === Engine::DAEMON) {
+                $this->clearInterval($subscription);
             } else {
-                throw new \RuntimeException(
-                    'Engine daemon encountered a fatal error'
-                );
+				$this->dequeue($signal, $subscription);
             }
         }
         if ($subscription->isExhausted()) {

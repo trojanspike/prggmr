@@ -77,6 +77,9 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $this->event->setData('test', 'test');
         $data = $this->event->getData();
         $this->assertEquals('test', $data['test']);
+		$this->event->setData('data', 'test');
+		$this->assertEquals('data', $this->event->getData('test'));
+		$this->assertFalse($this->event->getData('false'));
     }
 
     public function testEventHalt()
@@ -85,4 +88,11 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $this->event->halt();
         $this->assertTrue($this->event->isHalted());
     }
+	
+	public function testEventSubscription()
+	{
+		$this->event->setSubscription(new \prggmr\Subscription(function(){;}));
+		$this->assertType('object', $this->event->getSubscription());
+		$this->assertInstanceOf('prggmr\Subscription', $this->event->getSubscription());
+	}
 }
