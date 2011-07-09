@@ -29,14 +29,14 @@ namespace prggmr;
  */
 class Server {
 
-	// server socket resource
-	protected $_server = null;
+    // server socket resource
+    protected $_server = null;
 
-	// client socket resource
-	protected $_client = null;
+    // client socket resource
+    protected $_client = null;
 
-	public function __construct($connect) {
+    public function __construct($connect) {
 
-	}
+    }
 
 }

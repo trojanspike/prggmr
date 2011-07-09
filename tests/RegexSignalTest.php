@@ -29,50 +29,50 @@ require_once 'SignalTest.php';
 
 class RegexSignalTest extends SignalTest
 {
-	public function testRegexSignal()
-	{
-		$signal = new \prggmr\RegexSignal('hello.:world');
-		$this->assertEquals('#hello.(?P<world>[\w_-]+)$#i', $signal->signal());
-	}
+    public function testRegexSignal()
+    {
+        $signal = new \prggmr\RegexSignal('hello.:world');
+        $this->assertEquals('#hello.(?P<world>[\w_-]+)$#i', $signal->signal());
+    }
 
-	public function testRegexSignalMatch()
-	{
-		$signal = new \prggmr\RegexSignal('hello.:world');
-		$this->assertEquals(array(
-			'test'
-		), $signal->compare('hello.test'));
-	}
+    public function testRegexSignalMatch()
+    {
+        $signal = new \prggmr\RegexSignal('hello.:world');
+        $this->assertEquals(array(
+            'test'
+        ), $signal->compare('hello.test'));
+    }
 
-	public function testRegexSignalMultipleMatches()
-	{
-		$signal = new \prggmr\RegexSignal('added.:action.:id.:from');
-		$this->assertEquals(array(
-			'user',
-			'7',
-			'administration'
-		), $signal->compare('added.user.7.administration'));
-	}
+    public function testRegexSignalMultipleMatches()
+    {
+        $signal = new \prggmr\RegexSignal('added.:action.:id.:from');
+        $this->assertEquals(array(
+            'user',
+            '7',
+            'administration'
+        ), $signal->compare('added.user.7.administration'));
+    }
 
-	public function testRegexNoVarReturn()
-	{
-		$signal = new \prggmr\RegexSignal('regular.[\w_-]+');
-		$this->assertTrue($signal->compare('regular.test'));
-	}
+    public function testRegexNoVarReturn()
+    {
+        $signal = new \prggmr\RegexSignal('regular.[\w_-]+');
+        $this->assertTrue($signal->compare('regular.test'));
+    }
 
-	public function testRegexNoMatch()
-	{
-		$signal = new \prggmr\RegexSignal('regular.expre.no[\w_-]+');
-		$this->assertFalse($signal->compare('nothing'));
-	}
+    public function testRegexNoMatch()
+    {
+        $signal = new \prggmr\RegexSignal('regular.expre.no[\w_-]+');
+        $this->assertFalse($signal->compare('nothing'));
+    }
 
-	public function testRegexMatchesCombination()
-	{
-		$signal = new \prggmr\RegexSignal('test.([\w_-]+).(?<user>[\w_-]+).(.*)');
-		$this->assertEquals(
-			array(
-				'one',
-				'two',
-				'three'
-			), $signal->compare('test.one.two.three'));
-	}
+    public function testRegexMatchesCombination()
+    {
+        $signal = new \prggmr\RegexSignal('test.([\w_-]+).(?<user>[\w_-]+).(.*)');
+        $this->assertEquals(
+            array(
+                'one',
+                'two',
+                'three'
+            ), $signal->compare('test.one.two.three'));
+    }
 }

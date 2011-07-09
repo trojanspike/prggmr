@@ -28,61 +28,61 @@ include_once 'bootstrap.php';
 
 class EventTest extends \PHPUnit_Framework_TestCase
 {
-	public function setUp()
-	{
-		$this->event = new \prggmr\Event();
-	}
+    public function setUp()
+    {
+        $this->event = new \prggmr\Event();
+    }
 
-	public function tearDown()
-	{
-		unset($this->event);
-	}
+    public function tearDown()
+    {
+        unset($this->event);
+    }
 
-	/**
-	 * Test Event states
-	 */
-	public function testEventStates()
-	{
-		$this->assertEquals(\prggmr\Event::STATE_INACTIVE, $this->event->getState());
-		$this->event->setState(\prggmr\Event::STATE_ACTIVE);
-		$this->assertEquals(\prggmr\Event::STATE_ACTIVE, $this->event->getState());
-	}
+    /**
+     * Test Event states
+     */
+    public function testEventStates()
+    {
+        $this->assertEquals(\prggmr\Event::STATE_INACTIVE, $this->event->getState());
+        $this->event->setState(\prggmr\Event::STATE_ACTIVE);
+        $this->assertEquals(\prggmr\Event::STATE_ACTIVE, $this->event->getState());
+    }
 
-	/**
-	 * Test event state messages
-	 */
-	public function testEventStateMessage()
-	{
-		$this->assertEquals(\prggmr\Event::STATE_INACTIVE, $this->event->getState());
-		$this->event->setState(\prggmr\Event::STATE_ACTIVE, 'This is a test');
-		$this->assertEquals('This is a test', $this->event->getStateMessage());
-	}
+    /**
+     * Test event state messages
+     */
+    public function testEventStateMessage()
+    {
+        $this->assertEquals(\prggmr\Event::STATE_INACTIVE, $this->event->getState());
+        $this->event->setState(\prggmr\Event::STATE_ACTIVE, 'This is a test');
+        $this->assertEquals('This is a test', $this->event->getStateMessage());
+    }
 
-	/**
-	 * Test event subscription set
-	 */
-	public function testEventSignal()
-	{
-		$this->assertNull($this->event->getSignal());
-		$this->event->setSignal(new \prggmr\Signal('test'));
-		$this->assertEquals('test', $this->event->getSignal()->signal());
-	}
+    /**
+     * Test event subscription set
+     */
+    public function testEventSignal()
+    {
+        $this->assertNull($this->event->getSignal());
+        $this->event->setSignal(new \prggmr\Signal('test'));
+        $this->assertEquals('test', $this->event->getSignal()->signal());
+    }
 
-	public function testEventData()
-	{
-		$this->assertEquals(0, count($this->event->getData()));
-		$this->event->setData('test');
-		$this->assertEquals(1, count($this->event->getData()));
-		$this->assertEquals(array('test'), $this->event->getData());
-		$this->event->setData('test', 'test');
-		$data = $this->event->getData();
-		$this->assertEquals('test', $data['test']);
-	}
+    public function testEventData()
+    {
+        $this->assertEquals(0, count($this->event->getData()));
+        $this->event->setData('test');
+        $this->assertEquals(1, count($this->event->getData()));
+        $this->assertEquals(array('test'), $this->event->getData());
+        $this->event->setData('test', 'test');
+        $data = $this->event->getData();
+        $this->assertEquals('test', $data['test']);
+    }
 
-	public function testEventHalt()
-	{
-		$this->assertFalse($this->event->isHalted());
-		$this->event->halt();
-		$this->assertTrue($this->event->isHalted());
-	}
+    public function testEventHalt()
+    {
+        $this->assertFalse($this->event->isHalted());
+        $this->event->halt();
+        $this->assertTrue($this->event->isHalted());
+    }
 }

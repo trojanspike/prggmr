@@ -23,7 +23,7 @@ namespace prggmr;
 
 
 use \Closure,
-	\InvalidArgumentException;
+    \InvalidArgumentException;
 
 /**
  * As of v0.1.2 the engine uses 2 different storages, indexed and non-indexed
@@ -69,13 +69,18 @@ class Engine {
     const DAEMON   = 0x65;
     const SHUTDOWN = 0x66;
     const ERROR    = 0x67;
-	
-	/**
-	 * Engine stacktrace.
-	 *
-	 * @var  array
-	 */
-	protected $_stacktrace = array();
+    
+    /**
+     * Daemon shutdown timeout.
+     */
+    const DAEMON_SHUTDOWN_TIMEOUT = 'daemon_shutdown';
+    
+    /**
+     * Engine stacktrace.
+     *
+     * @var  array
+     */
+    protected $_stacktrace = array();
 
     /**
      * Construction inits our empty storage array and sets default state.
@@ -275,7 +280,7 @@ class Engine {
 
         // the queue loop
         while($queue->valid()) {
-			$subscription = $queue->current();
+            $subscription = $queue->current();
             if ($event->isHalted()) break;
             $this->_fire($queue->getSignal(), $subscription, &$vars, $event);
             $queue->next();
@@ -352,7 +357,7 @@ class Engine {
      * @param  integer  $exhaust  Count to set subscription exhaustion.
      *
      * @throws  InvalidArgumentException  Thrown when an invalid callback or
-     * 			interval is provided.
+     *          interval is provided.
      *
      * @return  object  Subscription
      */
@@ -394,7 +399,7 @@ class Engine {
      * @param  integer  $exhaust  Count to set subscription exhaustion.
      *
      * @throws  InvalidArgumentException  Thrown when an invalid callback or
-     * 			interval is provided.
+     *          interval is provided.
      *
      * @return  object  Subscription
      */
@@ -408,7 +413,7 @@ class Engine {
      * Clears an interval set by setInterval.
      *
      * @param  mixed  $subscription  Subscription object of the interval or
-     * 		   identifer.
+     *         identifer.
      *
      * @return  void
      */
@@ -429,7 +434,7 @@ class Engine {
      * Clears a timeout set by setTimeout.
      *
      * @param  mixed  $subscription  Subscription object of the timeout or
-     * 		   identifer.
+     *         identifer.
      *
      * @return  void
      */
@@ -462,16 +467,26 @@ class Engine {
      * Starts daemon mode.
      *
      * @param  boolean  $reset  Resets all timers to begin at daemon start.
+     * @param  integer  $timeout  Number of milliseconds to run the daemon. 
      *
      * @return  void
      */
-    public function daemon($reset = false)
+    public function daemon($reset = false, $timeout = null)
     {
         if ($reset) {
             $timers = count($this->_timers);
             foreach($this->_timers as $_index => $_timer) {
                 $this->_timers[$_index][2] = $this->getMilliseconds() + $this->_timers[$_index][1];
             }
+        }
+        // this can be cleared using clearTime(Engine::DAEMON_SHUTDOWN_TIMEOUT)
+        // but after that the daemon will run indefinitly
+        if (null !== $timeout && is_int($timeout)) {
+            // this is a required hack ... i know
+            $engine = $this;
+            $this->setTimeout(function() use ($engine) {
+                $engine->shutdown();
+            }, $timeout, null, Engine::DAEMON_SHUTDOWN_TIMEOUT);
         }
         while(true) {
             usleep(100);
@@ -488,11 +503,16 @@ class Engine {
                             $vars = array($vars);
                         } else {
                             if (isset($vars[0]) && !$vars[0] instanceof Event) {
+                                echo 'IM HERE Step 1 '.$_timer[0]->getIdentifier();
                                 array_unshift($vars, new Event());
                             }
                         }
                     } else {
                         $vars = array(new Event());
+                    }
+                    if (!$vars[0] instanceof Event) {
+                        echo 'IM HERE Step 2 '.$_timer[0]->getIdentifier();
+                        array_unshift($vars, new Event());
                     }
                     try {
                         $this->_fire(null, $_timer[0], &$vars, &$vars[0]);
@@ -513,38 +533,43 @@ class Engine {
             }
         }
     }
-	
-	/**
-	 * Keeps a running record of an event stacktrace which is built
-	 * in reverse when an error is encountered.
-	 *
-	 * This method is a debugging method and highly recommended
-	 * aganist use while in a production environment as it is quite
-	 * an expensive call.
-	 *
-	 * @param  object  $event  Event which is called.
-	 * @param  boolean  $return  Return the stacktrace for the event
-	 *
-	 * @return  void
-	 */
-	protected function _stacktrace($event, $return = false)
-	{
-		// debug setting
-		if (!PRGGMR_DEBUG) return null;
-		$hash = spl_object_hash($event);
-		if ($return) return $this->_stacktrace[$hash];
-		// we have to return the entire trace ... which may be expensive
-		// but until php5.4 there isnt much that can be done except
-		// running a debug mode
-		$this->_stacktrace[$hash][] = end(
-			debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
-		);
-	}
-	
-	/**
-	 * Fires a subscription.
-	 *
-	 * @param  object  $signal  Signal
+    
+    /**
+     * ===== EXPERIMENTAL ======
+     *
+     * THIS METHOD IS CURRENTLY COMPLETELY UNTESTED IN EARLY PLANNING
+     * STAGES AND MAY NOT REFLECT THE FINAL FUNCTIONALITY
+     * 
+     * Keeps a running record of an event stacktrace which is built
+     * in reverse when an error is encountered.
+     *
+     * This method is a debugging method and highly recommended
+     * aganist use while in a production environment as it is quite
+     * an expensive call.
+     *
+     * @param  object  $event  Event which is called.
+     * @param  boolean  $return  Return the stacktrace for the event
+     *
+     * @return  void
+     */
+    protected function _stacktrace($event, $return = false)
+    {
+        // debug setting
+        if (!PRGGMR_DEBUG) return null;
+        $hash = spl_object_hash($event);
+        if ($return) return $this->_stacktrace[$hash];
+        // we have to return the entire trace ... which may be expensive
+        // but until php5.4 there isnt much that can be done except
+        // running a debug mode
+        $this->_stacktrace[$hash][] = end(
+            debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
+        );
+    }
+    
+    /**
+     * Fires a subscription.
+     *
+     * @param  object  $signal  Signal
      *
      * @param  object  $subscription  Subscription
      * 
@@ -553,31 +578,38 @@ class Engine {
      * @param  object  $event  Event
      *
      * @return  object  Event
-	 */
-	protected function _fire($signal, $subscription, $vars, $event)
-	{
-		// [TODO]
-		// should there be a object validation check here
-		// leave out for now put it on the todo list
+     */
+    protected function _fire($signal, $subscription, $vars, $event)
+    {
+        if (!$event instanceof Event ||
+            !$subscription instanceof Subscription) {
+            // return null not false as it causes the engine to stop running
+            throw new \InvalidArgumentException(
+                sprintf(
+                    'Subscription %s shit itself',
+                    $subscription->getIdentifier()
+                )
+            );
+        }
         $event->setSubscription($subscription);
         $result = $subscription->fire($vars);
         if (false === $result) {
             $event->halt();
         }
-		if ($event->getState() == Event::STATE_ERROR) {
-			if ($this->getState() === Engine::DAEMON && null !== $signal) {
-				$this->dequeue($signal, $subscription);
-			} else {
-				throw new Exception(
-					
-				);
-			}
-		}
-		if ($subscription->isExhausted()) {
-			$this->dequeue($signal, $subscription);
-		}
-		return $event;
-	}
+        if ($event->getState() == Event::STATE_ERROR) {
+            if ($this->getState() === Engine::DAEMON && null !== $signal) {
+                $this->dequeue($signal, $subscription);
+            } else {
+                throw new \RuntimeException(
+                    'Engine daemon encountered a fatal error'
+                );
+            }
+        }
+        if ($subscription->isExhausted()) {
+            $this->dequeue($signal, $subscription);
+        }
+        return $event;
+    }
 
     /**
      * Sends the engine the shutdown signal while in daemon mode.

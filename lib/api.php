@@ -45,7 +45,7 @@
 */
 function subscribe($signal, $subscription, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
 {
-	return Prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, $exhaust);
+    return Prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, $exhaust);
 }
 
 /**
@@ -71,7 +71,7 @@ function subscribe($signal, $subscription, $identifier = null, $priority = null,
 */
 function once($signal, $subscription, $identifier = null, $priority = null, $chain = null)
 {
-	return Prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, 1);
+    return Prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, 1);
 }
 
 /**
@@ -84,7 +84,7 @@ function once($signal, $subscription, $identifier = null, $priority = null, $cha
  */
 function chain($signal, $chain)
 {
-	return Prggmr::instance()->queue($signal)->getSignal()->setChain($chain);
+    return Prggmr::instance()->queue($signal)->getSignal()->setChain($chain);
 }
 
 /**
@@ -97,7 +97,7 @@ function chain($signal, $chain)
  */
 function dechain($signal, $chain)
 {
-	return Prggmr::instance()->queue($signal)->getSignal()->delChain($chain);
+    return Prggmr::instance()->queue($signal)->getSignal()->delChain($chain);
 }
 
 /**
@@ -114,7 +114,7 @@ function dechain($signal, $chain)
 */
 function fire($signal, $vars = null, $event = null)
 {
-	return Prggmr::instance()->fire($signal, $vars, $event);
+    return Prggmr::instance()->fire($signal, $vars, $event);
 }
 
 /**
@@ -132,7 +132,7 @@ function fire($signal, $vars = null, $event = null)
  * @param  integer  $exhaust  Count to set subscription exhaustion.
  *
  * @throws  InvalidArgumentException  Thrown when an invalid callback or
- * 			interval is provided.
+ *          interval is provided.
  *
  * @return  object  Subscription
  */
@@ -156,7 +156,7 @@ function setInterval($subscription, $interval, $vars = null, $identifier = null,
  * @param  integer  $exhaust  Count to set subscription exhaustion.
  *
  * @throws  InvalidArgumentException  Thrown when an invalid callback or
- * 			interval is provided.
+ *          interval is provided.
  *
  * @return  object  Subscription
  */
@@ -170,7 +170,7 @@ function setTimeout($subscription, $interval, $vars = null, $identifier = null)
  * Clears an interval set by setInterval.
  *
  * @param  mixed  $subscription  Subscription object of the interval or
- * 		   identifer.
+ *         identifer.
  *
  * @return  void
  */
@@ -183,7 +183,7 @@ function clearInterval($subscription)
  * Clears a timeout set by setTimeout.
  *
  * @param  mixed  $subscription  Subscription object of the timeout or
- * 		   identifer.
+ *         identifer.
  *
  * @return  void
  */
