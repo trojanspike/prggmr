@@ -1,5 +1,12 @@
-v0.2.0 ( June 29th, 2011 )
+v0.2.0 ( July 9th, 2011 )
 -----------------------------------
+- Added PRGGMR_DEBUG constant
+- Added the "getSignal()" method to Event which returns the Event Signal object
+- Added a key parameter to Event::getData to allow for direct data access
+- Fixed a bug in the Queue which caused errors when using E_STRICT @alkavan
+- Subcription fires are now handled via an internal engine fire
+  which is used for both timed and subscribed events.
+- Added countTimers method to Engine
 - Added shutdown method to Engine
 - Added Engine daemon mode which allows an engine to run as a daemon
 - Added Engine states (RUNNING, ERROR, DAEMON)
@@ -34,22 +41,26 @@ v0.1.1 ( May 30th, 2011 )
 - Removed data object
 - Removed functions file
 - Removed the autoloaders
-- Removed all logic code from adapter, adapter now acts only as an interface to the engine.
+- Removed all logic code from adapter, adapter now acts only as an interface to
+  the engine.
 - Renamed Listenable class to Adapter
 - Adapter implements new Engine api
 - AdapterInterface implements new Engine api
 - Engine object is now a singleton
 - Engine object rewritten
 - Queue and Engine now use a SplObjectStorage rather than an array
-- Event object no longer supplies the event chain, rather is supplied a chained event
+- Event object no longer supplies the event chain, rather is supplied a chained
+  event
 - Event chains are now added through a signal
 - Signal object added
-- Queue object added implemented as a SplObjectStorage with priority in a queue (LIFO) by default
+- Queue object added implemented as a SplObjectStorage with priority in a queue
+  (LIFO) by default
 - bubble method renamed to fire
 - prggmr object renamed to engine
 - All Unittests rewritten
 - Event is no longer a child of Adapter
-- RegexSignal object added which supports event naming of "hello/:world" and any regex string
+- RegexSignal object added which supports event naming of "hello/:world" and any
+  regex string
 - New api implemented (fire, subscribe) removed benchmark, bubble
 
 v0.1.0 ( March 9th, 2011 )
