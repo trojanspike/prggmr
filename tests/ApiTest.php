@@ -143,21 +143,7 @@ class ApiTest extends EngineTest
         $this->assertEquals(\prggmr\Engine::SHUTDOWN, Prggmr::instance()->getState());
         $this->assertEquals(5, $count);
     }
-	
-	public function testEventHaltInDaemon()
-	{
-		$this->engine->flush();
-		$this->engine->daemon();
-		$this->engine->flush();
-		$this->engine->daemon();
-		//$this->assertEquals(2, $count);
-	}
-	
-	public function testThis()
-	{
-		prggmrd();
-	}
-	
+
 	public function testClearTimeout()
 	{
 		$count = 0;

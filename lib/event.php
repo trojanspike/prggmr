@@ -70,7 +70,7 @@ class Event
      * @var  object  Signal
      */
     protected $_signal = null;
-    
+
     /**
      * Subscription event is within.
      *
@@ -170,7 +170,7 @@ class Event
      */
     public function getData($key = null)
     {
-        if ($null !== $key) {
+        if (null !== $key) {
             if (isset($this->_data[$key])) {
                 return $this->_data[$key];
             } else {
@@ -203,7 +203,7 @@ class Event
 
         return true;
     }
-    
+
     /**
      * Sets the signal this event represents.
      *
@@ -237,7 +237,7 @@ class Event
     {
         $this->_subscription = $subscription;
     }
-    
+
     /**
      * Returns the event subscription string this event will bubble upon.
      *

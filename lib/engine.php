@@ -69,12 +69,12 @@ class Engine {
     const DAEMON   = 0x65;
     const SHUTDOWN = 0x66;
     const ERROR    = 0x67;
-    
+
     /**
      * Daemon shutdown timeout.
      */
     const DAEMON_SHUTDOWN_TIMEOUT = 'daemon_shutdown';
-    
+
     /**
      * Engine stacktrace.
      *
@@ -224,6 +224,7 @@ class Engine {
         // extra vars returned from a signal compare
         $compare = false;
         // index lookup
+        $obj = (is_object($signal) && $signal instanceof Signal);
         if (static::canIndex($signal)) {
             $index = ($obj) ? $signal->getSignal() : $signal;
             if (isset($this->_indexStorage[$index])) {
@@ -333,7 +334,7 @@ class Engine {
     {
         return count($this->_storage) + count($this->_indexStorage);
     }
-    
+
     /**
      * Returns the number of timers in the engine.
      *
@@ -437,7 +438,7 @@ class Engine {
     public function clearInterval($subscription)
     {
         $timers = count($this->_timers);
-        $obj = (is_object($signal) && $signal instanceof Subscription);
+        $obj = (is_object($subscription) && $subscription instanceof Subscription);
         foreach($this->_timers as $_index => $_timer) {
             if (($obj && $_timer[0] === $subscription) ||
                 ($_timer[0]->getIdentifier() === $subscription)) {
@@ -484,7 +485,7 @@ class Engine {
      * Starts daemon mode.
      *
      * @param  boolean  $reset  Resets all timers to begin at daemon start.
-     * @param  integer  $timeout  Number of milliseconds to run the daemon. 
+     * @param  integer  $timeout  Number of milliseconds to run the daemon.
      *
      * @return  void
      */
@@ -546,15 +547,15 @@ class Engine {
             }
         }
     }
-    
+
     // @codeCoverageIgnoreStart
-    
+
     /**
      * ===== EXPERIMENTAL ======
      *
      * THIS METHOD IS CURRENTLY COMPLETELY UNTESTED IN EARLY PLANNING
      * STAGES AND MAY NOT REFLECT THE FINAL FUNCTIONALITY
-     * 
+     *
      * Keeps a running record of an event stacktrace which is built
      * in reverse when an error is encountered.
      *
@@ -580,16 +581,16 @@ class Engine {
             debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
         );
     }
-    
+
     // @codeCoverageIgnoreEnd
-    
+
     /**
      * Fires a subscription.
      *
      * @param  object  $signal  Signal
      *
      * @param  object  $subscription  Subscription
-     * 
+     *
      * @param  array  $vars  Array of variables to pass the subscribers.
      *
      * @return  object  Event
