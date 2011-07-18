@@ -149,7 +149,7 @@ class Subscription {
             }
         }
 
-        // subscription
+        // subscription fire
         try {
             return call_user_func_array($this->_function, $params);
         } catch (\Exception $e) {
@@ -161,8 +161,8 @@ class Subscription {
         }
 
         // post fire
-        if (null !== $this->_pre) {
-            foreach ($this->_pre as $_func) {
+        if (null !== $this->_post) {
+            foreach ($this->_post as $_func) {
                 try {
                     call_user_func_array($_func, $params);
                 } catch (\Exception $e) {
