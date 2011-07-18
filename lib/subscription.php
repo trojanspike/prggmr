@@ -73,6 +73,20 @@ class Subscription {
      */
      protected $_identifier = null;
 
+    /**
+     * Array of functions to fire pre dispatch
+     *
+     * @var  object
+     */
+    protected $_pre = null;
+
+    /**
+     * Array of functions to fire post dispatch
+     *
+     * @var  object
+     */
+    protected $_post = null;
+
 
     /**
      * Constructs a new subscription object.
@@ -120,6 +134,22 @@ class Subscription {
             }
         }
 
+        // pre fire
+        if (null !== $this->_pre) {
+            foreach ($this->_pre as $_func) {
+                try {
+                    call_user_func_array($_func, $params);
+                } catch (\Exception $e) {
+                    throw new \RuntimeException(sprintf(
+                        'Subscription pre fire %s failed with error %s',
+                        $this->getIdentifier(),
+                        $e->getMessage()
+                    ));
+                }
+            }
+        }
+
+        // subscription
         try {
             return call_user_func_array($this->_function, $params);
         } catch (\Exception $e) {
@@ -128,6 +158,21 @@ class Subscription {
 				$this->getIdentifier(),
 				$e->getMessage()
 			));
+        }
+
+        // post fire
+        if (null !== $this->_pre) {
+            foreach ($this->_pre as $_func) {
+                try {
+                    call_user_func_array($_func, $params);
+                } catch (\Exception $e) {
+                    throw new \RuntimeException(sprintf(
+                        'Subscription post fire %s failed with error %s',
+                        $this->getIdentifier(),
+                        $e->getMessage()
+                    ));
+                }
+            }
         }
     }
 
@@ -190,5 +235,41 @@ class Subscription {
     public function getIdentifier(/* ... */)
     {
         return $this->_identifier;
+    }
+
+    /**
+     * Adds a function to trigger before firing the subscription.
+     *
+     * @param  object  $closure  Closure
+     *
+     * @return  void
+     */
+    public function preFire($closure)
+    {
+        if (!is_callable($closure)) {
+            throw new \InvalidArgumentException(
+                'argument $closure is not a valid php callback'
+            );
+        }
+        if (null === $this->_pre) $this->_pre = array();
+        $this->_pre[] = $closure;
+    }
+
+    /**
+     * Adds a function to trigger after firing the subscription.
+     *
+     * @param  object  $closure  Closure
+     *
+     * @return  void
+     */
+    public function postFire($closure)
+    {
+        if (!is_callable($closure)) {
+            throw new \InvalidArgumentException(
+                'argument $closure is not a valid php callback'
+            );
+        }
+        if (null === $this->_post) $this->_post = array();
+        $this->_post[] = $closure;
     }
 }
