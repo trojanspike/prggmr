@@ -151,7 +151,7 @@ class Subscription {
 
         // subscription fire
         try {
-            return call_user_func_array($this->_function, $params);
+            $result = call_user_func_array($this->_function, $params);
         } catch (\Exception $e) {
             throw new \RuntimeException(sprintf(
 				'Subscription %s failed with error %s',
@@ -174,6 +174,8 @@ class Subscription {
                 }
             }
         }
+
+        return $result;
     }
 
     /**
