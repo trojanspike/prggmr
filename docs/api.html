@@ -1,0 +1,157 @@
+<link href="style.css" type="text/css" rel="stylesheet" />
+<h1>
+    Global API Functions
+</h1>
+<p>
+    The following functions are global and make use
+    of the global <a href="prggmr.html">prggmr</a> engine.
+</p>
+<h3 id="api.subscribe">
+    subscribe(signal, subscription, [identifier, priority, chain, exhaust])
+</h3>
+<p>
+    Creates a subscription to the given signal.
+</p>
+<p>
+    Returns the <a href="subscription.html#object">subscription</a> object sent to the queue.
+</p>
+<h4>Parameters</h4>
+<ul>
+    <li>
+        The event signal. Refer to <a href="signal.html">signals</a> for more info.
+    </li>
+    <li>
+        An anoymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
+    </li>
+    <li>
+        A string used for later identifing the subscription, if not provided a random integer will be generated, and so the ability to identify this subscription.
+    </li>
+    <li>
+        Integer in ASC order which determains the firing order in queue.
+    </li>
+    <li>
+        Signal to chain once this subscription completes. Refer to <a href="chains.html#subscriber">chains</a> for more info.
+    </li>
+    <li>
+        The number of times this subscription will fire before being dumped. Defaults to 0 (infinte).
+    </li>
+</ul>
+<h4>Example</h4>
+<div class="code">
+<pre>
+// subscribe to the "hello.world" event
+subscribe("hello.world", function($event){
+    echo "HelloWorld";
+});
+</pre>
+</div>
+<h3 id="api.once">
+    once(signal, subscription, [identifier, priority, chain])
+</h3>
+<p>
+    Creates a subscription that will expire after a single call, by setting a default exhaust of 1.
+</p>
+<p>
+    Refer to <a href="api.html#api.subscribe">subscribe</a> for more information.
+</p>
+<h4>Example</h4>
+<div class="code">
+<pre>
+// subscribe to the "hello.world" function
+once("hello.world", function($event){
+    echo "HelloWorld";
+});
+</pre>
+</div>
+<h3 id="api.chain">
+    chain(signal, chain)
+</h3>
+<p>
+    Creates a chain between two signals.
+</p>
+<h4>Parameters</h4>
+<ul>
+    <li>
+        The signal that starts the chain.
+    </li>
+    <li>
+        Signal to be chained.
+    </li>
+</ul>
+<h4>Example</h4>
+<div class="code">
+<pre>
+// chain world from signal hello
+chain('hello', 'world');
+</pre>
+</div>
+<h3 id="api.dechain">
+    dechain(signal, chain)
+</h3>
+<p>
+    Removed a chained link between two signals.
+</p>
+<h4>Parameters</h4>
+<ul>
+    <li>
+        The signal that starts the chain.
+    </li>
+    <li>
+        Chained signal link to be removed.
+    </li>
+</ul>
+<h4>Example</h4>
+<div class="code">
+<pre>
+// remove the chain world from signal hello
+dechain('hello', 'world');
+</pre>
+</div>
+<h3 id="api.fire">
+    fire(signal, [vars, event])
+</h3>
+<p>
+    Fires a event signal.
+</p>
+<h4>Parameters</h4>
+<ul>
+    <li>
+        The event signal to fire. Refer to <a href="signal.html">signals</a> for more info.
+    </li>
+    <li>
+        A list of variables to pass the subscription.
+        <div class="notice">
+            <p>
+                This is expected as an array, to pass an array as a variable it must be contained within a parent array, otherwise it will be intrepruted as a variable listing.
+            </p>
+        </div>
+        <div class="code">
+        <pre>
+// send an array as a parameter
+fire('this', array(array('var1','var2')));
+
+// expected
+function($event, $vars);
+
+// otherwise
+fire('this', array('var1', 'var2'));
+
+// results
+function($event, $var, $var2);
+        </pre>
+        </div>
+    </li>
+    <li>
+        event is a <a href="event.html">Event</a> object to use for the event.
+    </li>
+</ul>
+<p>
+    Returns an <a href="event.html">Event</a> object.
+</p>
+<h4>Example</h4>
+<div class="code">
+<pre>
+// fire the HelloWorld event
+$event = fire('HelloWorld');
+</pre>
+</div>
