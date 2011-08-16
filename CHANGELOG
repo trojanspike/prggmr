@@ -1,3 +1,11 @@
+v0.2.1 ( TBD )
+-----------------------------------
+- Added pre and post fire events to subscriptions
+- Returned event data is now added to the event data
+- Errors encountered in daemon mode first try to remove timer then queue signal
+  subscrip
+- clearInterval now returns false if a interval isnt cleared
+
 v0.2.0 ( July 9th, 2011 )
 -----------------------------------
 - Added PRGGMR_DEBUG constant
