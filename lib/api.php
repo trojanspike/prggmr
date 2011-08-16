@@ -21,7 +21,7 @@
  */
 
 /**
-* Attaches a new subscription to a signal queue.
+* Creates a subscription to the given signal.
 *
 * @param  mixed  $signal  Signal the subscription will attach to, this
 *         can be a Signal object, the signal representation or an array
@@ -72,6 +72,23 @@ function subscribe($signal, $subscription, $identifier = null, $priority = null,
 function once($signal, $subscription, $identifier = null, $priority = null, $chain = null)
 {
     return Prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, 1);
+}
+
+/**
+* Removes a subscription from the queue.
+*
+* @param  mixed  $signal  Signal the subscription is attached to, this
+*         can be a Signal object or the signal representation.
+*
+* @param  mixed  subscription  String identifier of the subscription or
+*         a Subscription object.
+*
+* @throws  InvalidArgumentException
+* @return  void
+*/
+function dequeue($signal, $subscription)
+{
+    return Prggmr::instance()->dequeue($signal, $subscription);   
 }
 
 /**

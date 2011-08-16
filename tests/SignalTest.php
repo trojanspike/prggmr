@@ -77,7 +77,7 @@ class SignalTest extends \PHPUnit_Framework_TestCase
     {
         $signal = new \prggmr\Signal(false);
         $this->assertTrue($signal->compare(false));
-         $this->assertFalse($signal->compare(0));
+        $this->assertFalse($signal->compare(0));
     }
 
     public function testIntegerSignal()

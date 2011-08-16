@@ -26,9 +26,7 @@ $dir = dirname(realpath(__FILE__));
 
 // start'er up
 require $dir.'/engine.php';
-require $dir.'/signalinterface.php';
 require $dir.'/signal.php';
-require $dir.'/regexsignal.php';
 require $dir.'/event.php';
 require $dir.'/api.php';
 require $dir.'/queue.php';

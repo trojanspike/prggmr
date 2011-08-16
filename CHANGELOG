@@ -1,5 +1,7 @@
 v0.2.1 ( TBD )
 -----------------------------------
+- Moved SignalInterface and RegexSignal into the signal.php file ... each class
+  was very small and it keeps the lib a little tidier.
 - Added pre and post fire events to subscriptions
 - Returned event data is now added to the event data
 - Errors encountered in daemon mode first try to remove timer then queue signal

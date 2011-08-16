@@ -3,9 +3,9 @@
     Engine
 </h1>
 <p>
-    The engine object is responsible for maintaining queues and
+    The engine object is responsible for maintaining <a href="#engine.queue">Queues</a> and
     ensuring I/O data conforms to prggmr specifications, it also provides functionality to
-    run a <a href="#engine.daemon_mode">daemon mode</a> and contains shortcut calls to managing <a href="#engine.queue">Queue</a> and their associated Signals and subscriptions.
+    run a <a href="#engine.daemon_mode">daemon mode</a>.
 </p>
 <h3>
     Constants
@@ -86,6 +86,7 @@ $engine = new \prggmr\Engine();
 $engine->subscribe("hello.world", function($event){
     echo "HelloWorld";
 });
+$engine->fire('hello.world');
 </pre>
 </div>
 <h3 id="engine.dequeue">
@@ -107,11 +108,15 @@ $engine->subscribe("hello.world", function($event){
 <div class="code">
 <pre>
 $engine = new \prggmr\Engine();
-$subcriber = $engine->subscribe('test', function(){;}, 'my-function');
-// dequeue by id
+$subcriber = $engine->subscribe('test', function(){
+    echo "HelloWorld";
+}, 'my-function');
+// fire
+$engine->fire('test');
+// dequeue
 $engine->dequeue('test', 'my-function');
-// dequeue by object
-$engine->dequeue('test', $subscriber);
+// nothing outputs
+$engine->fire('test');
 </pre>
 </div>
 <h3 id="engine.queue">
@@ -168,20 +173,15 @@ echo $queue->count();
         </div>
         <div class="code">
         <pre>
-// without parent
-fire('this', array('var1','var2'));
+subscribe('test', function($event, $var){
+    var_dump($var);
+});
 
-// expected
-function($event, $var1);
+// without parent vars recieved as param list
+fire('test', array('var1','var2'));
 
-// result
-function($event, $var1, $var2);
-
-// with parent
-fire('this', array(array('var1', 'var2')));
-
-// results
-function($event, $var1);
+// with parent works as expected
+fire('test', array(array('var1', 'var2')));
         </pre>
         </div>
     </li>
@@ -195,15 +195,54 @@ function($event, $var1);
 <h4>Examples</h4>
 <div class="code">
 <pre>
+$engine = new \prggmr\Engine();
+
+/**
+ * Fire an event with no additional params.
+ */
+ 
+// first subscribe
+$engine->subscribe('HelloWorld', function($event){
+    echo "HelloWorld";
+}, 'one');
+
 // fire the HelloWorld event
-$event = fire('HelloWorld');
+$engine->fire('HelloWorld');
+
+// remove the subscriber
+$engine->dequeue('HelloWorld', 'one');
+
+
+/**
+ * Firing providing the event parameters
+ */
+ 
+// Subcribe with multi params
+$engine->subscribe('HelloWorld', function($event, $param1, $param2){
+    echo $param1.$param2;
+}, 'params');
 
 // fire HelloWorld passing params
-fire('HelloWorld', array(param1, param2));
+$engine->fire('HelloWorld', array('Hello', 'World'));
 
-// fire with a custom event object
+// remove the subscriber
+$engine->dequeue('HelloWorld', 'params');
+
+
+/**
+ * Fire using a provided event object
+ */
+// subscribe for a custom event
+$engine->subscribe('HelloWorld', function($event){
+    echo $event->getData('hello');
+});
+
+// inst a new event
 $event = new \prggmr\Event();
-fire('HelloWorld', array(param1), $event);
+$event->setData('HelloWorld', 'hello');
+
+// fire with a custom event object as the third param
+$engine->fire('HelloWorld', null, $event);
 </pre>
 </div>
 <h3 id="engine.flush">
@@ -229,7 +268,7 @@ $engine->flush();
 <div class="code">
 <pre>
 $engine = new \prggmr\Engine();
-$engine->count();
+echo $engine->count();
 </pre>
 </div>
 <h3 id="engine.getstate">
@@ -297,6 +336,7 @@ setInterval(function($event, $count){
 // start it all
 prggmrd();
 </pre>
+</div>
 <p>
     And to run
 </p>
@@ -357,6 +397,3 @@ $engine = new \prggmr\Engine();
 $engine->countTimers();
 </pre>
 </div>
-<footer>
-    prggmr Verbose Source - v0.2.0
-</footer>

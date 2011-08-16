@@ -22,6 +22,30 @@ namespace prggmr;
  */
 
 /**
+ * The signal object represents the signal passed to the engine
+ * to fire a subscription queue.
+ */
+interface SignalInterface {
+
+    /**
+     * Compares the event signal given aganist itself.
+     *
+     * @param  mixed  $signal  Signal to compare
+     *
+     * @return  mixed  False on failure. True if matches. String/Array
+     *          return results found via the match.
+     */
+    public function compare($signal);
+
+    /**
+     * Returns if this signal returns an indexable value.
+     *
+     * @return  boolean
+     */
+    public function canIndex();
+}
+
+/**
  * The default signal object allows for signals of any type requiring only
  * that they evalute to true on a strict comparison check, otherwise meaning
  * each signal must be exactly equal both in type and value.
@@ -132,5 +156,69 @@ class Signal implements SignalInterface {
     public function canIndex()
     {
         return Engine::canIndex($this->_signal);
+    }
+}
+
+/**
+ * Regex signal
+ *
+ * Allows for signals using regular expresssions and :var param
+ * query strings
+ */
+class RegexSignal extends Signal {
+
+    /**
+     * Constructs a regular expression signal.
+     * Support for :name parameters are supported.
+     *
+     * @param  string  $signal  Regex event signal
+     * @param  mixed  $chain  An additional signal for a chain
+     *
+     * @return  void
+     */
+    public function __construct($signal)
+    {
+        $regex = preg_replace('#:([\w]+)#i', 'fix\(?P<$1>[\w_-]+fix\)', $signal);
+        $regex = str_replace('fix\(', '(', $regex);
+        $regex = str_replace('fix\)', ')', $regex);
+        $regex = '#' . $regex . '$#i';
+        parent::__construct($regex);
+    }
+
+    /**
+     * Compares the event signal given with itself using
+     * regular expressions.
+     *
+     * @param  mixed  $signal  Signal to compare
+     *
+     * @return  mixed  False on failure. True if matches. String/Array
+     *          return results found via the match.
+     */
+    public function compare($signal)
+    {
+        if (preg_match($this->_signal, $signal, $matches)) {
+            array_shift($matches);
+            if (count($matches) != 0) {
+                foreach ($matches as $_k => $_v) {
+                    if (is_string($_k)) {
+                        unset($matches[$_k]);
+                    }
+                }
+                return $matches;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns if this signal returns an indexable value.
+     * Regex signals cannot be index, this return false always.
+     *
+     * @return  boolean
+     */
+    public function canIndex()
+    {
+        return false;
     }
 }
