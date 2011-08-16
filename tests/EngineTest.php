@@ -525,4 +525,17 @@ class EngineTest extends \PHPUnit_Framework_TestCase
 		$this->engine->daemon(false, 300);
 		$this->assertEquals(0, $count);
 	}
+    
+    public function testReturnEventData()
+    {
+        $this->engine->flush();
+        $this->assertEquals(0, $this->engine->count());
+        $this->engine->subscribe('test', function($event){
+            return 'HelloWorld';  
+        });
+        $this->engine->fire('test');
+        $this->assertEquals(array(
+            'return' => 'HelloWorld'
+        ), $this->engine->fire('test')->getData());
+    }
 }

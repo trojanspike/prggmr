@@ -443,9 +443,10 @@ class Engine {
             if (($obj && $_timer[0] === $subscription) ||
                 ($_timer[0]->getIdentifier() === $subscription)) {
                 unset($this->_timers[$_index]);
-                break;
+                return true;
             }
         }
+        return false;
     }
 
     /**
@@ -602,10 +603,16 @@ class Engine {
         $result = $subscription->fire($vars);
         if (false === $result) {
             $vars[0]->halt();
+        } elseif (true !== $result && null !== $result) {
+            // anything returned is set to the "return" value
+            // note that it is greedy
+            $vars[0]->setData($result, 'return');
         }
         if ($vars[0]->getState() == Event::STATE_ERROR) {
             if ($this->getState() === Engine::DAEMON) {
-                $this->clearInterval($subscription);
+                if (false === $this->clearInterval($subscription)) {
+                    $this->dequeue($signal, $subscription);
+                }
             } else {
                 $this->dequeue($signal, $subscription);
             }

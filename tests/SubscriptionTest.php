@@ -101,4 +101,61 @@ class SubscriptionTest extends \PHPUnit_Framework_TestCase
 		$sub = new \prggmr\Subscription(function(){;}, null, 'a');
 		$this->assertEquals(0, $sub->limit());
     }
+    
+    public function testPrePostFire()
+    {
+        $sub = new \prggmr\Subscription(function(){;}, 'mytest', 1);
+        // test exceptions
+        try {
+            $sub->postFire('a');
+            $this->fail('Failed throwing InvalidArgumentException');
+        } catch (\InvalidArgumentException $e) {
+            $this->addToAssertionCount(1);
+        }
+        try {
+            $sub->preFire('b');
+            $this->fail('Failed throwing InvalidArgumentException');
+        } catch (\InvalidArgumentException $e) {
+            $this->addToAssertionCount(1);
+        }
+        // test adding
+        $sub->preFire(function($a){
+            $a->hello = 'Hello';
+        });
+        $sub->postFire(function($a){
+            $a->world = 'World';
+        });
+        $obj = new stdClass();
+        $sub->fire($obj);
+        $this->assertEquals('HelloWorld', $obj->hello.$obj->world);
+        
+        // test runtime exception
+        $sub->preFire(function($a){
+            throw new \Exception('Really?');
+        });
+        $sub->postFire(function($a){
+            throw new \Exception('Really?');
+        });
+        // pre fire runtime exception and removal
+        try {
+            $sub->fire($obj);
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() == 'Subscription pre fire mytest failed with error Really?') {
+                $this->addToAssertionCount(1);
+            } else {
+                $this->fail('Failed throwing preFire Exception');
+            }
+        }
+        
+        // post fire runtime exception and removal
+        try {
+            $sub->fire($obj);
+        } catch (\RuntimeException $e) {
+            if ($e->getMessage() == 'Subscription post fire mytest failed with error Really?') {
+                $this->addToAssertionCount(1);
+            } else {
+                $this->fail('Failed throwing postFire Exception and possibly failed removing preFire error');
+            }
+        }
+    }
 }

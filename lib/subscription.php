@@ -136,10 +136,12 @@ class Subscription {
 
         // pre fire
         if (null !== $this->_pre) {
-            foreach ($this->_pre as $_func) {
+            foreach ($this->_pre as $_index => $_func) {
                 try {
                     call_user_func_array($_func, $params);
                 } catch (\Exception $e) {
+                    // unset incase we continue
+                    unset($this->_pre[$_index]);
                     throw new \RuntimeException(sprintf(
                         'Subscription pre fire %s failed with error %s',
                         $this->getIdentifier(),
@@ -162,10 +164,12 @@ class Subscription {
 
         // post fire
         if (null !== $this->_post) {
-            foreach ($this->_post as $_func) {
+            foreach ($this->_post as $_index => $_func) {
                 try {
                     call_user_func_array($_func, $params);
                 } catch (\Exception $e) {
+                    // unset incase we continue
+                    unset($this->_pre[$_index]);
                     throw new \RuntimeException(sprintf(
                         'Subscription post fire %s failed with error %s',
                         $this->getIdentifier(),
