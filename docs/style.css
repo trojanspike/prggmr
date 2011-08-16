@@ -1,5 +1,5 @@
 body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: Helvetica, Arial, sans-serif;
   font-size: .95em;
   line-height: 1.5em;
   color: #222222;
@@ -8,12 +8,12 @@ body {
 }
 
 a {
-    color: #00BC1C;
+    color: #086600;
     text-decoration: underline;
 }
 
 a:visited {
-    color: #B75082;
+    color: #0033B5;
     text-decoration: underline;
 }
 
@@ -28,26 +28,27 @@ code a:hover {
 
 pre {
     padding: 1em 1em .75em;
-    border: 1px solid #E0E0E0;
-    border-width: 1px 1px 1px 8px;
-    color: #383430;
-    /*background: #F2F2F2;*/
-    font-family: "Monaco", "Consolas", "Courier-New", monospace;
+    border: 1px solid #000;
+    border-width: 5px 5px 5px 5px;
+    /*color: #383430;*/
+    color: #0F0;
+    background: #131313;
+    font-family: "Monaco", "Courier New", monospace;
     font-size: 1em;
-    line-height: 1.3em;
+    line-height: 1.5em;
+    border-radius: 5px;
 }
 
 .notice {
   display: block;
   padding: 1em;
-  margin: 1.4667em 0 2.9334em;
+  margin: 1.4em 0 2.2em;
   background:#FFF6BF;
   color:#514721;
   border:1px solid #FFD324;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: Georgia, FreeSerif, Times, serif;
     margin: .5em 0 0;
     line-height: 1.1em;
 }
@@ -65,22 +66,24 @@ h3 {
     border-bottom: 4px solid #E0E0E0;
     padding-bottom: .6em;
     line-height: 1.4em;
-    margin-top: 3em;
+    margin-top: 2em;
 }
 
 h4, h5, h6 {
     font-size: 1.15em;
 }
 
-span {
-    color: #B20800;
-    font-size: .78em;
-}
-
 ul {
-    list-style: diamond;
+    list-style: disc;
 }
 
 ul li {
     margin: 1em 0;
+}
+
+footer {
+    padding: 10px;
+    margin: 2.5em 0;
+    text-align: center;
+    border-top: 5px solid #E0E0E0;
 }

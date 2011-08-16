@@ -3,12 +3,9 @@
     Engine
 </h1>
 <p>
-    The engine object serves the main purpose of maintaining signal queues and
+    The engine object is responsible for maintaining queues and
     ensuring I/O data conforms to prggmr specifications, it also provides functionality to
-    run a daemon mode and contains shortcut calls to managing Queue, Signal and Subscription objects.
-</p>
-<p>
-    Lives in the <span>prggmr</span> namespace.
+    run a <a href="#engine.daemon_mode">daemon mode</a> and contains shortcut calls to managing <a href="#engine.queue">Queue</a> and their associated Signals and subscriptions.
 </p>
 <h3>
     Constants
@@ -164,22 +161,27 @@ echo $queue->count();
         A list of variables to pass the subscription.
         <div class="notice">
             <p>
-                This is expected as an array, to pass an array as a variable it must be contained within a parent array, otherwise it will be intrepruted as a variable listing.
+                This is expected as an array, if passed an array it will interupt it as the variable list.
+                To workaround this limitation array parameters must be provided within a parent array if attempting
+                to pass an array as a variable on its own.
             </p>
         </div>
         <div class="code">
         <pre>
-// send an array as a parameter
-fire('this', array(array('var1','var2')));
+// without parent
+fire('this', array('var1','var2'));
 
 // expected
-function($event, $vars);
+function($event, $var1);
 
-// otherwise
-fire('this', array('var1', 'var2'));
+// result
+function($event, $var1, $var2);
+
+// with parent
+fire('this', array(array('var1', 'var2')));
 
 // results
-function($event, $var, $var2);
+function($event, $var1);
         </pre>
         </div>
     </li>
@@ -245,12 +247,106 @@ if ($engine->getState() == \prggmr\Engine::RUNNING) {
 }
 </pre>
 </div>
+<h3 id="engine.canindex">
+    canIndex(variable)
+</h3>
+<p>
+    Determains if the provided var is indexable by the engine.
+</p>
+<h4>Parameters</h4>
+<ul>
+    <li>
+        The variable to check.
+    </li>
+</ul>
+<h4>Example</h4>
+<div class="code">
+<pre>
+$engine = new \prggmr\Engine();
+if ($engine->canIndex('string')) {
+    // use it as an index its fast!
+}
+</pre>
+</div>
+<h2 id="engine.daemon_mode">
+    Daemon Mode
+</h2>
+<p>
+    Daemon mode allows for running prggmr as a daemon with timer based events avaliable.
+</p>
+<p>
+    It has two possible entry points the first and recommended public api function <a href="api.html#api.prggmrd">prggmrd</a>, and the second
+    below <a href="#engine.daemon">daemon</a>.
+</p>
+<h4>Example</h4>
+<p>
+    Provided is an incredibly crude example of a prggmr daemon for documentary purposes.
+<div class="code">
+<pre>
+// daemon.php
+require 'lib/prggmr.php';
+
+$count = 0;
+setInterval(function($event, $count){
+    echo sprintf(
+        "Running for %d seconds now ... \n",
+        $count++
+    );
+}, 1000, array(&$count));
+
+// start it all
+prggmrd();
+</pre>
+<p>
+    And to run
+</p>
+<div class="code">
+<pre>
+php daemon.php
+</pre>
+</div>
+<div class="notice">
+    <p>
+        The following methods are avaliable ONLY while in daemon mode, all times are in milliseconds.
+    </p>
+</div>
 <h3 id="engine.counttimers">
     countTimers()
 </h3>
 <p>
     Returns a count of the timed subscribers.
 </p>
+<h4>Example</h4>
+<div class="code">
+<pre>
+$engine = new \prggmr\Engine();
+$engine->countTimers();
+</pre>
+</div>
+<h3 id="engine.setinterval">
+    setInterval(subscription, interval, [vars, identifier, exhaust])
+</h3>
+<p>
+    Sets a subscriber to call at the given interval.
+</p>
+<h4>Parameters</h4>
+<ul>
+    <li>
+        An anonymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
+    </li>
+    <li>
+        The interval time in milliseconds to fire.
+    </li>
+    <li>
+        A list of variables to pass to the subscription.
+    </li>
+    <li>
+        A string used for later identifing the subscription, if not provided a random integer will be generated, and so the ability to identify this subscription.
+    </li>
+    <li>
+        Number of times this subscription will fire before being automatically removed by the engine.
+    </li>
+</ul>
 <p>
     Refer to <a href="timers.html">timers</a> for more info.
 </p>
@@ -261,3 +357,6 @@ $engine = new \prggmr\Engine();
 $engine->countTimers();
 </pre>
 </div>
+<footer>
+    prggmr Verbose Source - v0.2.0
+</footer>
