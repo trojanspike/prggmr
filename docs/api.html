@@ -1,10 +1,30 @@
-<link href="style.css" type="text/css" rel="stylesheet" />
+<!DOCTYPE html>
+<head>
+<title>
+    Prggmr v0.2.0 API Documentation
+</title>
+<link href="style.css" type="text/css" rel="stylesheet" media="all" />
+<link href="js/google-code-prettify/prettify.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="js/google-code-prettify/prettify.js"></script>
+</head>
+<body onload="prettyPrint()">
 <h1>
-    Global API Functions
+    Prggmr Documentation &amp; Manual v0.2.0
 </h1>
+<a href="index.html">Index</a>
+<h2>
+    Prggmr API
+</h2>
 <p>
-    The following functions are global and make use
-    of the global <a href="prggmr.html">prggmr</a> engine.
+    This page contains all of prggmr's public API functions and is the page most users should become very
+    comfortable with and spend the most time learning.
+</p>
+<p>
+    prggmr's API has been designed to provide php functions that wrap
+    directly into a global engine, which with any luck should allow most
+    users to use prggmr as just another core set of php functions and never have
+    the need to instantiate an object until you get into some of the more advanced aspects of
+    developing with prggmr.
 </p>
 <h3 id="api.subscribe">
     subscribe(signal, subscription, [identifier, priority, chain, exhaust])
@@ -38,7 +58,7 @@
 </ul>
 <h4>Example</h4>
 <div class="code">
-<pre>
+<pre class="prettyprint php">
 // subscribe to the "hello.world" event
 subscribe("hello.world", function($event){
     echo "HelloWorld";
@@ -56,7 +76,7 @@ subscribe("hello.world", function($event){
 </p>
 <h4>Example</h4>
 <div class="code">
-<pre>
+<pre class="prettyprint php">
 // subscribe to the "hello.world" function
 once("hello.world", function($event){
     echo "HelloWorld";
@@ -80,7 +100,7 @@ once("hello.world", function($event){
 </ul>
 <h4>Example</h4>
 <div class="code">
-<pre>
+<pre class="prettyprint php">
 // chain world from signal hello
 chain('hello', 'world');
 </pre>
@@ -102,7 +122,7 @@ chain('hello', 'world');
 </ul>
 <h4>Example</h4>
 <div class="code">
-<pre>
+<pre class="prettyprint php">
 // remove the chain world from signal hello
 dechain('hello', 'world');
 </pre>
@@ -122,22 +142,22 @@ dechain('hello', 'world');
         A list of variables to pass the subscription.
         <div class="notice">
             <p>
-                This is expected as an array, to pass an array as a variable it must be contained within a parent array, otherwise it will be intrepruted as a variable listing.
+                This is expected as an array, if passed an array it will interupt it as the variable list.
+                To workaround this limitation array parameters must be provided within a parent array if attempting
+                to pass an array as a variable on its own.
             </p>
         </div>
         <div class="code">
-        <pre>
-// send an array as a parameter
-fire('this', array(array('var1','var2')));
+        <pre class="prettyprint php">
+subscribe('test', function($event, $var){
+    var_dump($var);
+});
 
-// expected
-function($event, $vars);
+// without parent vars recieved as param list
+fire('test', array('var1','var2'));
 
-// otherwise
-fire('this', array('var1', 'var2'));
-
-// results
-function($event, $var, $var2);
+// with parent works as expected
+fire('test', array(array('var1', 'var2')));
         </pre>
         </div>
     </li>
@@ -148,10 +168,54 @@ function($event, $var, $var2);
 <p>
     Returns an <a href="event.html">Event</a> object.
 </p>
-<h4>Example</h4>
+<h4>Examples</h4>
 <div class="code">
-<pre>
+<pre class="prettyprint php">
+/**
+ * Fire an event with no additional params.
+ */
+ 
+// first subscribe
+subscribe('HelloWorld', function($event){
+    echo "HelloWorld";
+}, 'one');
+
 // fire the HelloWorld event
-$event = fire('HelloWorld');
+fire('HelloWorld');
+
+// remove the subscriber
+dequeue('HelloWorld', 'one');
+
+
+/**
+ * Firing providing the event parameters
+ */
+ 
+// Subcribe with multi params
+subscribe('HelloWorld', function($event, $param1, $param2){
+    echo $param1.$param2;
+}, 'params');
+
+// fire HelloWorld passing params
+fire('HelloWorld', array('Hello', 'World'));
+
+// remove the subscriber
+dequeue('HelloWorld', 'params');
+
+
+/**
+ * Fire using a provided event object
+ */
+// subscribe for a custom event
+subscribe('HelloWorld', function($event){
+    echo $event->getData('hello');
+});
+
+// inst a new event
+$event = new \prggmr\Event();
+$event->setData('HelloWorld', 'hello');
+
+// fire with a custom event object as the third param
+fire('HelloWorld', null, $event);
 </pre>
 </div>

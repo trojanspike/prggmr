@@ -104,3 +104,8 @@ footer {
     text-align: center;
     border-top: 5px solid #E0E0E0;
 }
+
+ul.toc li {
+    margin: .2em;
+    font-size: 1.2em;
+}
