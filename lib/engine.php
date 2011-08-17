@@ -400,6 +400,7 @@ class Engine {
         }
 
         $this->_timers[] = array($subscription, $interval, $this->getMilliseconds() + $interval, $vars);
+        return $subscription;
     }
 
     /**
@@ -463,7 +464,7 @@ class Engine {
     }
 
     /**
-     * Returns the current time in microseconds.
+     * Returns the current time in millseconds.
      *
      * @return  integer
      */
