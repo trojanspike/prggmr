@@ -6,29 +6,14 @@ pre .kwd, code .kwd { color: #EF2929; }
 pre .com, code .com { color: #a9a9a9; font-style: italic; } 
 pre .typ, code .typ { color: #89bdff; } 
 pre .lit, code .lit { color: #06989A; }
-pre .pun, code .pun { color: #fff; } 
-pre .pln, code .pln { color: #0f0; }
+pre .pun, code .pun { color: #ffffff; } 
+pre .pln, code .pln { color: #00ff00; }
 pre .tag, code .tag { color: #89bdff; }
 pre .atn, code .atn { color: #bdb76b; } 
 pre .atv, code .atv { color: #65B042; } 
 pre .dec, code .dec { color: #34E2E2; } 
 
-pre.prettyprint, code.prettyprint {
-    margin: 0;
-    padding: 1em 1em .75em;
-    border: 1px solid #000;
-    border-width: 5px 5px 5px 5px;
-    /*color: #383430;*/
-    color: #0F0;
-    background: #131313;
-    font-family: Monaco, "Courier New", "Droid Sans Mono", monospace, monospace;
-    font-size: 0.75em;
-    line-height: 1.5em;
-    border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    white-space: pre-wrap;
-}
+pre.prettyprint, code.prettyprint {}
 
 
 /* Specify class=linenums on a pre to get line numbering */
