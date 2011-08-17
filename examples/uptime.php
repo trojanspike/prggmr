@@ -7,11 +7,9 @@
  * which point it will send a notification things are down and start
  * the process over again.
  */
-require '../lib/prggmr.php';
-$engine = new \prggmr\Engine();
 
 // failure event
-$engine->subscribe('failure', function($event){
+subscribe('failure', function($event){
     // uptime reset
     $event->uptime = 0;
     echo sprintf(
@@ -42,17 +40,17 @@ function ping() {
 // ping every 5 minutes if failure ping again in 30 seconds intervals
 // once there are 5 failures notify
 // if success clear check reset counter
-$engine->setInterval(function($event) use ($engine){
+setInterval(function($event) use ($engine){
     if (200 !== ping()) {
         if (!$event->fail) $event->fail = 0;
         echo "FAILURE FOUND START FAILSAFE ----\n";
-        $engine->setInterval(function($event) use ($engine){
+        setInterval(function($event) use ($engine){
             if (200 !== ping()) {
                 echo "FAILURE\n";
                 if ($event->fail >= 5) {
                     $event->fail = 0;
-                    $engine->clearInterval('fail-check');
-                    $engine->fire('failure', null, $event);
+                    clearInterval('fail-check');
+                    fire('failure', null, $event);
                     // return false to break event
                     return false;
                 }
@@ -60,7 +58,7 @@ $engine->setInterval(function($event) use ($engine){
             } else {
                 $event->fail = 0;
                 // drop this fail check
-                $engine->clearInterval('fail-check');
+                clearInterval('fail-check');
             }
         }, 1000 * 30, array($event), 'fail-check');
     } else {
@@ -75,6 +73,3 @@ $engine->setInterval(function($event) use ($engine){
         );
     }
 }, (1000 * (60 * 5)));
-
-// run the daemon
-$engine->daemon();

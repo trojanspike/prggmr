@@ -1,0 +1,57 @@
+#!/usr/bin/php
+<?php
+/**
+ * Directly run files in a prggmr daemon.
+ */
+$usage = "usage: prggmrd [options] FILE
+
+Current options:
+  -s  Sync all timer clocks with the daemons clock on startup.
+  -t  Length of time to run in milliseconds 
+";
+
+if (count($argv) == 1) {
+    exit($usage);
+}
+
+if (!class_exists('Prggmr')) {
+    // attempt to include prggmr lib on include path
+    require 'prggmr/lib/prggmr.php';
+}
+
+$sync = false;
+$ttr = null;
+// last param is file
+$runfile = $argv[$argc - 1];
+$options = getopt('t:s');
+
+// parse args and check for options
+foreach ($options as $_i => $_arg) {
+    switch ($_i) {
+        case 's':
+            $sync = true;
+            break;
+        case 't':
+            if (false === $_arg || !is_int($_arg + 0)) {
+                exit("invalid option 't'\n".$usage);
+            }
+            $ttr = $_arg + 0;
+            break;
+        default:
+            // this does nothing
+            break;
+    }
+}
+
+if (false === $runfile) {
+    exit($usage);
+}
+
+if (!file_exists($runfile)) {
+    die("Unknown file : $runfile\n");
+} else {
+    require $runfile;
+}
+
+// start the daemon child!!
+prggmrd($sync, $ttr);
