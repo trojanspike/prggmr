@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<head>
+<title>
+    Prggmr v0.2.0 API Documentation
+</title>
+<link href="style.css" type="text/css" rel="stylesheet" media="all" />
+<link href="js/google-code-prettify/prettify.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="js/google-code-prettify/prettify.js"></script>
+</head>
+<body onload="prettyPrint()">
+<h1>
+    Prggmr Documentation &amp; Manual v0.2.0
+</h1>
+<a href="index.html">Index</a>
+<h2 id="event">
+    Event
+</h2>
+<p>
+    The Event represents as it's name implies an event in prggmr, it maintains information
+    such as the signal that triggered it, it's current status and any data that has been assigned
+    to it. The event is usually generated automatically by the <a href="engine.html">engine</a> when it
+    recieves a signal to fire, but can be passed when advanced functionality is nessecary.
+</p>
+<div class="notice">
+    Subscriptions will <strong>ALWAYS</strong> be passed an Event as it's first parameter!
+</div>
+<h3 id="event.constants">
+    Constants
+</h3>
+<ul>
+    <li id="event.state_active">
+        <span>STATE_ACTIVE</span> event is currently being run.
+    </li>
+    <li id="event.state_inactive">
+        <span>STATE_INACTIVE</span> event is inactive.
+    </li>
+    <li id="event.state_error">
+        <span>STATE_ERROR</span> event has encountered an error, depending on the state of the engine, this will cause the <em>subscription</em>
+        which encountered this error to be purged from the system.
+    </li>
+</ul>
+<p>
+    Refer to <a href="event.html#event.states">event states</a> for more info.
+</p>
+<h3 id="engine.__construct">
+    __construct()
+</h3>
+<p>
+    Object constructor takes no parameters 
+</p>
+<p>
+    Internally readies the engine by empting all storages and setting the engines
+    state to <span>RUNNING</span>
+</p>
+<h4>Example</h4>
+<div class="code">
+<pre class="prettyprint php">
+$engine = new \prggmr\Engine();
+</pre>
+</div>
+<h3 id="engine.subscribe">
+    subscribe(signal, subscription, [identifier, priority, chain, exhaust])
+</h3>
+<p>
+    Creates a subscription to the given signal.
+</p>
+<p>
+    Returns the <a href="subscription.html#object">subscription</a> object sent to the queue.
+</p>
+<h4>Parameters</h4>
+<ul>
+    <li>
+        The event signal. Refer to <a href="signal.html">signals</a> for more info.
+    </li>
+    <li>
+        An anonymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
+    </li>
+    <li>
+        A string used for later identifing the subscription, if not provided a random integer will be generated, and so the ability to identify this subscription.
+    </li>
+    <li>
+        Integer in ASC order which determains the firing order in queue.
+    </li>
+    <li>
+        Signal to chain once this subscription completes. Refer to <a href="chains.html#subscriber">chains</a> for more info.
+    </li>
+    <li>
+        The number of times this subscription will fire before being dumped. Defaults to 0 (infinte).
+    </li>
+</ul>
+<h4>
+    Exceptions
+</h4>
+<ul>
+    <li>
+        InvalidArgumentException
+    </li>
+</ul>
+<h4>Example</h4>
+<div class="code">
+<pre class="prettyprint php">
+$engine = new \prggmr\Engine();
+// subscribe to the "hello.world" event
+$engine->subscribe("hello.world", function($event){
+    echo "HelloWorld";
+});
+$engine->fire('hello.world');
+</pre>
+</div>
+
+<h2 id="event.states">Event States</h2>
+<p>
+    Events keep track of their current activity by using states, represented by integers.
+</p>
+<div class="notice">
+    The state of an event is very important to how it will be handled by the engine as such states should
+    NOT be used for passing data across subscriptions, setting an incorrect or improper state will cause problems.
+</div>
+<p>
+    Event states are set by the engine automatically at specific points of execution or can be set manually
+    using the <a href="event.html#event.setstate">setState</a> method.
+</p>
+<p>
+    By default all events are created with an <a href="event.html#event.states.inactive">inactive</a> state.
+</p>
+
+<h3 id="event.states.inactive">
+    Inactive state (0x02)
+</h3>
+<p>
+    Inactive state indicates that an event is currently not being executed.
+</p>
+<ul>
+    <li>
+        The default state set when an event is created.
+    </li>
+    <li>
+        The engine will automatically set this state once an event has finished execution, so it's safe to assume that
+        if an event is inactive it generally is.
+    </li>
+</ul>
+
+<h3 id="event.states.inactive">
+    Active state (0x01)
+</h3>
+<p>
+    Active state indicates that an event is currently being executed.
+</p>
+<ul>
+    <li>
+        The engine will automatically set this state when an event begins execution.
+    </li>
+</ul>
