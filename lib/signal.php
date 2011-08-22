@@ -143,7 +143,7 @@ class Signal implements SignalInterface {
             $this->_chain = null;
         } else {
             // reindex the array starting at 0
-            // relly should be a better way to do this
+            // really should be a better way to do this
             $this->_chain = array_values($this->_chain);
         }
     }

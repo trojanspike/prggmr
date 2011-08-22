@@ -86,6 +86,13 @@ class Subscription {
      * @var  object
      */
     protected $_post = null;
+    
+    /**
+     * Array of additional parameters to pass.
+     *
+     * @var  array
+     */
+    protected $_params = null;
 
 
     /**
@@ -133,12 +140,16 @@ class Subscription {
                 $params = array($params);
             }
         }
+        
+        if (null !== $this->_params) {
+            $params = array_merge(&$params, $this->_params);
+        }
 
         // pre fire
         if (null !== $this->_pre) {
             foreach ($this->_pre as $_index => $_func) {
                 try {
-                    call_user_func_array($_func, $params);
+                    call_user_func_array($_func, &$params);
                 } catch (\Exception $e) {
                     // unset incase we continue
                     unset($this->_pre[$_index]);
@@ -277,5 +288,25 @@ class Subscription {
         }
         if (null === $this->_post) $this->_post = array();
         $this->_post[] = $closure;
+    }
+    
+    /**
+     * Sets an additional set of parameters to pass.
+     *
+     * @param  mixed  $params  Array of additional parameters.
+     *
+     * @return  void
+     */
+    public function params($params)
+    {
+        if (!is_array($params)) {
+            $params = array($params);
+        }
+        
+        if (is_array($this->_params)) {
+            array_merge($this->_params, $params);
+        } else {
+            $this->_params = $params;
+        }
     }
 }

@@ -23,6 +23,7 @@ namespace prggmr;
 
 
 use \Closure,
+    \ArrayObject,
     \InvalidArgumentException;
 
 /**
@@ -220,13 +221,17 @@ class Engine {
      */
     public function fire($signal, $vars = null, $event = null)
     {
+        
+        // Create a temporary queue
+        $queue = array();
+        
         if (null !== $vars) {
             if (!is_array($vars)) {
                 $vars = array($vars);
             }
         }
 
-        if (!is_object($event)) {
+        if (null === $event || !is_object($event)) {
             $event = new Event();
         } elseif (!$event instanceof Event) {
             throw new \InvalidArgumentException(
@@ -249,73 +254,51 @@ class Engine {
         if (static::canIndex($signal)) {
             $index = ($obj) ? $signal->getSignal() : $signal;
             if (isset($this->_indexStorage[$index])) {
-                $event = $this->_fireQueue($this->_indexStorage[$index], $vars, $event);
+                $queue[] = $this->_indexStorage[$index];
             }
         }
         $length = count($this->_storage);
         if (0 !== $length) {
             for($i=0;$i!=$length;$i++) {
-                if (false !== ($compare = $this->_storage[$i]->getSignal()->compare($signal))) {
-                    $this->_fireQueue(
-                        $this->_storage[$i],
-                        (is_array($compare)) ? array_merge($vars, $compare) : $vars,
-                        $event
-                    );
-                    break;
+                if (false !==
+                    ($compare = $this->_storage[$i]->getSignal()->compare($signal))) {
+                    // add additional parameters
+                    $this->_storage[$i]->rewind();
+                    while($this->_storage[$i]->valid()){
+                        $this->_storage[$i]->current()->params(&$compare);
+                        $this->_storage[$i]->next();
+                    }
+                    $queue[] = $this->_storage[$i];
                 }
-            // this is skipped
-            // @codeCoverageIgnoreStart
             }
-            // @codeCoverageIgnoreEnd
         }
         
         // keep the event in an active state until everything completes
         $event->setState(Event::STATE_INACTIVE);
         
-        return $event;
-    }
-    
-    /**
-     * Processes a signal queue and triggers subscriptions.
-     *
-     * @param  object  $queue  \prggmr\Queue
-     *
-     * @param  array  $vars  Array of variables to pass the subscribers
-     *
-     * @param  object  $event  Event
-     */
-    protected function _fireQueue($queue, $vars, $event)
-    {
-        // rewinds and prioritizes the queue
-        $queue->rewind();
-        
-        // set the signal
-        $event->setSignal($queue->getSignal());
-
         // the queue loop
-        while($queue->valid()) {
-            $subscription = $queue->current();
+        foreach ($queue as $_queue) {
             if ($event->isHalted()) break;
-            $this->_fire($queue->getSignal(), $subscription, &$vars, $event);
-            $queue->next();
-        }
-
-        // the chain
-        if (!$event->isHalted() &&
-            null !== ($chain = $queue->getSignal()->getChain())) {
-            if (null !== ($data = $event->getData())) {
-                // remove the current event from the vars
-                unset($vars[0]);
-                $vars = array_merge($vars, $event->getData());
+            $_queue->rewind();
+            while($_queue->valid()) {
+                $event->setSignal($_queue->getSignal());
+                if ($event->isHalted()) break;
+                $this->_fire($_queue->getSignal(), $_queue->current(), &$vars);
+                $_queue->next();
             }
-            foreach ($chain as $_chain) {
-                $link = $this->fire($_chain, $vars);
-                if (false !== $chain) {
-                    $event->setChain($link);
+            if (!$event->isHalted() &&
+                null !== ($chain = $_queue->getSignal()->getChain())) {
+                foreach ($chain as $_chain) {
+                    $link = $this->fire($_chain, $vars);
+                    if (false !== $chain) {
+                        $event->setChain($link);
+                    }
                 }
             }
         }
         
+        // release temporary queue
+        unset($queue);
         return $event;
     }
 
