@@ -220,42 +220,11 @@ class Engine {
      */
     public function fire($signal, $vars = null, $event = null)
     {
-        $queue = false;
-        // extra vars returned from a signal compare
-        $compare = false;
-        // index lookup
-        $obj = (is_object($signal) && $signal instanceof Signal);
-        if (static::canIndex($signal)) {
-            $index = ($obj) ? $signal->getSignal() : $signal;
-            if (isset($this->_indexStorage[$index])) {
-                $queue = $this->_indexStorage[$index];
-            }
-        }
-        // non-index lookup - this is done on all signals
-        // if an indexed signal is not found
-        if (false === $queue) {
-            $length = count($this->_storage);
-            for($i=0;$i!=$length;$i++) {
-                if (false !== ($compare = $this->_storage[$i]->getSignal()->compare($signal))) {
-                    $queue = $this->_storage[$i];
-                    break;
-                }
-            // this is skipped
-            // @codeCoverageIgnoreStart
-            }
-            // @codeCoverageIgnoreEnd
-        }
-
-        if (!$queue) return false;
-
         if (null !== $vars) {
             if (!is_array($vars)) {
                 $vars = array($vars);
             }
         }
-
-        // rewinds and prioritizes the queue
-        $queue->rewind();
 
         if (!is_object($event)) {
             $event = new Event();
@@ -266,24 +235,62 @@ class Engine {
                 , get_class($event))
             );
         }
-
-        $event->setSignal($queue->getSignal());
-        $event->setState(Event::STATE_ACTIVE);
-
+        
         if (0 === count($vars)) {
             $vars = array(&$event);
         } else {
             $vars = array_merge(array(&$event), $vars);
         }
 
-        if ($compare !== false) {
-            // allow for array return
-            if (is_array($compare)) {
-                $vars = array_merge($vars, $compare);
-            } else {
-                $vars[] = $compare;
+        $event->setState(Event::STATE_ACTIVE);
+        
+        // index lookup
+        $obj = (is_object($signal) && $signal instanceof Signal);
+        if (static::canIndex($signal)) {
+            $index = ($obj) ? $signal->getSignal() : $signal;
+            if (isset($this->_indexStorage[$index])) {
+                $event = $this->_fireQueue($this->_indexStorage[$index], $vars, $event);
             }
         }
+        $length = count($this->_storage);
+        if (0 !== $length) {
+            for($i=0;$i!=$length;$i++) {
+                if (false !== ($compare = $this->_storage[$i]->getSignal()->compare($signal))) {
+                    $this->_fireQueue(
+                        $this->_storage[$i],
+                        (is_array($compare)) ? array_merge($vars, $compare) : $vars,
+                        $event
+                    );
+                    break;
+                }
+            // this is skipped
+            // @codeCoverageIgnoreStart
+            }
+            // @codeCoverageIgnoreEnd
+        }
+        
+        // keep the event in an active state until everything completes
+        $event->setState(Event::STATE_INACTIVE);
+        
+        return $event;
+    }
+    
+    /**
+     * Processes a signal queue and triggers subscriptions.
+     *
+     * @param  object  $queue  \prggmr\Queue
+     *
+     * @param  array  $vars  Array of variables to pass the subscribers
+     *
+     * @param  object  $event  Event
+     */
+    protected function _fireQueue($queue, $vars, $event)
+    {
+        // rewinds and prioritizes the queue
+        $queue->rewind();
+        
+        // set the signal
+        $event->setSignal($queue->getSignal());
 
         // the queue loop
         while($queue->valid()) {
@@ -308,10 +315,7 @@ class Engine {
                 }
             }
         }
-
-        // keep the event in an active state until its chain completes
-        $event->setState(Event::STATE_INACTIVE);
-
+        
         return $event;
     }
 

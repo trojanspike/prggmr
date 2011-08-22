@@ -299,12 +299,6 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array('three'), $link2[0]->getData());
     }
 
-    public function testEventQueueEmptyFire()
-    {
-        $this->assertEquals(0, $this->engine->count());
-        $this->assertFalse($this->engine->fire('test'));
-    }
-
     public function testQueue()
     {
         $this->assertEquals(0, $this->engine->count());
