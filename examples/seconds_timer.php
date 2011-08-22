@@ -1,4 +1,6 @@
 <?php
+set_include_path(get_include_path().DIRECTORY_SEPARATOR.dirname(realpath(__FILE__)).'/../');
+require 'ilb/prggmr.php';
 /**
  * A timer that counts and displays the number of seconds it has run
  * every second.

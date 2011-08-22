@@ -1,4 +1,5 @@
 <?php
+require '../lib/prggmr.php';
 /**
  * Runs a status check every 5 minutes to ensure a website is up
  * keeping track of its uptime.
