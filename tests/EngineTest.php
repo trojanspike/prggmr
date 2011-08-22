@@ -46,6 +46,7 @@ class TestSignal extends \prggmr\Signal
 
 class EngineTest extends \PHPUnit_Framework_TestCase
 {
+    
     public function setUp()
     {
         $this->engine = new \prggmr\Engine();
@@ -55,7 +56,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->engine->flush();
     }
-
+    
     public function assertEvent($event, $params, $expected)
     {
         $event = $this->engine->fire($event, $params);
@@ -349,22 +350,22 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     public function testPriority()
     {
         $this->assertEquals(0, $this->engine->count());
-        $this->engine->subscribe('test', function($event){
+        $this->engine->subscribe('testPriority', function($event){
             $event->setData('one');
         });
-        $this->engine->subscribe('test', function($event){
+        $this->engine->subscribe('testPriority', function($event){
             $event->setData('two');
         }, null, 10);
-        $this->engine->subscribe('test', function($event){
+        $this->engine->subscribe('testPriority', function($event){
            $event->setData('three');
         }, null, 1);
-        $this->engine->subscribe('test', function($event){
+        $this->engine->subscribe('testPriority', function($event){
             $event->setData('four');
         }, null, '123');
-        $this->engine->subscribe('test', function($event){
+        $this->engine->subscribe('testPriority', function($event){
             $event->setData('five');
         }, null, array('asd'));
-        $this->assertEvent('test', array(), array(
+        $this->assertEvent('testPriority', array(), array(
             'three', 'two', 'one', 'four', 'five'
         ));
     }

@@ -27,7 +27,7 @@
 include_once 'bootstrap.php';
 include_once 'EngineTest.php';
 
-class ApiTest extends EngineTest
+class ApiTest extends \PHPUnit_Framework_TestCase
 {
     public function testInstance()
     {
@@ -54,6 +54,24 @@ class ApiTest extends EngineTest
         $event = fire('test');
         $this->assertEquals(array('test'), $event->getData());
     }
+    
+    public function testPriority()
+    {
+        subscribe('priority_test', function($e){
+            $e->setData('one');
+        }, null, 10);
+        subscribe(new \prggmr\RegexSignal('priority_:test'), function($e, $test) {
+           $e->setData('two');
+        }, 'REGEX TEST', 1);
+        subscribe(new \prggmr\RegexSignal('priority_:test'), function($e, $test) {
+           $e->setData('four');
+        }, 'REGEX TESTS', 6);
+        subscribe('priority_test', function($e){
+            $e->setData('three');
+        }, null, 0);
+        $fire = fire('priority_test');
+        $this->assertEquals(array('three', 'two', 'four', 'one'), $fire->getData());
+    }
 
     public function testChains()
     {
@@ -78,35 +96,35 @@ class ApiTest extends EngineTest
         $link1 = $event->getChain();
         $this->assertType('array', $link1);
         $this->assertEquals(2, count($link1));
-
+    
         // FIRST CHAIN LINK 1
         $this->assertInstanceOf('\prggmr\Event', $link1[0]);
         $this->assertEquals('chain_1', $link1[0]->getSignal()->signal());
         $this->assertEquals(array('chain_1'), $link1[0]->getData());
-
+    
         // FIRST CHAIN LINK 1 LINK 1
         $link1c1 = $link1[0]->getChain();
         $this->assertType('array', $link1c1);
         $this->assertEquals('chain_2', $link1c1[0]->getSignal()->signal());
         $this->assertEquals(array('chain_2'), $link1c1[0]->getData());
-
+    
         // FIRST CHAIN LINK 1 LINK 1 LINK 1
         $link1c1c1 = $link1c1[0]->getChain();
         $this->assertType('array', $link1c1c1);
         $this->assertEquals('chain_3', $link1c1c1[0]->getSignal()->signal());
         $this->assertEquals(array('chain_3'), $link1c1c1[0]->getData());
-
+    
         // FIRST CHAIN LINK 2
         $this->assertInstanceOf('\prggmr\Event', $link1[1]);
         $this->assertEquals('chain_2', $link1[1]->getSignal()->signal());
         $this->assertEquals(array('chain_2'), $link1[1]->getData());
-
+    
         // FIRST CHAIN LINK 2 LINK 1
         $link2c1 = $link1[1]->getChain();
         $this->assertType('array', $link2c1);
         $this->assertEquals('chain_3', $link2c1[0]->getSignal()->signal());
         $this->assertEquals(array('chain_3'), $link2c1[0]->getData());
-
+    
         subscribe('test_dechain', function(){;});
         subscribe('test_dechain1', function(){;});
         chain('test_dechain', 'test_dechain1');

@@ -1,5 +1,7 @@
 v0.2.1 ( TBD )
 -----------------------------------
+- Multiple Signals can now be triggered upon a single fire
+- No longer greedy overwrite return result, returns are added as data
 - added the prggmrd bin file
 - timeout/interval set methods now return the subscription
 - Moved SignalInterface and RegexSignal into the signal.php file ... each class

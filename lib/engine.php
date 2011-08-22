@@ -223,7 +223,7 @@ class Engine {
     {
         
         // Create a temporary queue
-        $queue = array();
+        $queue = new Queue(new Signal($signal));
         
         if (null !== $vars) {
             if (!is_array($vars)) {
@@ -254,7 +254,16 @@ class Engine {
         if (static::canIndex($signal)) {
             $index = ($obj) ? $signal->getSignal() : $signal;
             if (isset($this->_indexStorage[$index])) {
-                $queue[] = $this->_indexStorage[$index];
+                $_queue = $this->_indexStorage[$index];
+                // rewind only
+                $_queue->rewind(false);
+                while($_queue->valid()){
+                    $queue->enqueue(
+                        $_queue->current(), 
+                        $_queue->getInfo()
+                    );
+                    $this->_indexStorage[$index]->next();
+                }
             }
         }
         $length = count($this->_storage);
@@ -262,13 +271,16 @@ class Engine {
             for($i=0;$i!=$length;$i++) {
                 if (false !==
                     ($compare = $this->_storage[$i]->getSignal()->compare($signal))) {
-                    // add additional parameters
-                    $this->_storage[$i]->rewind();
+                    // rewind only
+                    $this->_storage[$i]->rewind(false);
                     while($this->_storage[$i]->valid()){
                         $this->_storage[$i]->current()->params(&$compare);
+                        $queue->enqueue(
+                            $this->_storage[$i]->current(), 
+                            $this->_storage[$i]->getInfo()
+                        );
                         $this->_storage[$i]->next();
                     }
-                    $queue[] = $this->_storage[$i];
                 }
             }
         }
@@ -276,18 +288,18 @@ class Engine {
         // keep the event in an active state until everything completes
         $event->setState(Event::STATE_INACTIVE);
         
+        // the queue is dirty
+        $queue->dirty = true;
+        
         // the queue loop
-        foreach ($queue as $_queue) {
+        $queue->rewind();
+        
+        while($queue->valid()) {
+            $event->setSignal($queue->getSignal());
             if ($event->isHalted()) break;
-            $_queue->rewind();
-            while($_queue->valid()) {
-                $event->setSignal($_queue->getSignal());
-                if ($event->isHalted()) break;
-                $this->_fire($_queue->getSignal(), $_queue->current(), &$vars);
-                $_queue->next();
-            }
+            $this->_fire($queue->getSignal(), $queue->current(), &$vars);
             if (!$event->isHalted() &&
-                null !== ($chain = $_queue->getSignal()->getChain())) {
+                null !== ($chain = $queue->getSignal()->getChain())) {
                 foreach ($chain as $_chain) {
                     $link = $this->fire($_chain, $vars);
                     if (false !== $chain) {
@@ -295,6 +307,7 @@ class Engine {
                     }
                 }
             }
+            $queue->next();
         }
         
         // release temporary queue
