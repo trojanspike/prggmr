@@ -126,7 +126,7 @@ class Subscription {
      * @throws  RuntimeException  When exception thrown within the closure.
      * @return  mixed  Results of the function
      */
-    public function fire($params = null)
+    public function fire(&$params = null)
     {
         // test for exhaustion
         if ($this->isExhausted()) return false;
@@ -142,14 +142,14 @@ class Subscription {
         }
         
         if (null !== $this->_params) {
-            $params = array_merge(&$params, $this->_params);
+            $params = array_merge($params, $this->_params);
         }
 
         // pre fire
         if (null !== $this->_pre) {
             foreach ($this->_pre as $_index => $_func) {
                 try {
-                    call_user_func_array($_func, &$params);
+                    call_user_func_array($_func, $params);
                 } catch (\Exception $e) {
                     // unset incase we continue
                     unset($this->_pre[$_index]);
@@ -297,7 +297,7 @@ class Subscription {
      *
      * @return  void
      */
-    public function params($params)
+    public function params(&$params)
     {
         if (!is_array($params)) {
             $params = array($params);
