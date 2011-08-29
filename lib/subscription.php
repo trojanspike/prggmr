@@ -126,7 +126,7 @@ class Subscription {
      * @throws  RuntimeException  When exception thrown within the closure.
      * @return  mixed  Results of the function
      */
-    public function fire($params = null)
+    public function fire(&$params = null)
     {
         // test for exhaustion
         if ($this->isExhausted()) return false;
@@ -142,22 +142,22 @@ class Subscription {
         }
         
         if (null !== $this->_params) {
-            $params = array_merge(&$params, $this->_params);
+            $params = array_merge($params, $this->_params);
         }
 
         // pre fire
         if (null !== $this->_pre) {
             foreach ($this->_pre as $_index => $_func) {
                 try {
-                    call_user_func_array($_func, &$params);
+                    call_user_func_array($_func, $params);
                 } catch (\Exception $e) {
                     // unset incase we continue
                     unset($this->_pre[$_index]);
-                    throw new \RuntimeException(sprintf(
+                    throw new SubscriptionException(sprintf(
                         'Subscription pre fire %s failed with error %s',
                         $this->getIdentifier(),
                         $e->getMessage()
-                    ));
+                    ), $params[0]);
                 }
             }
         }
@@ -166,11 +166,11 @@ class Subscription {
         try {
             $result = call_user_func_array($this->_function, $params);
         } catch (\Exception $e) {
-            throw new \RuntimeException(sprintf(
+            throw new SubscriptionException(sprintf(
 				'Subscription %s failed with error %s',
 				$this->getIdentifier(),
 				$e->getMessage()
-			));
+			), $params[0]);
         }
 
         // post fire
@@ -181,11 +181,11 @@ class Subscription {
                 } catch (\Exception $e) {
                     // unset incase we continue
                     unset($this->_pre[$_index]);
-                    throw new \RuntimeException(sprintf(
+                    throw new SubscriptionException(sprintf(
                         'Subscription post fire %s failed with error %s',
                         $this->getIdentifier(),
                         $e->getMessage()
-                    ));
+                    ), $params[0]);
                 }
             }
         }
@@ -297,7 +297,7 @@ class Subscription {
      *
      * @return  void
      */
-    public function params($params)
+    public function params(&$params)
     {
         if (!is_array($params)) {
             $params = array($params);
@@ -308,5 +308,32 @@ class Subscription {
         } else {
             $this->_params = $params;
         }
+    }
+}
+
+
+class SubscriptionException extends \Exception {
+    
+    /**
+     * Event associated with the exception.
+     *
+     * @param  object  \prggmr\Event
+     */
+    protected $_event = null;
+    
+    public function __construct($message, $event)
+    {
+        $this->_event = $event;
+        parent::__construct($message);
+    }
+    
+    /**
+     * Returns the event assocaited with this exception.
+     *
+     * @return  object  \prggmr\Event
+     */
+    public function getEvent()
+    {
+        return $this->_event;
     }
 }

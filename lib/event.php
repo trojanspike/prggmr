@@ -91,6 +91,13 @@ class Event
      * @param  object  Event
      */
     protected $_chain = null;
+    
+    /**
+     * Backtrace of where this event was fired from, usefull for debugging.
+     *
+     * @param  array  $trace
+     */
+    protected $_trace = array();
 
     /**
      * Constructs a new event object.
@@ -266,8 +273,30 @@ class Event
      *
      * @return  mixed  array, null if no chain exists.
      */
-    public function getChain()
+    public function getChain(/* ... */)
     {
         return $this->_chain;
+    }
+    
+    /**
+     * Adds a new location from where this event fired from.
+     *
+     * @param  array  $trace  PHP trace array.
+     *
+     * @return  void
+     */
+    public function addTrace($trace)
+    {
+        $this->_trace[] = $trace;
+    }
+    
+    /**
+     * Returns the backtrace information for debugging purposes.
+     *
+     * @return  array
+     */
+    public function getTrace(/* ... */)
+    {
+        return $this->_trace;
     }
 }

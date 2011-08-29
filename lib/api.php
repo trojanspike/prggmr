@@ -129,9 +129,17 @@ function dechain($signal, $chain)
 *
 * @return  object  Event
 */
-function fire($signal, $vars = null, $event = null)
+function fire($signal, $vars = null, &$event = null)
 {
-    return Prggmr::instance()->fire($signal, $vars, $event);
+    if (PRGGMR_DEBUG) {
+        if (version_compare(phpversion(), '5.3.6', '>=')) {
+            return Prggmr::instance()->fire($signal, $vars, $event, debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT));
+        } else {
+            return Prggmr::instance()->fire($signal, $vars, $event, debug_backtrace());
+        }
+    } else {
+        return Prggmr::instance()->fire($signal, $vars, $event);
+    }
 }
 
 /**

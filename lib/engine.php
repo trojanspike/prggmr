@@ -143,7 +143,7 @@ class Engine {
     * Removes a subscription from the queue.
     *
     * @param  mixed  $signal  Signal the subscription is attached to, this
-     *         can be a Signal object or the signal representation.
+    *         can be a Signal object or the signal representation.
     *
     * @param  mixed  subscription  String identifier of the subscription or
     *         a Subscription object.
@@ -219,9 +219,8 @@ class Engine {
      *
      * @return  object  Event
      */
-    public function fire($signal, $vars = null, $event = null)
+    public function fire($signal, $vars = null, $event = null, $stacktrace = null)
     {
-        
         // Create a temporary queue
         $queue = new Queue(new Signal($signal));
         
@@ -274,7 +273,7 @@ class Engine {
                     // rewind only
                     $this->_storage[$i]->rewind(false);
                     while($this->_storage[$i]->valid()){
-                        $this->_storage[$i]->current()->params(&$compare);
+                        $this->_storage[$i]->current()->params($compare);
                         $queue->enqueue(
                             $this->_storage[$i]->current(), 
                             $this->_storage[$i]->getInfo()
@@ -294,10 +293,23 @@ class Engine {
         // the queue loop
         $queue->rewind();
         
+        // add stacktrace
+        if (PRGGMR_DEBUG) {
+            if (null === $stacktrace) {
+                if (version_compare(phpversion(), '5.3.6', '>=')) {
+                    $event->addTrace(debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT));
+                } else {
+                    $event->addTrace(debug_backtrace());
+                }
+            } else {
+                $event->addTrace($stacktrace);
+            }
+        }
+        
         while($queue->valid()) {
             $event->setSignal($queue->getSignal());
             if ($event->isHalted()) break;
-            $this->_fire($queue->getSignal(), $queue->current(), &$vars);
+            $this->_fire($queue->getSignal(), $queue->current(), $vars);
             if (!$event->isHalted() &&
                 null !== ($chain = $queue->getSignal()->getChain())) {
                 foreach ($chain as $_chain) {
@@ -536,7 +548,7 @@ class Engine {
                         array_unshift($vars, new Event());
                     }
                     if (!$vars[0]->isHalted()){
-                        $this->_fire(null, $_timer[0], &$vars);
+                        $this->_fire(null, $_timer[0], $vars);
                     }
                     if (isset($this->_timers[$_index])) {
                         $this->_timers[$_index][3] = $vars;
@@ -597,17 +609,18 @@ class Engine {
      *
      * @return  object  Event
      */
-    protected function _fire($signal, $subscription, $vars)
+    protected function _fire($signal, $subscription, &$vars)
     {
         // TODO Is an additional object validation required at this point?
         $vars[0]->setSubscription($subscription);
         $result = $subscription->fire($vars);
-        if (false === $result) {
-            $vars[0]->halt();
-        } elseif (true !== $result && null !== $result) {
+        if (null !== $result) {
             // anything returned is set to the "return" value
             // note that it is greedy
             $vars[0]->setData($result, 'return');
+            if (false === $result) {
+                $vars[0]->halt();
+            } 
         }
         if ($vars[0]->getState() == Event::STATE_ERROR) {
             if ($this->getState() === Engine::DAEMON) {

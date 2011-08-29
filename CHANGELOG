@@ -1,5 +1,6 @@
 v0.2.1 ( TBD )
 -----------------------------------
+- Subscriptions now throw a SubscriptionException if an error is encountered.
 - Multiple Signals can now be triggered upon a single fire
 - No longer greedy overwrite return result, returns are added as data
 - added the prggmrd bin file
