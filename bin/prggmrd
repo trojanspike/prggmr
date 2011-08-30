@@ -6,24 +6,22 @@
 $usage = "usage: prggmrd [options] FILE
 
 Current options:
-  -s  Sync all timer clocks with the daemons clock on startup.
-  -t  Length of time to run in milliseconds 
+  -v    Displays current prggmr version.
+  -s    Sync all timer clocks with the daemons clock on startup.
+  -t    Length of time to run in milliseconds.
+  -d    Run debug mode.
+  -h    Shows this help message.
 ";
 
 if (count($argv) == 1) {
     exit($usage);
 }
 
-if (!class_exists('Prggmr')) {
-    // attempt to include prggmr lib on include path
-    require 'prggmr/lib/prggmr.php';
-}
-
 $sync = false;
 $ttr = null;
 // last param is file
 $runfile = $argv[$argc - 1];
-$options = getopt('t:s');
+$options = getopt('t:sdhv');
 
 // parse args and check for options
 foreach ($options as $_i => $_arg) {
@@ -37,6 +35,15 @@ foreach ($options as $_i => $_arg) {
             }
             $ttr = $_arg + 0;
             break;
+        case 'd':
+            define('PRGGMR_DEBUG', true);
+            break;
+        case 'h':
+            exit($usage);
+            break;
+        case 'v':
+            $showversion = true;
+            break;
         default:
             // this does nothing
             break;
@@ -46,6 +53,15 @@ foreach ($options as $_i => $_arg) {
 if (false === $runfile) {
     exit($usage);
 }
+
+// load prggmr
+if (!class_exists('Prggmr')) {
+    // attempt to include prggmr lib on include path
+    require 'prggmr/lib/prggmr.php';
+}
+
+if (isset($showversion)) exit('prggmr version '.PRGGMR_VERSION." by Nickolas Whiting
+");
 
 if (!file_exists($runfile)) {
     die("Unknown file : $runfile\n");
