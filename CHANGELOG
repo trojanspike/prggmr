@@ -1,16 +1,15 @@
-v0.2.1 ( TBD )
+v0.2.1
 -----------------------------------
 - Subscriptions now throw a SubscriptionException if an error is encountered.
 - Multiple Signals can now be triggered upon a single fire
-- No longer greedy overwrite return result, returns are added as data
 - added the prggmrd bin file
 - timeout/interval set methods now return the subscription
 - Moved SignalInterface and RegexSignal into the signal.php file ... each class
   was very small and it keeps the lib a little tidier.
 - Added pre and post fire events to subscriptions
-- Returned event data is now added to the event data
+- Returned event data is now added to the event data as the "return" key.
 - Errors encountered in daemon mode first try to remove timer then queue signal
-  subscrip
+  subscription
 - clearInterval now returns false if a interval isnt cleared
 
 v0.2.0 ( July 9th, 2011 )
