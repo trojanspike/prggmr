@@ -1,7 +1,7 @@
 <?php
 namespace prggmr;
 /**
- *  Copyright 2010 Nickolas Whiting
+ *  Copyright 2010-11 Nickolas Whiting
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@ namespace prggmr;
  *  limitations under the License.
  *
  *
- * @author  Nickolas Whiting  <me@nwhiting.com>
+ * @author  Nickolas Whiting  <prggmr@gmail.com>
  * @package  prggmr
- * @copyright  Copyright (c), 2010 Nickolas Whiting
+ * @copyright  Copyright (c), 2010-11 Nickolas Whiting
  */
 
 
@@ -98,12 +98,12 @@ class Engine {
     /**
      * Attaches a new subscription to a signal queue.
      *
+     * @param  mixed  $subscription  Subscription closure that will trigger on
+     *         fire or a Subscription object.
+     *
      * @param  mixed  $signal  Signal the subscription will attach to, this
      *         can be a Signal object, the signal representation or an array
      *         for a chained signal.
-     *
-     * @param  mixed  $subscription  Subscription closure that will trigger on
-     *         fire or a Subscription object.
      *
      * @param  string  $identifier  Identifier of this subscription.
      *
@@ -118,8 +118,22 @@ class Engine {
      *
      * @return  object  Subscription
      */
-    public function subscribe($signal, $subscription, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
+    public function subscribe($subscription, $signal, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
     {
+        /***
+         * To note about this ... This will allow for "legacy subscribing"
+         * putting the signal first, but after alot of use the function
+         * should be first.
+         *
+         * This will be phased out or will it?
+         */
+        if ($signal instanceof \Closure) {
+            $tmp = $subscription;
+            $subscription = $signal;
+            $signal = $tmp;
+            // pretend this didnt happen
+            unset($tmp);
+        }
         if (!$subscription instanceof Subscription) {
             if (!is_callable($subscription)) {
                 throw new \InvalidArgumentException(

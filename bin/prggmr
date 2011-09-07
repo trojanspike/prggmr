@@ -21,7 +21,7 @@ $sync = false;
 $ttr = null;
 // last param is file
 $runfile = $argv[$argc - 1];
-$options = getopt('t:sdhv');
+$options = getopt('qwert:yuiopasdfghjklzxcvbnm');
 
 // parse args and check for options
 foreach ($options as $_i => $_arg) {
@@ -45,7 +45,10 @@ foreach ($options as $_i => $_arg) {
             $showversion = true;
             break;
         default:
-            // this does nothing
+            exit(sprintf(
+                "Unknown option %s",
+                $_arg
+            ));
             break;
     }
 }

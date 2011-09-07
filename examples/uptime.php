@@ -1,5 +1,4 @@
 <?php
-require '../lib/prggmr.php';
 /**
  * Runs a status check every 5 minutes to ensure a website is up
  * keeping track of its uptime.
@@ -41,11 +40,11 @@ function ping() {
 // ping every 5 minutes if failure ping again in 30 seconds intervals
 // once there are 5 failures notify
 // if success clear check reset counter
-setInterval(function($event) use ($engine){
+setInterval(function($event){
     if (200 !== ping()) {
         if (!$event->fail) $event->fail = 0;
         echo "FAILURE FOUND START FAILSAFE ----\n";
-        setInterval(function($event) use ($engine){
+        setInterval(function($event){
             if (200 !== ping()) {
                 echo "FAILURE\n";
                 if ($event->fail >= 5) {
