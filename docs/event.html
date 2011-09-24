@@ -11,19 +11,23 @@
 <h1>
     Prggmr Documentation &amp; Manual v0.2.0
 </h1>
-<a href="index.html">Index</a>
+<a href="index.html">Index</a> | <a href="api.html">API</a> | <a href="engine.html">Engine</a> | <a href="event.html">Event</a> |
+<a href="signal.html">Signals</a> | <a href="queue.html">Queue</a>
 <h2 id="event">
     Event
 </h2>
 <p>
     The Event represents as it's name implies an event in prggmr, it maintains information
-    such as the signal that triggered it, it's current status and any data that has been assigned
-    to it. The event is usually generated automatically by the <a href="engine.html">engine</a> when it
-    recieves a signal to fire, but can be passed when advanced functionality is nessecary.
+    such as the signal that triggered it, it's current state, any data that has been assigned
+    to it, links in a chain and it's executable status.
 </p>
-<div class="notice">
-    Subscriptions will <strong>ALWAYS</strong> be passed an Event as it's first parameter!
-</div>
+<p>
+    Events in prggmr are not used for dispatching and listening to change, that responsibility falls
+    upon <a href="signals.html">Signals</a>, rather the event is used strictly as the event representation, the object is
+    generated automatically by the <a href="engine.html">Engine</a> when it
+    recieves a <a href="signals.html">Signals</a> to fire and is always passed as the first parameter to all 
+    <a href="subscription.html">Subscriptions</a>.
+</p>
 <h3 id="event.constants">
     Constants
 </h3>

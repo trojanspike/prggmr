@@ -13,8 +13,8 @@ class AllTests
 {
     public static function suite()
     {
-        $suite = new PHPUnit_Framework_TestSuite('PHPUnit');
-
+        $suite = new PHPUnit_Framework_TestSuite('prggmr');
+        
         foreach (glob('*Test.php') as $file)
         {
             $suite->addTestSuite(substr($file,0,-4));

@@ -13,7 +13,7 @@ a {
     text-decoration: underline;
 }
 
-a:visited {
+a:hover {
     color: #0033B5;
     text-decoration: underline;
 }

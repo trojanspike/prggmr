@@ -231,6 +231,19 @@ function prggmrd($reset = false, $timeout = null)
 }
 
 /**
+ * Starts daemon mode.
+ *
+ * @param  boolean  $reset  Resets all timers to begin at daemon start.
+ * @param  integer  $timeout  Number of milliseconds to run the daemon. 
+ *
+ * @return  void
+ */
+function prggmr($reset = false, $timeout = null)
+{
+    return prggmrd($reset, $timeout);
+}
+
+/**
  * Sends the engine the shutdown signal while in daemon mode.
  *
  * @return  void

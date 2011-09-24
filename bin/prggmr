@@ -3,14 +3,14 @@
 /**
  * Directly run files in a prggmr daemon.
  */
-$usage = "usage: prggmrd [options] FILE
+$usage = "usage: prggmr [options...] file
 
 Current options:
-  -v    Displays current prggmr version.
-  -s    Sync all timer clocks with the daemons clock on startup.
-  -t    Length of time to run in milliseconds.
-  -d    Run debug mode.
-  -h    Shows this help message.
+  -v/--version  Displays current prggmr version.
+  -s/--sync     Sync all timer clocks with the daemons clock on startup.
+  -t/--time     Length of time to run in milliseconds.
+  -d/--debug    Run debug mode.
+  -h/--help     Shows this help message.
 ";
 
 if (count($argv) == 1) {
@@ -21,33 +21,45 @@ $sync = false;
 $ttr = null;
 // last param is file
 $runfile = $argv[$argc - 1];
-$options = getopt('qwert:yuiopasdfghjklzxcvbnm');
+$options = getopt(
+    'qwert:yuiopasdfghjklzxcvbnm',
+    array(
+        'help', 'debug', 'version', 'sync', 'time:'
+    )
+);
 
+$tmp = $argv;
 // parse args and check for options
 foreach ($options as $_i => $_arg) {
     switch ($_i) {
         case 's':
+        case 'sync':
             $sync = true;
             break;
         case 't':
+        case 'time':
             if (false === $_arg || !is_int($_arg + 0)) {
                 exit("invalid option 't'\n".$usage);
             }
             $ttr = $_arg + 0;
             break;
         case 'd':
+        case 'debug':
             define('PRGGMR_DEBUG', true);
             break;
         case 'h':
+        case 'help':
             exit($usage);
             break;
         case 'v':
+        case 'version':
             $showversion = true;
             break;
         default:
             exit(sprintf(
-                "Unknown option %s",
-                $_arg
+                "Unknown option '%s'\n%s",
+                $_i,
+                $usage
             ));
             break;
     }
@@ -63,7 +75,7 @@ if (!class_exists('Prggmr')) {
     require 'prggmr/lib/prggmr.php';
 }
 
-if (isset($showversion)) exit('prggmr version '.PRGGMR_VERSION." by Nickolas Whiting
+if (isset($showversion)) exit('prggmr version '.PRGGMR_VERSION."
 ");
 
 if (!file_exists($runfile)) {

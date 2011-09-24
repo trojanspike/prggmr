@@ -11,7 +11,8 @@
 <h1>
     Prggmr Documentation &amp; Manual v0.2.0
 </h1>
-<a href="index.html">Index</a>
+<a href="index.html">Index</a> | <a href="api.html">API</a> | <a href="engine.html">Engine</a> | <a href="event.html">Event</a> |
+<a href="signal.html">Signals</a> | <a href="queue.html">Queue</a>
 <h2>
     Prggmr API
 </h2>
@@ -47,7 +48,7 @@
         The event signal. Refer to <a href="signal.html">signals</a> for more info.
     </li>
     <li>
-        A string used for later identifing the subscription, if not provided a random integer will be generated, and so the ability to identify this subscription.
+        A string used for later identifing the subscription, if not provided a random integer will be generated, and so the ability to identify this subscription will be lost.
     </li>
     <li>
         Integer in ASC order which determains the firing order in queue.
@@ -59,7 +60,11 @@
         The number of times this subscription will fire before being dumped. Defaults to 0 (infinte).
     </li>
 </ul>
-<h4>Example</h4>
+<h4>Examples</h4>
+<h5>Standard Subscription</h5>
+<p>
+    Note that a subscription will always be passed an <a href="event.html">Event</a> as the first parameter.
+</p>
 <div class="code">
 <pre class="prettyprint php">
 // subscribe to the "hello.world" event
@@ -68,8 +73,22 @@ subscribe(function($event){
 }, "helloworld");
 </pre>
 </div>
+<h5>
+    Subscribing with object constants
+</h5>
+<p>
+    Using object constants for string signals is highly recommended.
+</p>
+<div class="code">
+<pre class="prettyprint php">
+subscribe(function($event){
+    echo "HelloWorld";
+}, Signals::HELLOWORLD);
+</pre>
+</div>
+</div>
 <h3 id="api.once">
-    once(signal, subscription, [identifier, priority, chain])
+    once(subscription, signal, [identifier, priority, chain])
 </h3>
 <p>
     Creates a subscription that will expire after a single call, by setting a default exhaust of 1.

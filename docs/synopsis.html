@@ -11,22 +11,23 @@
 <h1>
     Prggmr Documentation &amp; Manual v0.2.0
 </h1>
-<a href="index.html">Index</a>
+<a href="index.html">Index</a> | <a href="api.html">API</a> | <a href="engine.html">Engine</a> | <a href="event.html">Event</a> |
+<a href="signal.html">Signals</a> | <a href="queue.html">Queue</a>
 <h2 id="synopsis">
     Synopsis
 </h2>
 <p>
-    Prggmr is a high-performance event processor, it uses <a href="signals.html">Signals</a>,
+    Prggmr is a high-performance event processing engine, it uses <a href="event.html">Events</a>, <a href="signals.html">Signals</a>,
     <a href="subscriptions.html">Subscriptions</a>, <a href="queues.html">Queues</a> and an
     <a href="engine.html">Engine</a>, that have been engineered from the ground up to be
-    incredibly lightweight, fast, efficent and robust with simplicity in mind.
+    incredibly lightweight, fast, efficent and robust with simplicity and ease of use in mind.
 </p>
 <p>
     Prggmr is much more than an event library, it is a robust standalone event processing engine
     written in PHP, allowing for application &amp; server level php programming as if it wasn't even php.
 </p>
 <p>
-    Within prggmr you can
+    Prggmr allows you to
 </p>
 <h4>subscribe</h4>
 <pre class="prettyprint php">
@@ -55,8 +56,10 @@ setTimeout(function(){
 }, 5000);
 </pre>
 <p>
-    without the need for some complex configuration or monolithic library.
+    with no configuration, no autoloading and no monolithic library, you need "just a single line of code." 
 </p>
-</p>
+<pre>
+include 'lib/prggmr.php';
+</pre>
 </body>
 </html>
