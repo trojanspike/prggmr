@@ -51,12 +51,12 @@ function subscribe($subscription, $signal, $identifier = null, $priority = null,
 /**
 * Attaches a new subscription to a signal queue with an exhaust rate of 1.
 *
+* @param  mixed  $subscription  Subscription closure that will trigger on
+*         fire or a Subscription object.
+*
 * @param  mixed  $signal  Signal the subscription will attach to, this
 *         can be a Signal object, the signal representation or an array
 *         for a chained signal.
-*
-* @param  mixed  $subscription  Subscription closure that will trigger on
-*         fire or a Subscription object.
 *
 * @param  string  $identifier  String identifier of this subscription.
 *
@@ -69,7 +69,7 @@ function subscribe($subscription, $signal, $identifier = null, $priority = null,
 *
 * @return  void
 */
-function once($signal, $subscription, $identifier = null, $priority = null, $chain = null)
+function once($subscription, $signal, $identifier = null, $priority = null, $chain = null)
 {
     return Prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, 1);
 }
