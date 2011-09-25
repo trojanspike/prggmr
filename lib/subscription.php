@@ -142,14 +142,16 @@ class Subscription {
         }
         
         if (null !== $this->_params) {
-            $params = array_merge($params, $this->_params);
+            $passparams = array_merge(&$params, &$this->_params);
+        } else {
+            $passparams = $params;
         }
 
         // pre fire
         if (null !== $this->_pre) {
             foreach ($this->_pre as $_index => $_func) {
                 try {
-                    call_user_func_array($_func, $params);
+                    call_user_func_array($_func, $passparams);
                 } catch (\Exception $e) {
                     // unset incase we continue
                     unset($this->_pre[$_index]);
@@ -164,7 +166,7 @@ class Subscription {
 
         // subscription fire
         try {
-            $result = call_user_func_array($this->_function, $params);
+            $result = call_user_func_array($this->_function, $passparams);
         } catch (\Exception $e) {
             throw new SubscriptionException(sprintf(
 				'Subscription %s failed with error %s',
@@ -177,7 +179,7 @@ class Subscription {
         if (null !== $this->_post) {
             foreach ($this->_post as $_index => $_func) {
                 try {
-                    call_user_func_array($_func, $params);
+                    call_user_func_array($_func, $passparams);
                 } catch (\Exception $e) {
                     // unset incase we continue
                     unset($this->_pre[$_index]);
@@ -303,11 +305,7 @@ class Subscription {
             $params = array($params);
         }
         
-        if (is_array($this->_params)) {
-            array_merge($this->_params, $params);
-        } else {
-            $this->_params = $params;
-        }
+        $this->_params = $params;
     }
 }
 
