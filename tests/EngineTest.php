@@ -59,8 +59,9 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     
     public function assertEvent($event, $params, $expected)
     {
+        var_dump(func_get_args());
         $event = $this->engine->fire($event, $params);
-        $this->assertInstanceOf('\prggmr\Event', $event);
+        $this->assertInstanceof('\prggmr\Event', $event);
         $this->assertEquals($expected, $event->getData());
     }
 
@@ -292,10 +293,10 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array('one'), $event->getData());
         $link1 = $event->getChain();
         $this->assertType('array', $link1);
-        $this->assertInstanceOf('\prggmr\Event', $link1[0]);
+        $this->assertInstanceof('\prggmr\Event', $link1[0]);
         $link2 = $link1[0]->getChain();
         $this->assertType('array', $link2);
-        $this->assertInstanceOf('\prggmr\Event', $link2[0]);
+        $this->assertInstanceof('\prggmr\Event', $link2[0]);
         $this->assertEquals(array('two'), $link1[0]->getData());
         $this->assertEquals(array('three'), $link2[0]->getData());
     }
@@ -304,7 +305,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals(0, $this->engine->count());
         $this->engine->subscribe('test', function(){});
-        $this->assertInstanceOf('\prggmr\Queue', $this->engine->queue('test'));
+        $this->assertInstanceof('\prggmr\Queue', $this->engine->queue('test'));
         $this->assertFalse($this->engine->queue('none', false));
         $class = new \stdClass();
         $queue = $this->engine->queue($class, true);
