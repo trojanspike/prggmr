@@ -67,14 +67,14 @@ class Engine {
      * Engine states.
      */
     const RUNNING  = 0x64;
-    const DAEMON   = 0x65;
+    const LOOP     = 0x65;
     const SHUTDOWN = 0x66;
     const ERROR    = 0x67;
 
     /**
-     * Daemon shutdown timeout.
+     * Loop shutdown timeout.
      */
-    const DAEMON_SHUTDOWN_TIMEOUT = 'daemon_shutdown';
+    const LOOP_SHUTDOWN_TIMEOUT = 'loop_shutdown';
 
     /**
      * Engine stacktrace.
@@ -510,14 +510,14 @@ class Engine {
     }
 
     /**
-     * Starts daemon mode.
+     * Starts the event loop.
      *
-     * @param  boolean  $reset  Resets all timers to begin at daemon start.
-     * @param  integer  $timeout  Number of milliseconds to run the daemon.
+     * @param  boolean  $reset  Resets all timers to begin at loop start.
+     * @param  integer  $timeout  Number of milliseconds to run the loop.
      *
      * @return  void
      */
-    public function daemon($reset = false, $timeout = null)
+    public function loop($reset = false, $timeout = null)
     {
         if ($reset) {
             $timers = count($this->_timers);
@@ -525,15 +525,15 @@ class Engine {
                 $this->_timers[$_index][2] = $this->getMilliseconds() + $this->_timers[$_index][1];
             }
         }
-        // this can be cleared using clearTime(Engine::DAEMON_SHUTDOWN_TIMEOUT)
-        // but after that the daemon will run indefinitly
+        // this can be cleared using clearTime(Engine::LOOP_SHUTDOWN_TIMEOUT)
+        // but after that the loop will run indefinitly
         if (null !== $timeout && is_int($timeout)) {
             // this is a required hack ... i know
             // php 5.4 will hopefully provide a fix
             $engine = $this;
             $this->setTimeout(function() use ($engine) {
                 $engine->shutdown();
-            }, $timeout, null, Engine::DAEMON_SHUTDOWN_TIMEOUT);
+            }, $timeout, null, Engine::LOOP_SHUTDOWN_TIMEOUT);
         }
         while(true) {
             usleep(100);
@@ -576,42 +576,6 @@ class Engine {
         }
     }
 
-    // @codeCoverageIgnoreStart
-
-    /**
-     * ===== EXPERIMENTAL ======
-     *
-     * THIS METHOD IS CURRENTLY COMPLETELY UNTESTED IN EARLY PLANNING
-     * STAGES AND MAY NOT REFLECT THE FINAL FUNCTIONALITY
-     *
-     * Keeps a running record of an event stacktrace which is built
-     * in reverse when an error is encountered.
-     *
-     * This method is a debugging method and highly recommended
-     * aganist use while in a production environment as it is quite
-     * an expensive call.
-     *
-     * @param  object  $event  Event which is called.
-     * @param  boolean  $return  Return the stacktrace for the event
-     *
-     * @return  void
-     */
-    protected function _stacktrace($event, $return = false)
-    {
-        // debug setting
-        if (!PRGGMR_DEBUG) return null;
-        $hash = spl_object_hash($event);
-        if ($return) return $this->_stacktrace[$hash];
-        // we have to return the entire trace ... which may be expensive
-        // but until php 5.4 there isnt much that can be done except
-        // running a debug mode
-        $this->_stacktrace[$hash][] = end(
-            debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
-        );
-    }
-
-    // @codeCoverageIgnoreEnd
-
     /**
      * Fires a subscription.
      *
@@ -637,7 +601,7 @@ class Engine {
             } 
         }
         if ($vars[0]->getState() == Event::STATE_ERROR) {
-            if ($this->getState() === Engine::DAEMON) {
+            if ($this->getState() === Engine::LOOP) {
                 if (false === $this->clearInterval($subscription)) {
                     $this->dequeue($signal, $subscription);
                 }
@@ -652,7 +616,7 @@ class Engine {
     }
 
     /**
-     * Sends the engine the shutdown signal while in daemon mode.
+     * Sends the engine the shutdown signal while in loop mode.
      *
      * @return  void
      */

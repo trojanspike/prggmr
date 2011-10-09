@@ -47,13 +47,13 @@ class QueueTest extends \PHPUnit_Framework_TestCase
     public function testEnqueueAndCount()
     {
         $this->queue->enqueue(new \prggmr\Subscription(function(){}, 'test'));
-        $this->assertEquals(1, $this->count());
+        $this->assertEquals(1, $this->queue->count());
     }
 
     public function testDequeueStringIdentifier()
     {
         $this->queue->enqueue(new \prggmr\Subscription(function(){}, 'test'));
-        $this->assertEquals(1, $this->count());
+        $this->assertEquals(1, $this->queue->count());
         $this->assertTrue(!$this->queue->dequeue('test'));
         $this->assertEquals(0, $this->queue->count());
     }

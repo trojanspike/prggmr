@@ -61,7 +61,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         var_dump(func_get_args());
         $event = $this->engine->fire($event, $params);
-        $this->assertInstanceof('\prggmr\Event', $event);
+        $this->assertInstanceOf('\prggmr\Event', $event);
         $this->assertEquals($expected, $event->getData());
     }
 
@@ -293,10 +293,10 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array('one'), $event->getData());
         $link1 = $event->getChain();
         $this->assertType('array', $link1);
-        $this->assertInstanceof('\prggmr\Event', $link1[0]);
+        $this->assertInstanceOf('\prggmr\Event', $link1[0]);
         $link2 = $link1[0]->getChain();
         $this->assertType('array', $link2);
-        $this->assertInstanceof('\prggmr\Event', $link2[0]);
+        $this->assertInstanceOf('\prggmr\Event', $link2[0]);
         $this->assertEquals(array('two'), $link1[0]->getData());
         $this->assertEquals(array('three'), $link2[0]->getData());
     }
@@ -305,7 +305,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals(0, $this->engine->count());
         $this->engine->subscribe('test', function(){});
-        $this->assertInstanceof('\prggmr\Queue', $this->engine->queue('test'));
+        $this->assertInstanceOf('\prggmr\Queue', $this->engine->queue('test'));
         $this->assertFalse($this->engine->queue('none', false));
         $class = new \stdClass();
         $queue = $this->engine->queue($class, true);
@@ -471,7 +471,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
         $this->engine->setTimeout(function($event, $unit){
             $unit->engine->shutdown();
         }, 1000 * 7, &$this, 'shutdown');
-        $this->engine->daemon();
+        $this->engine->loop();
         $this->assertEquals(\prggmr\Engine::SHUTDOWN, $this->engine->getState());
         $this->assertEquals(5, $count);
     }
@@ -506,7 +506,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
 				$event->halt();
 			}
         }, 50, array(&$count), 'intervalTest');
-		$engine->daemon();
+		$engine->loop();
 		$this->assertEquals(2, $count);
 	}
 
@@ -518,7 +518,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase
 			$count++;
 		}, 200, null, 'timeout_clear');
 		$this->engine->clearTimeout('timeout_clear');
-		$this->engine->daemon(false, 300);
+		$this->engine->loop(false, 300);
 		$this->assertEquals(0, $count);
 	}
     

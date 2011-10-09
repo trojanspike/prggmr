@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <head>
 <title>
-    Prggmr v0.2.0 API Documentation
+    prggmr v0.2.0 API Documentation
 </title>
 <link href="style.css" type="text/css" rel="stylesheet" media="all" />
 <link href="js/google-code-prettify/prettify.css" type="text/css" rel="stylesheet" />
@@ -9,7 +9,7 @@
 </head>
 <body onload="prettyPrint()">
 <h1>
-    Prggmr Documentation &amp; Manual v0.2.0
+    prggmr Documentation &amp; Manual v0.2.0
 </h1>
 <a href="index.html">Index</a> | <a href="api.html">API</a> | <a href="engine.html">Engine</a> | <a href="event.html">Event</a> |
 <a href="signal.html">Signals</a> | <a href="queue.html">Queue</a>
@@ -19,7 +19,7 @@
 <p>
     The engine object is responsible for maintaining <a href="#engine.queue">Queues</a> and
     ensuring I/O data conforms to prggmr specifications, it also provides functionality to
-    run a <a href="#engine.daemon_mode">daemon mode</a>.
+    run a <a href="#engine.loop_mode">event loop</a>.
 </p>
 <h3>
     Constants
@@ -29,7 +29,7 @@
         <span>RUNNING</span> engine is in a running state.
     </li>
     <li>
-        <span>DAEMON</span> engine is in daemon mode.
+        <span>LOOP</span> engine is in the event loop.
     </li>
     <li>
         <span>SHUTDOWN</span> engine has been shutdown. This does not indicate an error.
@@ -38,7 +38,7 @@
         <span>ERROR</span> engine has encountered an error.
     </li>
     <li>
-        <span>DAEMON_SHUTDOWN_TIMEOUT</span> daemon shutdown signal timeout.
+        <span>LOOP_SHUTDOWN_TIMEOUT</span> loop shutdown signal timeout.
 </ul>
 <h3 id="engine.__construct">
     __construct()
@@ -323,17 +323,17 @@ if ($engine->canIndex('string')) {
 }
 </pre>
 </div>
-<h2 id="engine.daemon_mode">
-    Daemon Mode
+<h2 id="engine.loop_mode">
+    Event Loop
 </h2>
 <p>
-    Daemon mode allows for running prggmr as a daemon with timer based events avaliable.
+    The event loop mode allows for running prggmr as an infinite event loop with timer based events avaliable.
     It has two possible entry points the first and recommended public api function
-    <a href="api.html#api.prggmrd">prggmrd</a>, and the engine method <a href="#engine.daemon">daemon</a>.
+    <a href="api.html#api.prggmrd">prggmr</a>, and the engine method <a href="#engine.loop">loop</a>.
 </p>
 <div class="notice">
     <p>
-        The following methods will work ONLY while in daemon mode, all times are in milliseconds.
+        The following methods will work ONLY while in loop mode, all times are in milliseconds.
     </p>
 </div>
 <h3 id="engine.counttimers">
@@ -392,7 +392,7 @@ $engine->setInterval(function($event, $count){
 }, 1000, array(&$count));
 
 // start it all
-$engine->daemon();
+$engine->loop();
 </pre>
 </div>
 <h3 id="engine.settimeout">
@@ -421,7 +421,7 @@ $engine->daemon();
 </ul>
 <h4>Example</h4>
 <p>
-    The example below kills the daemon after 5 seconds.
+    The example below kills the loop after 5 seconds.
 </p>
 <div class="code">
 <pre class="prettyprint php">
@@ -433,7 +433,7 @@ $engine->setTimeout(function($event) use ($engine){
 }, (1000 * 5), array(&$count));
 
 // start it all
-$engine->daemon();
+$engine->loop();
 </pre>
 </div>
 <h3 id="engine.clearinterval">
@@ -463,7 +463,7 @@ $engine->setTimeout(function() use ($engine){
 }, 5000);
 
 // start it all
-$engine->daemon();
+$engine->loop();
 </pre>
 </div>
 <h3 id="engine.clearinterval">
@@ -494,25 +494,25 @@ $engine->setTimeout(function() use ($engine){
 }, 9000);
 
 // start it all
-$engine->daemon();
+$engine->loop();
 </pre>
 </div>
-<h3 id="engine.daemon">
-    daemon([reset, timeout])
+<h3 id="engine.loop">
+    prggmr([reset, timeout])
 </h3>
 <p>
-    Runs the engine in daemon mode.
+    Runs the engine in loop mode.
 </p>
 <p>
-    Refer to <a href="daemon.html">daemon</a> for more info.
+    Refer to <a href="loop.html">loop</a> for more info.
 </p>
 <h4>Parameters</h4>
 <ul>
     <li>
-        When true all timers are reset to have a start time in sync with the daemon.
+        When true all timers are reset to have a start time in sync with the loop.
     </li>
     <li>
-        Time in milliseconds to run the daemon.
+        Time in milliseconds to run the loop.
     </li>
 </ul>
 <h4>Example</h4>
@@ -521,14 +521,14 @@ $engine->daemon();
 $engine = new \prggmr\Engine();
 
 // GO GO GO
-$engine->daemon();
+$engine->loop();
 </pre>
 </div>
 <h3 id="engine.shutdown">
     shutdown()
 </h3>
 <p>
-    Sends the daemon the shutdown signal.
+    Sends the loop the shutdown signal.
 </p>
 <h4>Example</h4>
 <div class="code">
@@ -541,13 +541,13 @@ $engine->setTimeout(function() use($engine){
 }, 1000);
 
 // GO GO GO
-$engine->daemon();
+$engine->loop();
 </pre>
 </div>
 <h2 id="protected">
     Protected Methods
 </h2>
-<h3 id="engine.daemon">
+<h3 id="engine.loop">
     _fire(signal, subscription, vars)
 </h3>
 <p>

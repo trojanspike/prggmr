@@ -218,37 +218,24 @@ function clearTimeout($subscription)
 }
 
 /**
- * Starts daemon mode.
+ * Starts prggmrs event loop.
  *
- * @param  boolean  $reset  Resets all timers to begin at daemon start.
- * @param  integer  $timeout  Number of milliseconds to run the daemon. 
- *
- * @return  void
- */
-function prggmrd($reset = false, $timeout = null)
-{
-    return Prggmr::instance()->daemon($reset, $timeout);
-}
-
-/**
- * Starts daemon mode.
- *
- * @param  boolean  $reset  Resets all timers to begin at daemon start.
- * @param  integer  $timeout  Number of milliseconds to run the daemon. 
+ * @param  boolean  $reset  Resets all timers to begin at loop start.
+ * @param  integer  $timeout  Number of milliseconds to run the loop. 
  *
  * @return  void
  */
 function prggmr($reset = false, $timeout = null)
 {
-    return prggmrd($reset, $timeout);
+    return Prggmr::instance()->loop($reset, $timeout);
 }
 
 /**
- * Sends the engine the shutdown signal while in daemon mode.
+ * Sends the engine the shutdown signal while in loop mode.
  *
  * @return  void
  */
-function prggmrd_shutdown()
+function shutdown()
 {
     return Prggmr::instance()->shutdown();
 }

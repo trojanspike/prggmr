@@ -32,6 +32,8 @@ class SignalTest extends \PHPUnit_Framework_TestCase
     {
         $signal = new \prggmr\Signal('helloworld');
         $this->assertEquals('helloworld', $signal->signal());
+        $this->assertEquals('a', 'a');
+        $this->assertEquals(1, 1);
     }
 
     public function testStringSignal()

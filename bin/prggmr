@@ -1,13 +1,13 @@
 #!/usr/bin/php
 <?php
 /**
- * Directly run files in a prggmr daemon.
+ * Directly runs files in the prggmr event loop
  */
 $usage = "usage: prggmr [options...] file
 
 Current options:
   -v/--version  Displays current prggmr version.
-  -s/--sync     Sync all timer clocks with the daemons clock on startup.
+  -s/--sync     Sync all timer clocks with the loop clock on startup.
   -t/--time     Length of time to run in milliseconds.
   -d/--debug    Run debug mode.
   -h/--help     Shows this help message.
@@ -84,5 +84,5 @@ if (!file_exists($runfile)) {
     require $runfile;
 }
 
-// start the daemon child!!
-prggmrd($sync, $ttr);
+// start the loop!!
+prggmr($sync, $ttr);
