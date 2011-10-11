@@ -1,126 +1,118 @@
-<!DOCTYPE html>
-<head>
-<title>
-    prggmr v0.2.0 API Documentation
-</title>
-<link href="style.css" type="text/css" rel="stylesheet" media="all" />
-<link href="js/google-code-prettify/prettify.css" type="text/css" rel="stylesheet" />
-<script type="text/javascript" src="js/google-code-prettify/prettify.js"></script>
-</head>
-<body onload="prettyPrint()">
-<h1>
-    prggmr Documentation &amp; Manual v0.2.0
-</h1>
-<a href="index.html">Index</a> | <a href="api.html">API</a> | <a href="engine.html">Engine</a> | <a href="event.html">Event</a> |
-<a href="signal.html">Signals</a> | <a href="queue.html">Queue</a>
-<h2>
-    prggmr API
-</h2>
-<p>
-    prggmr's API has been designed to provide php functions for use with prggmr,
-    which with any luck should allow most
-    developers to use prggmr as just another core set of php functions without ever having
-    to instantiate an object or learn any complex architectures.
-</p>
-<h4>
-    Before you get started
-</h4>
-<p>
-    Certain functions require the use of prggmr's event loop, those that do will be detailed.
-</p>
-<p>
-    It is highly recommended to read the <a href="about.html">about</a> prggmr page if you are just getting
-    started to get a better understanding of prggmr. 
-</p>
-<h4>
-    Code Examples
-</h4>
-<p>
-    Examples for all functions detailed below are given at the <a href="#api.examples">end</a> of this section.
-</p>
-<h3 id="api.subscribe">
-    subscribe(subscription, signal, [identifier, priority, chain, exhaust])
-</h3>
-<p>
-    Assigns a new subscription to the given signal.
-</p>
-<p>
-    Returns the <a href="subscription.html#object">subscription</a> object sent to the queue.
-</p>
-<h4>Parameters</h4>
-<ul>
-    <li>
-        An anoymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
-    </li>
-    <li>
-        The event signal. Refer to <a href="signal.html">signals</a> for more info.
-    </li>
-    <li>
-        A string used for later identifing the subscription, if not provided a random integer will be generated.
-        <div class="notice">
-            It is highly recommended to provide a identifier if you plan on doing
-            any management or debugging.
-        </div>
-    </li>
-    <li>
-        Integer in which determains the firing order in queue. Refer to <a href="queues.html#priority">queues</a> for more info.
-    </li>
-    <li>
-        Signal to chain once this subscription completes. Refer to <a href="chains.html#subscriber">chains</a> for more info.
-    </li>
-    <li>
-        The number of times this subscription will fire before being removed from the queue. Defaults to 0 (infinte).
-    </li>
-</ul>
-<h4>Examples</h4>
-<p>
-    Note that a subscription will always be passed an <a href="event.html">Event</a> as it's first parameter.
-</p>
-<div class="code">
-<pre class="prettyprint php">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+    <head>
+        <title>
+            prggmr v0.2.0 API Documentation
+        </title>
+        <link href="style.css" type="text/css" rel="stylesheet" media="all">
+        <link href="js/google-code-prettify/prettify.css" type="text/css" rel="stylesheet">
+        <script type="text/javascript" src="js/google-code-prettify/prettify.js">
+</script>
+    </head>
+    <body onload="prettyPrint()">
+        <h1>
+            prggmr Documentation &amp; Manual v0.2.0
+        </h1>
+        <p>
+            <a href="index.html">Index</a> | <a href="api.html">API</a> | <a href="engine.html">Engine</a> | <a href="event.html">Event</a> | <a href="signal.html">Signals</a> | <a href="queue.html">Queue</a>
+        </p>
+        <h2>
+            prggmr API
+        </h2>
+        <p>
+            prggmr's API has been designed to provide php functions for use with prggmr, which with any luck should allow most developers to use prggmr as just another core set of php functions without ever having to instantiate an object or learn any complex architectures.
+        </p>
+        <h4>
+            Before you get started
+        </h4>
+        <p>
+            Certain functions require the use of prggmr's event loop, those that do will be detailed.
+        </p>
+        <p>
+            It is highly recommended to read the <a href="about.html">about</a> prggmr page if you are just getting started to get a better understanding of prggmr.
+        </p>
+        <h4>
+            Code Examples
+        </h4>
+        <p>
+            Examples for all functions detailed below are given at the <a href="#api.examples">end</a> of this section.
+        </p>
+        <h3 id="api.subscribe">
+            subscribe(subscription, signal, [identifier, priority, chain, exhaust])
+        </h3>
+        <p>
+            Assigns a new subscription to the given signal.
+        </p>
+        <p>
+            Returns the <a href="subscription.html#object">subscription</a> object sent to the queue.
+        </p>
+        <h4>
+            Parameters
+        </h4>
+        <ul>
+            <li>An anoymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
+            </li>
+            <li>The event signal. Refer to <a href="signal.html">signals</a> for more info.
+            </li>
+            <li>A string used for later identifing the subscription, if not provided a random integer will be generated.
+                <div class="notice">
+                    It is highly recommended to provide a identifier if you plan on doing any management or debugging.
+                </div>
+            </li>
+            <li>Integer in which determains the firing order in queue. Refer to <a href="queues.html#priority">queues</a> for more info.
+            </li>
+            <li>Signal to chain once this subscription completes. Refer to <a href="chains.html#subscriber">chains</a> for more info.
+            </li>
+            <li>The number of times this subscription will fire before being removed from the queue. Defaults to 0 (infinte).
+            </li>
+        </ul>
+        <h4>
+            Examples
+        </h4>
+        <p>
+            Note that a subscription will always be passed an <a href="event.html">Event</a> as it's first parameter.
+        </p>
+        <div class="code">
+            <pre class="prettyprint php">
 // subscribe to the "hello.world" event
 subscribe(function($event){
     echo "HelloWorld";
 }, "hello.world");
 </pre>
-</div>
-<h5>
-    Object constants
-</h5>
-<p>
-    Using object constants for string and integer signals is highly recommended as prggmr
-    uses strict comparisons when evaluating signals, e.g. HelloWorld and helloWorld are not
-    the same signal.
-</p>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h5>
+            Object constants
+        </h5>
+        <p>
+            Using object constants for string and integer signals is highly recommended as prggmr uses strict comparisons when evaluating signals, e.g. HelloWorld and helloWorld are not the same signal.
+        </p>
+        <div class="code">
+            <pre class="prettyprint php">
 subscribe(function($event){
     echo "HelloWorld";
 }, Signals::HELLOWORLD);
 </pre>
-</div>
-<h3 id="api.fire">
-    fire(signal, [vars, event])
-</h3>
-<p>
-    Fires a event signal.
-</p>
-<h4>Parameters</h4>
-<ul>
-    <li>
-        The event signal to fire. Refer to <a href="signal.html">signals</a> for more info.
-    </li>
-    <li>
-        A list of variables to pass the subscription.
-        <div class="notice">
-            <p>
-                This is expected as an array, if passed an array it will interupt it as the variable list.
-                To workaround this array parameters must be provided within a parent array if attempting
-                to pass an array as a variable on its own.
-            </p>
         </div>
-        <div class="code">
-        <pre class="prettyprint php">
+        <h3 id="api.fire">
+            fire(signal, [vars, event])
+        </h3>
+        <p>
+            Fires a event signal.
+        </p>
+        <h4>
+            Parameters
+        </h4>
+        <ul>
+            <li>The event signal to fire. Refer to <a href="signal.html">signals</a> for more info.
+            </li>
+            <li>A list of variables to pass the subscription.
+                <div class="notice">
+                    <p>
+                        This is expected as an array, if passed an array it will interupt it as the variable list. To workaround this array parameters must be provided within a parent array if attempting to pass an array as a variable on its own.
+                    </p>
+                </div>
+                <div class="code">
+                    <pre class="prettyprint php">
 subscribe('test', function($event, $var){
     var_dump($var);
 });
@@ -130,272 +122,298 @@ fire('test', array('var1','var2'));
 
 // with parent works as expected
 fire('test', array(array('var1', 'var2')));
-        </pre>
-        </div>
-    </li>
-    <li>
-        Event is a <a href="event.html">Event</a> object to use for the event.
-    </li>
-</ul>
-<p>
-    Returns an <a href="event.html">Event</a> object.
-</p>
-<h4>Examples</h4>
-<div class="code">
-<pre class="prettyprint php">
+        
+</pre>
+                </div>
+            </li>
+            <li>Event is a <a href="event.html">Event</a> object to use for the event.
+            </li>
+        </ul>
+        <p>
+            Returns an <a href="event.html">Event</a> object.
+        </p>
+        <h4>
+            Examples
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 // fire the HelloWorld event
 fire('HelloWorld');
 </pre>
-</div>
-<h3 id="api.queue">
-    dequeue(signal, subscription)
-</h3>
-<p>
-    Removes a subscription from the given signal.
-</p>
-<h4>Parameters</h4>
-<ul>
-    <li>
-        The signal which the subscription is subscribed to.
-    </li>
-    <li>
-        The subscription identifier or subscription object.
-    </li>
-</ul>
-<h4>Example</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h3 id="api.queue">
+            dequeue(signal, subscription)
+        </h3>
+        <p>
+            Removes a subscription from the given signal.
+        </p>
+        <h4>
+            Parameters
+        </h4>
+        <ul>
+            <li>The signal which the subscription is subscribed to.
+            </li>
+            <li>The subscription identifier or subscription object.
+            </li>
+        </ul>
+        <h4>
+            Example
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 dequeue("HelloWorld", "World");
 </pre>
-</div>
-<h3 id="api.once">
-    once(subscription, signal, [identifier, priority, chain])
-</h3>
-<p>
-    Creates a subscription to the given signal with an exhaust rate of 1.
-</p>
-<p>
-    Refer to <a href="api.html#api.subscribe">subscribe</a> for more information.
-</p>
-<h4>Example</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h3 id="api.once">
+            once(subscription, signal, [identifier, priority, chain])
+        </h3>
+        <p>
+            Creates a subscription to the given signal with an exhaust rate of 1.
+        </p>
+        <p>
+            Refer to <a href="api.html#api.subscribe">subscribe</a> for more information.
+        </p>
+        <h4>
+            Example
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 // subscribe to the "hello.world" function
 once(function($event){
     echo "HelloWorld";
 }, "hello.world");
 </pre>
-</div>
-<h3 id="api.chain">
-    chain(signal, chain)
-</h3>
-<p>
-    Creates a chain between two signals. Refer to <a href="chains.html#chains">Signals</a> for more info.
-</p>
-<h4>Parameters</h4>
-<ul>
-    <li>
-        The parent signal.
-    </li>
-    <li>
-        The child signal.
-    </li>
-</ul>
-<h4>Example</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h3 id="api.chain">
+            chain(signal, chain)
+        </h3>
+        <p>
+            Creates a chain between two signals. Refer to <a href="chains.html#chains">Signals</a> for more info.
+        </p>
+        <h4>
+            Parameters
+        </h4>
+        <ul>
+            <li>The parent signal.
+            </li>
+            <li>The child signal.
+            </li>
+        </ul>
+        <h4>
+            Example
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 // chain world from signal hello
 chain('hello', 'world');
 </pre>
-</div>
-<h3 id="api.dechain">
-    dechain(signal, chain)
-</h3>
-<p>
-    Removes a chain link between two signals.
-</p>
-<h4>Parameters</h4>
-<ul>
-    <li>
-        The parent signal.
-    </li>
-    <li>
-        The child signal to remove.
-    </li>
-</ul>
-<h4>Example</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h3 id="api.dechain">
+            dechain(signal, chain)
+        </h3>
+        <p>
+            Removes a chain link between two signals.
+        </p>
+        <h4>
+            Parameters
+        </h4>
+        <ul>
+            <li>The parent signal.
+            </li>
+            <li>The child signal to remove.
+            </li>
+        </ul>
+        <h4>
+            Example
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 // remove the chain world from signal hello
 dechain('hello', 'world');
 </pre>
-</div>
-<h3 id="api.setinterval">
-    setInterval(subscription, interval, [vars, identifier, exhaust])
-</h3>
-<p>
-    Registers the subscription to fire at the given interval in milliseconds.
-</p>
-<p>
-    Returns the subscription object.
-</p>
-<h4>Parameters</h4>
-<ul>
-    <li>
-        An anonymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
-    </li>
-    <li>
-        The amount of time in seconds between calls.
-    </li>
-    <li>
-        A list of variables to pass to the subscription.
-    </li>
-    <li>
-        A string used for later identifing the subscription, if not provided a random integer will be generated.
-    </li>
-    <li>
-        Number of times this subscription will fire before being automatically removed by the engine.
-    </li>
-</ul>
-<h4>Example</h4>
-<p>
-    The example below keeps a count of the number of seconds it has run and prints it out.
-</p>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h3 id="api.setinterval">
+            setInterval(subscription, interval, [vars, identifier, exhaust])
+        </h3>
+        <p>
+            Registers the subscription to fire at the given interval in milliseconds.
+        </p>
+        <p>
+            Returns the subscription object.
+        </p>
+        <h4>
+            Parameters
+        </h4>
+        <ul>
+            <li>An anonymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
+            </li>
+            <li>The amount of time in seconds between calls.
+            </li>
+            <li>A list of variables to pass to the subscription.
+            </li>
+            <li>A string used for later identifing the subscription, if not provided a random integer will be generated.
+            </li>
+            <li>Number of times this subscription will fire before being automatically removed by the engine.
+            </li>
+        </ul>
+        <h4>
+            Example
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 setInterval(function(){
     echo "One Second passed!";
 }, 1000);
 </pre>
-</div>
-<h3 id="api.settimeout">
-    setTimeout(subscription, interval, [vars, identifier])
-</h3>
-<p>
-    Registers a subscription to fire after the given time in milliseconds has passed.
-</p>
-<p>
-    Returns the subscription object.
-</p>
-<h4>Parameters</h4>
-<ul>
-    <li>
-        An anonymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
-    </li>
-    <li>
-        The amount of time in seconds between calls.
-    </li>
-    <li>
-        A list of variables to pass to the subscription.
-    </li>
-    <li>
-        A string used for later identifing the subscription, if not provided a random integer will be generated.
-    </li>
-</ul>
-<h4>Example</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h3 id="api.settimeout">
+            setTimeout(subscription, interval, [vars, identifier])
+        </h3>
+        <p>
+            Registers a subscription to fire after the given time in milliseconds has passed.
+        </p>
+        <p>
+            Returns the subscription object.
+        </p>
+        <h4>
+            Parameters
+        </h4>
+        <ul>
+            <li>An anonymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
+            </li>
+            <li>The amount of time in seconds between calls.
+            </li>
+            <li>A list of variables to pass to the subscription.
+            </li>
+            <li>A string used for later identifing the subscription, if not provided a random integer will be generated.
+            </li>
+        </ul>
+        <h4>
+            Example
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 setTimeout(function($event){
     echo "Five seconds just passed!";
 }, 5000);
 </pre>
-</div>
-<h3 id="api.clearinterval">
-    clearInterval(subscription)
-</h3>
-<p>
-    Clears a interval function.
-</p>
-<h4>Parameters</h4>
-<ul>
-    <li>
-        The subscription identifier or subscription object.
-    </li>
-</ul>
-<h4>Example</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h3 id="api.clearinterval">
+            clearInterval(subscription)
+        </h3>
+        <p>
+            Clears a interval function.
+        </p>
+        <h4>
+            Parameters
+        </h4>
+        <ul>
+            <li>The subscription identifier or subscription object.
+            </li>
+        </ul>
+        <h4>
+            Example
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 clearInterval("Timer");
 </pre>
-</div>
-<h3 id="api.clearinterval">
-    clearTimeout(subscription)
-</h3>
-<p>
-    Clears a timeout function.
-</p>
-<h4>Parameters</h4>
-<ul>
-    <li>
-        The subscription identifier or subscription object.
-    </li>
-</ul>
-<h4>Example</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h3 id="api.clearinterval">
+            clearTimeout(subscription)
+        </h3>
+        <p>
+            Clears a timeout function.
+        </p>
+        <h4>
+            Parameters
+        </h4>
+        <ul>
+            <li>The subscription identifier or subscription object.
+            </li>
+        </ul>
+        <h4>
+            Example
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 clearTimeout("Timer");
 </pre>
-</div>
-<h3 id="api.loop">
-    prggmr([reset, timeout])
-</h3>
-<p>
-    Runs the prggmr event loop.
-</p>
-<p>
-    Refer to <a href="loop.html">loop</a> for more info.
-</p>
-<h4>Parameters</h4>
-<ul>
-    <li>
-        When true all timers are reset to have a start time in sync with the loop.
-    </li>
-    <li>
-        Time in milliseconds to run the loop.
-    </li>
-</ul>
-<h4>Example</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h3 id="api.loop">
+            prggmr([reset, timeout])
+        </h3>
+        <p>
+            Runs the prggmr event loop.
+        </p>
+        <p>
+            Refer to <a href="loop.html">loop</a> for more info.
+        </p>
+        <h4>
+            Parameters
+        </h4>
+        <ul>
+            <li>When true all timers are reset to have a start time in sync with the loop.
+            </li>
+            <li>Time in milliseconds to run the loop.
+            </li>
+        </ul>
+        <h4>
+            Example
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 prggmr();
 </pre>
-</div>
-<h3 id="api.shutdown">
-shutdown()
-</h3>
-<p>
-    Sends the event loop the shutdown signal.
-</p>
-<h4>Example</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h3 id="api.shutdown">
+            shutdown()
+        </h3>
+        <p>
+            Sends the event loop the shutdown signal.
+        </p>
+        <h4>
+            Example
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 shutdown();
 </pre>
-</div>
-<h3 id="api.examples">
-    API Examples
-</h3>
-<p>
-    For those that learn by example, take notice each subscription is properly
-    identified this is optional but recommended.
-</p>
-<p>
-    The examples below can be run from the "prggmr/docs/examples/api/" directory, using the following command.
-</p>
-<div class="code">
-<pre class="prettyprint">
+        </div>
+        <h3 id="api.examples">
+            API Examples
+        </h3>
+        <p>
+            For those that learn by example, take notice each subscription is properly identified this is optional but recommended.
+        </p>
+        <p>
+            The examples below can be run from the "prggmr/docs/examples/api/" directory, using the following command.
+        </p>
+        <div class="code">
+            <pre class="prettyprint">
 prggmr examplefile.php
 </pre>
-</div>
-<p>
-    The examples include the shutdown function to automatically shutdown the loop to example
-    the code at the end of the file, you can remove it but prggmr will run until you kill it.
-</p>
-<h4>
-    Subscribe to an event and echo HelloWorld
-</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <p>
+            Before you begin crunching the code below you should probably note that I purposely provided the code
+            with little description and comments, other than what it does and if any bit complex, as something 
+            I have learned over the years is scanning a page and then copy and pasting some code will get you nowhere 
+            ... fast.
+        </p>
+        <p>
+            My intentions are to force those of you that follow this standard into shape, wether you like it or not,
+            because the day will come when you can't Google the answer.
+        </p> 
+        <p>
+            For those of you that use the examples included, they make use of the shutdown function to automatically shutdown 
+            the loop to example the code at the end of the file, you can remove it but prggmr will run until you kill it,
+            as running forever is it's desire.
+        </p>
+        <h4>
+            Subscribe to an event and echo HelloWorld
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 // Subscribe
 subscribe(function($event){
     echo "HelloWorld";
@@ -404,12 +422,12 @@ subscribe(function($event){
 // Fire
 fire("HelloWorld");
 </pre>
-</div>
-<h4>
-    Subscribing and Firing w/Parameters
-</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h4>
+            Subscribing and Firing w/Parameters
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 // Subscribe
 subscribe(function($event, $user, $action){
     echo "Hello $user, Are you sure you want to $action?";
@@ -421,12 +439,12 @@ fire("UserAction", array(
     'Delete the entire database'
 ));
 </pre>
-</div>
-<h4>
-    Removing subscriptions
-</h4>
-<div class="code">
-<pre class="prettyprint php">
+        </div>
+        <h4>
+            Removing subscriptions
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 subscribe(function($event){
     echo "Hello";
 }, 'HelloWorld', 'Hello');
@@ -439,13 +457,32 @@ subscribe(function($event){
 dequeue('HelloWorld', 'Hello');
 
 fire("HelloWorld");
-</pre></div>
+</pre>
+        </div>
+        <p>
+            Subscriptions can also be removed by providing the subscription object, which is returned when you subscribe.
+        </p>
+        <div class="code">
+            <pre class="prettyprint php">
+$subscription = subscribe(function($event){
+    echo "Hello";
+}, 'HelloWorld', 'Hello');
 
-<h4>
-    Passing Array parameters
-</h4>
-<div class="code">
-<pre class="prettyprint php">
+subscribe(function($event){
+    echo "World";
+}, 'HelloWorld', 'World');
+
+// remove the Hello subscriber
+dequeue('HelloWorld', $subscription);
+
+fire("HelloWorld");
+            </pre>
+        </div>
+        <h4>
+            Passing Array parameters
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 // Subcribe with multi params
 subscribe(function($event, $array){
     var_dump($array);
@@ -458,35 +495,35 @@ echo PHP_EOL;
 
 // This works!
 fire('Arrays', array(array("Hello", "World")));
-</pre></div>
-<p>
-    Remember prggmr expects its parameters in an array!
-</p>
-<h4>
-    Passing Around event data
-</h4>
-<div class="code">
-<pre class="prettyprint php">
+</pre>
+        </div>
+        <p>
+            Remember prggmr expects its parameters in an array!
+        </p>
+        <h4>
+            Passing Around event data
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 subscribe(function($event){
-    $event->hello = "HelloWorld";
+    $event-&gt;hello = "HelloWorld";
 }, "PassData", "SetVar");
 
 subscribe(function($event){
-    echo $event->hello;
+    echo $event-&gt;hello;
 }, "PassData", "EchoVar");
 
 fire("PassData");
-</pre></div>
-<p>
-    prggmr automatically passes all vars around as references, so go ahead and go
-    crazy, but be ever aware of the ripple effect.
-</p>
-
-<h4>
-    Subscriptions with priority
-</h4>
-<div class="code">
-<pre class="prettyprint php">
+</pre>
+        </div>
+        <p>
+            prggmr automatically passes all vars around as references, so go ahead and go crazy, but be ever aware of the ripple effect.
+        </p>
+        <h4>
+            Subscriptions with priority
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
 subscribe(function($event){
     echo "Hello";
 }, "Priority", "Second", 2);
@@ -496,31 +533,127 @@ subscribe(function($event){
 }, "Priority", "First", 1);
 
 fire("Priority");
-</pre></div>
-<p>
-    Priority is determained in ascending order 0 coming first.
-</p>
-<h4>
-    Timed intervals
-</h4>
-<p>
-    Intervals are avaliable only in the event loop.
-</p>
-<div class="code">
-<pre class="prettyprint php">
+</pre>
+        </div>
+        <p>
+            Priority is determined in ascending order 0 coming first.
+        </p>
+        <h4>
+            Timed intervals
+        </h4>
+        <p>
+            Intervals are available only in the event loop.
+        </p>
+        <div class="code">
+            <pre class="prettyprint php">
 $count = 0;
 setInterval(function($event, $count){
     echo sprintf(
         "Running for %d seconds now ... \n",
         $count++
     );
-}, 1000, array(&$count));
-</pre>
-</div>
-<h4>
-    Missing some examples?
-</h4>
-<p>
-    I'm sure that there are more examples that can be included here, these are just the basics
-    so please let me know what is missing!
-</p>
+}, 1000, array(&amp;$count));
+            </pre>
+        </div>
+        <h4>
+            Timeouts
+        </h4>
+        <p>
+            Timeouts are available only in the event loop.
+        </p>
+        <div class="code">
+            <pre class="prettyprint php">
+setTimeout(function($event){
+    echo "A second just passed!";
+}, 1000);
+            </pre>
+        </div>
+        <h4>
+            Clearing Intervals
+        </h4>
+        <div class="code">
+            <pre class="prettyprint php">
+setInterval(function($event){
+    echo "Half A second just passed!".PHP_EOL;
+}, 500, null, 'myInterval'); 
+
+setInterval(function($event){
+    echo "A second just passed!".PHP_EOL;
+}, 1000, null, 'myInterval2');
+
+// Lets clear the interval after 5 seconds
+setTimeout(function($event){
+    echo "Clearing the Interval".PHP_EOL;
+    clearInterval('myInterval');
+}, 3000);
+            </pre>
+        </div>
+        <p>
+            Intervals just like subscriptions can be also be removed by providing the object which is returned when it is created.
+        </p>
+        <div class="code">
+            <pre class="prettyprint php">
+$myinterval = setInterval(function($event){
+    echo "Half A second just passed!".PHP_EOL;
+}, 500); 
+
+setInterval(function($event){
+    echo "A second just passed!".PHP_EOL;
+}, 1000);
+
+// Lets clear the interval after 5 seconds
+setTimeout(function($event) use ($myinterval){
+    echo "Clearing the Interval".PHP_EOL;
+    clearInterval($myinterval);
+}, 3000);
+            </pre>
+        </div>
+        <h4>
+            Clearing Timeouts
+        </h4>
+        <p>
+            Timeouts work exactly like intervals and subscriptions ... aren't standards just awesome?
+        </p>
+        <div class="code">
+            <pre class="prettyprint php">
+setTimeout(function(){
+    echo "Half A second just passed!".PHP_EOL;
+}, 500, null, 'myTimeout'); 
+
+setTimeout(function(){
+    clearTimeout('myTimeout');
+}, 999, null, 'clearer');
+
+setTimeout(function(){
+    echo "A second just passed!".PHP_EOL;
+}, 1000, null, 'myTimeout2');
+            </pre>
+        </div>
+        <p>
+            Yes ... every millisecond is accounted for ... time is critical!
+        </p>
+        <div class="code">
+            <pre class="prettyprint php">
+$timeout = setTimeout(function(){
+    echo "Half A second just passed!".PHP_EOL;
+}, 500, null, 'myTimeout'); 
+
+setTimeout(function() use ($timeout){
+    clearTimeout($timeout);
+}, 999, null, 'clearer');
+
+setTimeout(function(){
+    echo "A second just passed!".PHP_EOL;
+}, 1000, null, 'myTimeout2');
+            </pre>
+        </div>
+        <p>
+            And just as intervals and subscriptions, timeouts can be cleared by providing the object.
+        <h4>
+            Missing some examples?
+        </h4>
+        <p>
+            I'm sure that there are more examples that can be included here, these are just the basics so please let me know what is missing!
+        </p>
+    </body>
+</html>

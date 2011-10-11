@@ -64,6 +64,8 @@ pre {
 h1, h2, h3, h4, h5, h6 {
     margin: 0.8em 0 0.8em;
     line-height: 1.1em;
+    border-bottom: 3px solid #EEE;
+    padding-bottom: 4px;
 }
 
 h1 {
@@ -75,11 +77,12 @@ h2 {
     margin: 1em 0 -.4em;
     border-top: 2px solid #E0E0E0;
     padding: 10px 0;
+    border-bottom: none;
 }
 
 h3 {
     font-size: 1.3em;
-    border-top: 2px solid #E0E0E0;
+/*    border-top: 2px solid #E0E0E0;*/
     padding-top: .6em;
     line-height: 1.4em;
 }

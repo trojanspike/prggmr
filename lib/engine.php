@@ -249,7 +249,7 @@ class Engine {
         } elseif (!$event instanceof Event) {
             throw new \InvalidArgumentException(
                 sprintf(
-                    'fire expected instance of Event recieved "%s"'
+                    'fire expected instance of Event received "%s"'
                 , get_class($event))
             );
         }
