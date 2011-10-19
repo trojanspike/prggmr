@@ -6,10 +6,18 @@
         </title>
         <link href="style.css" type="text/css" rel="stylesheet" media="all">
         <link href="js/google-code-prettify/prettify.css" type="text/css" rel="stylesheet">
-        <script type="text/javascript" src="js/google-code-prettify/prettify.js">
-</script>
+        <script type="text/javascript" src="js/google-code-prettify/prettify.js"></script>
+        <script src="js/jquery.js"></script>
+        <script src="js/plugins.js"></script>
+        <script src="js/search.js"></script>
+        <script>
+        $(function(){
+            $.prggmr.initSearch();
+        });
+        </script>
     </head>
     <body onload="prettyPrint()">
+    <div class="document">
         <h1>
             prggmr Documentation &amp; Manual v0.2.0
         </h1>
@@ -46,9 +54,9 @@
         <p>
             Returns the <a href="subscription.html#object">subscription</a> object sent to the queue.
         </p>
-        <h4>
+        <h5>
             Parameters
-        </h4>
+        </h5>
         <ul>
             <li>An anoymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
             </li>
@@ -99,9 +107,9 @@ subscribe(function($event){
         <p>
             Fires a event signal.
         </p>
-        <h4>
+        <h5>
             Parameters
-        </h4>
+        </h5>
         <ul>
             <li>The event signal to fire. Refer to <a href="signal.html">signals</a> for more info.
             </li>
@@ -147,18 +155,18 @@ fire('HelloWorld');
         <p>
             Removes a subscription from the given signal.
         </p>
-        <h4>
+        <h5>
             Parameters
-        </h4>
+        </h5>
         <ul>
             <li>The signal which the subscription is subscribed to.
             </li>
             <li>The subscription identifier or subscription object.
             </li>
         </ul>
-        <h4>
+        <h5>
             Example
-        </h4>
+        </h5>
         <div class="code">
             <pre class="prettyprint php">
 dequeue("HelloWorld", "World");
@@ -173,9 +181,9 @@ dequeue("HelloWorld", "World");
         <p>
             Refer to <a href="api.html#api.subscribe">subscribe</a> for more information.
         </p>
-        <h4>
+        <h5>
             Example
-        </h4>
+        </h5>
         <div class="code">
             <pre class="prettyprint php">
 // subscribe to the "hello.world" function
@@ -190,18 +198,18 @@ once(function($event){
         <p>
             Creates a chain between two signals. Refer to <a href="chains.html#chains">Signals</a> for more info.
         </p>
-        <h4>
+        <h5>
             Parameters
-        </h4>
+        </h5>
         <ul>
             <li>The parent signal.
             </li>
             <li>The child signal.
             </li>
         </ul>
-        <h4>
+        <h5>
             Example
-        </h4>
+        </h5>
         <div class="code">
             <pre class="prettyprint php">
 // chain world from signal hello
@@ -214,18 +222,18 @@ chain('hello', 'world');
         <p>
             Removes a chain link between two signals.
         </p>
-        <h4>
+        <h5>
             Parameters
-        </h4>
+        </h5>
         <ul>
             <li>The parent signal.
             </li>
             <li>The child signal to remove.
             </li>
         </ul>
-        <h4>
+        <h5>
             Example
-        </h4>
+        </h5>
         <div class="code">
             <pre class="prettyprint php">
 // remove the chain world from signal hello
@@ -241,9 +249,9 @@ dechain('hello', 'world');
         <p>
             Returns the subscription object.
         </p>
-        <h4>
+        <h5>
             Parameters
-        </h4>
+        </h5>
         <ul>
             <li>An anonymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
             </li>
@@ -256,9 +264,9 @@ dechain('hello', 'world');
             <li>Number of times this subscription will fire before being automatically removed by the engine.
             </li>
         </ul>
-        <h4>
+        <h5>
             Example
-        </h4>
+        </h5>
         <div class="code">
             <pre class="prettyprint php">
 setInterval(function(){
@@ -275,9 +283,9 @@ setInterval(function(){
         <p>
             Returns the subscription object.
         </p>
-        <h4>
+        <h5>
             Parameters
-        </h4>
+        </h5>
         <ul>
             <li>An anonymous function, a <a href="subscription.html#object">Subscription</a> object or a php callable. Refer to <a href="subscription.html">subscriptions</a> for more info.
             </li>
@@ -288,9 +296,9 @@ setInterval(function(){
             <li>A string used for later identifing the subscription, if not provided a random integer will be generated.
             </li>
         </ul>
-        <h4>
+        <h5>
             Example
-        </h4>
+        </h5>
         <div class="code">
             <pre class="prettyprint php">
 setTimeout(function($event){
@@ -304,16 +312,16 @@ setTimeout(function($event){
         <p>
             Clears a interval function.
         </p>
-        <h4>
+        <h5>
             Parameters
-        </h4>
+        </h5>
         <ul>
             <li>The subscription identifier or subscription object.
             </li>
         </ul>
-        <h4>
+        <h5>
             Example
-        </h4>
+        </h5>
         <div class="code">
             <pre class="prettyprint php">
 clearInterval("Timer");
@@ -325,16 +333,16 @@ clearInterval("Timer");
         <p>
             Clears a timeout function.
         </p>
-        <h4>
+        <h5>
             Parameters
-        </h4>
+        </h5>
         <ul>
             <li>The subscription identifier or subscription object.
             </li>
         </ul>
-        <h4>
+        <h5>
             Example
-        </h4>
+        </h5>
         <div class="code">
             <pre class="prettyprint php">
 clearTimeout("Timer");
@@ -349,18 +357,18 @@ clearTimeout("Timer");
         <p>
             Refer to <a href="loop.html">loop</a> for more info.
         </p>
-        <h4>
-            Parameters
-        </h4>
+        <h5>
+            Example
+        </h5>
         <ul>
             <li>When true all timers are reset to have a start time in sync with the loop.
             </li>
             <li>Time in milliseconds to run the loop.
             </li>
         </ul>
-        <h4>
+        <h5>
             Example
-        </h4>
+        </h5>
         <div class="code">
             <pre class="prettyprint php">
 prggmr();
@@ -372,9 +380,9 @@ prggmr();
         <p>
             Sends the event loop the shutdown signal.
         </p>
-        <h4>
+        <h5>
             Example
-        </h4>
+        </h5>
         <div class="code">
             <pre class="prettyprint php">
 shutdown();
@@ -649,11 +657,23 @@ setTimeout(function(){
         </div>
         <p>
             And just as intervals and subscriptions, timeouts can be cleared by providing the object.
+        </p>
+        <h4>
+            prggmr Event Loop ( Advanced )
+        </h4>
+        <p>
+            Manually starting the loop allows for finely tuned control of prggmr for use within
+            Web apps.
+        </p>
+        <div class="code">
+            <pre class="prettyprint php">prggmr();</pre>
+        </div>
         <h4>
             Missing some examples?
         </h4>
         <p>
             I'm sure that there are more examples that can be included here, these are just the basics so please let me know what is missing!
         </p>
+    </div>
     </body>
 </html>
