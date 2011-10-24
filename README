@@ -1,0 +1,10 @@
+prggmr is a high-performance event processing engine, it uses Events, Signals,
+Subscriptions, Queues and an Engine, that have been engineered from the ground
+up to be incredibly lightweight, fast, efficent and robust with simplicity and
+ease of use in mind.
+
+prggmr is much more than an event library, it is a robust standalone event
+processing engine written in PHP, allowing for application &amp; server level
+php programming as if it wasn't even php.
+
+Read More @ http://www.prggmr.org
