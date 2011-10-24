@@ -171,25 +171,29 @@
         
         /**
          * Passes through next and prev search result items.
-         
+         *
          * true = next, false = prev
          */
         $.prggmr.keyResults = function(dir) {
             if (finder.is(':hidden')) return true;
             var found = false;
-            $('ul li.result', results).each(function(){
+            $('ul li', results).each(function(){
+                console.log($(this));
                 if ($(this).hasClass('active')) {
                     found = true;
-                    var item = (dir) ? $(this).next() : $(this).prev();
-                    // couldn't find a fast way ... todo: Find a better method
-                    if (item.hasClass('heading')) item = (dir) ? item.next() : item.prev();
+                    var item = function(a){
+                        var t = (dir) ? a.next() : a.prev();
+                        if (t.hasClass('heading')) this.call(t);
+                        return t;
+                    }($(this));
+                    console.log(item);
                     if (!found) {
                         // reverse
                         if (item.length === 0) {
                             var item = (dir) ? $('ul li.result:first', results) : $('ul li.result:last', results);
                         }
                         // how?
-                        if (item.length === 0) return false;
+                        //if (item.length === 0) return false;
                         found = true;
                         $(this).trigger('mouseleave');
                         item.trigger('mouseenter');
@@ -200,7 +204,7 @@
             });
             
             if (!found) {
-                $('ul li.result:first', results).trigger('mouseenter');
+                $('ul li:first', results).trigger('mouseenter');
             }
             return false;
         }
@@ -215,13 +219,17 @@
         });
         
         // alt+down/alt+up moves through results
-        $(document, 'input').bind('keydown', 'down', function(){
-            return $.prggmr.keyResults(true);
+        $(document).bind('keydown', 'alt+down', function(){
+            $.prggmr.keyResults(true);
+            // disable anything else
+            return false;
         });
         
         // alt+down/alt+up moves through results
-        $(document, 'input').bind('keydown', 'up', function(){
-            return $.prggmr.keyResults(false);
+        $(document).bind('keydown', 'alt+up', function(){
+            $.prggmr.keyResults(false);
+            // disable anything else
+            return false;
         });
         
         // alt+enter goes to current result

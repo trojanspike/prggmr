@@ -161,9 +161,9 @@ function fire($signal, $vars = null, &$event = null)
  *
  * @return  object  Subscription
  */
-function setInterval($subscription, $interval, $vars = null, $identifier = null, $exhaust = 0)
+function setInterval($subscription, $interval, $vars = null, $identifier = null, $exhaust = 0, $start = null)
 {
-    return prggmr::instance()->setInterval($subscription, $interval, $vars, $identifier, $exhaust);
+    return prggmr::instance()->setInterval($subscription, $interval, $vars, $identifier, $exhaust, $start);
 }
 
 /**
@@ -185,10 +185,10 @@ function setInterval($subscription, $interval, $vars = null, $identifier = null,
  *
  * @return  object  Subscription
  */
-function setTimeout($subscription, $interval, $vars = null, $identifier = null)
+function setTimeout($subscription, $interval, $vars = null, $identifier = null, $start = null)
 {
     // This simply uses set interval and sets an exhaustion rate of 1 ...
-    return prggmr::instance()->setTimeout($subscription, $interval, $vars, $identifier);
+    return prggmr::instance()->setTimeout($subscription, $interval, $vars, $identifier, $start);
 }
 
 /**

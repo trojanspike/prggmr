@@ -402,12 +402,14 @@ class Engine {
      *
      * @param  integer  $exhaust  Count to set subscription exhaustion.
      *
+     * @param  mixed  $start  Unix parseable date to start the interval.
+     *
      * @throws  InvalidArgumentException  Thrown when an invalid callback or
      *          interval is provided.
      *
      * @return  object  Subscription
      */
-    public function setInterval($subscription, $interval, $vars = null, $identifier = null, $exhaust = 0)
+    public function setInterval($subscription, $interval, $vars = null, $identifier = null, $exhaust = 0, $start = null)
     {
         if (!$subscription instanceof Subscription) {
             if (!is_callable($subscription)) {
@@ -426,8 +428,33 @@ class Engine {
                 )
             );
         }
-
-        $this->_timers[] = array($subscription, $interval, $this->getMilliseconds() + $interval, $vars);
+        // Allow support for setting the interval in the future
+        // e.g. Set to begin at 12/1/1 at 12:00pm every 24 hours
+        if (null !== $start) {
+            if (is_int($start)) {
+                if (time() <= $start) {
+                    $timestamp = $start;
+                }
+            } else {
+                if (false !== ($timestamp = strtotime($start, time()))) {
+                    if (time() >= $timestamp) {
+                        $start = null;
+                    }
+                } else {
+                    $start = null;
+                }
+            }
+        }
+        if (null !== $start) {
+            // really this is getting old
+            $engine = $this;
+            $this->setTimeout(function() use ($engine, $subscription, $interval, $vars, $exhaust){
+                $engine->setInterval($subscription, $interval, $vars, $identifier, $exhaust, null);
+            }, ($timestamp - time()) * 1000, null);
+            // notice that this does seconds only not milli seconds
+        } else {
+            $this->_timers[] = array($subscription, $interval, $this->getMilliseconds() + $interval, $vars);
+        }
         return $subscription;
     }
 
@@ -445,15 +472,17 @@ class Engine {
      *
      * @param  integer  $exhaust  Count to set subscription exhaustion.
      *
+     * @param  mixed  $start  Unix parseable date to start the interval.
+     *
      * @throws  InvalidArgumentException  Thrown when an invalid callback or
      *          interval is provided.
      *
      * @return  object  Subscription
      */
-    public function setTimeout($subscription, $interval, $vars = null, $identifier = null)
+    public function setTimeout($subscription, $interval, $vars = null, $identifier = null, $start = null)
     {
         // This simply uses set interval and sets an exhaustion rate of 1 ...
-        return $this->setInterval($subscription, $interval, $vars, $identifier, 1);
+        return $this->setInterval($subscription, $interval, $vars, $identifier, 1, $start);
     }
 
     /**

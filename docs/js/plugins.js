@@ -43,10 +43,11 @@
 	
 		handleObj.handler = function( event ) {
 			// Don't fire in text-accepting inputs that we didn't directly bind to
-			if ( this !== event.target && (/textarea|select/i.test( event.target.nodeName ) ||
-				 event.target.type === "text") ) {
-				return;
-			}
+            // disable as i dont want to stay in a input
+			//if ( this !== event.target && (/textarea|select/i.test( event.target.nodeName ) ||
+			//	 event.target.type === "text") ) {
+			//	return;
+			//}
 			
 			// Keypress represents characters, not special keys
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ],
