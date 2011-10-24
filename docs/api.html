@@ -241,7 +241,7 @@ dechain('hello', 'world');
 </pre>
         </div>
         <h3 id="api.setinterval">
-            setInterval(subscription, interval, [vars, identifier, exhaust])
+            setInterval(subscription, interval, [vars, identifier, exhaust, start])
         </h3>
         <p>
             Registers the subscription to fire at the given interval in milliseconds.
@@ -263,6 +263,12 @@ dechain('hello', 'world');
             </li>
             <li>Number of times this subscription will fire before being automatically removed by the engine.
             </li>
+            <li>Time to start this interval, this can be a PHP parseable date or a UNIX timestamp.
+            <div class="notice">
+                This allows for simple setup of a PHP cron job, see examples below.
+                <br /><br />
+                An Exception will be thrown when an unparseable date is provided.
+            </li>
         </ul>
         <h5>
             Example
@@ -275,7 +281,7 @@ setInterval(function(){
 </pre>
         </div>
         <h3 id="api.settimeout">
-            setTimeout(subscription, interval, [vars, identifier])
+            setTimeout(subscription, interval, [vars, identifier, start])
         </h3>
         <p>
             Registers a subscription to fire after the given time in milliseconds has passed.
@@ -294,6 +300,13 @@ setInterval(function(){
             <li>A list of variables to pass to the subscription.
             </li>
             <li>A string used for later identifing the subscription, if not provided a random integer will be generated.
+            </li>
+            <li>Time to start this interval. This can be a PHP parseable date or a UNIX timestamp.
+            <div class="notice">
+                This allows for simple setup of a PHP cron job, see examples below.
+                <br /><br />
+                An Exception will be thrown when an unparseable date is provided.
+            </li>
             </li>
         </ul>
         <h5>
@@ -667,6 +680,42 @@ setTimeout(function(){
         </p>
         <div class="code">
             <pre class="prettyprint php">prggmr();</pre>
+        </div>
+        <h4>
+            PHP prggmr cron job
+        </h4>
+        <p>
+            Intervals and timeouts can be set to run at the time you specify, e.g 12 o'clock midnight New Years!
+        </p>
+        <p>
+            This will send you a countdown to New Year's celebration!
+        <div class="code">
+            <pre class="prettyprint php">
+$time = 10;
+setInterval(function() use (&$time){
+    if ($time != 0) {
+        $message = sprintf(
+            "%s seconds till the new year begins!",
+            $time
+        );
+    } else {
+        $message = sprintf(
+            "HAPPY HAPPY NEW YEAR FROM prggmr IT'S %s",
+            date('Y')
+        );
+        clearInterval('New Years Celebration Email');
+    }
+    mail(
+        'your@email.com',
+        'HAPPY NEW YEAR!', 
+        sprintf(
+            "HAPPY HAPPY NEW YEAR FROM prggmr IT'S %s",
+            date('Y')
+        )
+    );
+    $time--;
+}, 1000, null, 'New Years Celebration Email', '12-31-'.date('Y').' 23:59:50'); 
+            </pre>
         </div>
         <h4>
             Missing some examples?

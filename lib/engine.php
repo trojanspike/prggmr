@@ -436,12 +436,16 @@ class Engine {
                     $timestamp = $start;
                 }
             } else {
-                if (false !== ($timestamp = strtotime($start, time()))) {
+                $timestamp = strtotime($start, time());
+                if (false !== $timestamp) {
                     if (time() >= $timestamp) {
                         $start = null;
                     }
                 } else {
-                    $start = null;
+                    throw new \InvalidArgumentException(sprintf(
+                        'Unparseable date given as starting time (%s)',
+                        $start 
+                    ));
                 }
             }
         }
