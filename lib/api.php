@@ -45,7 +45,7 @@
 */
 function subscribe($subscription, $signal, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
 {
-    return Prggmr::instance()->subscribe($subscription, $signal, $identifier, $priority, $chain, $exhaust);
+    return prggmr::instance()->subscribe($subscription, $signal, $identifier, $priority, $chain, $exhaust);
 }
 
 /**
@@ -71,7 +71,7 @@ function subscribe($subscription, $signal, $identifier = null, $priority = null,
 */
 function once($subscription, $signal, $identifier = null, $priority = null, $chain = null)
 {
-    return Prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, 1);
+    return prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, 1);
 }
 
 /**
@@ -88,7 +88,7 @@ function once($subscription, $signal, $identifier = null, $priority = null, $cha
 */
 function dequeue($signal, $subscription)
 {
-    return Prggmr::instance()->dequeue($signal, $subscription);   
+    return prggmr::instance()->dequeue($signal, $subscription);   
 }
 
 /**
@@ -101,7 +101,7 @@ function dequeue($signal, $subscription)
  */
 function chain($signal, $chain)
 {
-    return Prggmr::instance()->queue($signal)->getSignal()->setChain($chain);
+    return prggmr::instance()->queue($signal)->getSignal()->setChain($chain);
 }
 
 /**
@@ -114,7 +114,7 @@ function chain($signal, $chain)
  */
 function dechain($signal, $chain)
 {
-    return Prggmr::instance()->queue($signal)->getSignal()->delChain($chain);
+    return prggmr::instance()->queue($signal)->getSignal()->delChain($chain);
 }
 
 /**
@@ -133,12 +133,12 @@ function fire($signal, $vars = null, &$event = null)
 {
     if (PRGGMR_DEBUG) {
         if (version_compare(phpversion(), '5.3.6', '>=')) {
-            return Prggmr::instance()->fire($signal, $vars, $event, debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT));
+            return prggmr::instance()->fire($signal, $vars, $event, debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT));
         } else {
-            return Prggmr::instance()->fire($signal, $vars, $event, debug_backtrace());
+            return prggmr::instance()->fire($signal, $vars, $event, debug_backtrace());
         }
     } else {
-        return Prggmr::instance()->fire($signal, $vars, $event);
+        return prggmr::instance()->fire($signal, $vars, $event);
     }
 }
 
@@ -163,7 +163,7 @@ function fire($signal, $vars = null, &$event = null)
  */
 function setInterval($subscription, $interval, $vars = null, $identifier = null, $exhaust = 0)
 {
-    return Prggmr::instance()->setInterval($subscription, $interval, $vars, $identifier, $exhaust);
+    return prggmr::instance()->setInterval($subscription, $interval, $vars, $identifier, $exhaust);
 }
 
 /**
@@ -188,7 +188,7 @@ function setInterval($subscription, $interval, $vars = null, $identifier = null,
 function setTimeout($subscription, $interval, $vars = null, $identifier = null)
 {
     // This simply uses set interval and sets an exhaustion rate of 1 ...
-    return Prggmr::instance()->setTimeout($subscription, $interval, $vars, $identifier);
+    return prggmr::instance()->setTimeout($subscription, $interval, $vars, $identifier);
 }
 
 /**
@@ -201,7 +201,7 @@ function setTimeout($subscription, $interval, $vars = null, $identifier = null)
  */
 function clearInterval($subscription)
 {
-    return Prggmr::instance()->clearInterval($subscription);
+    return prggmr::instance()->clearInterval($subscription);
 }
 
 /**
@@ -214,7 +214,7 @@ function clearInterval($subscription)
  */
 function clearTimeout($subscription)
 {
-    return Prggmr::instance()->clearTimeout($subscription);
+    return prggmr::instance()->clearTimeout($subscription);
 }
 
 /**
@@ -227,7 +227,7 @@ function clearTimeout($subscription)
  */
 function prggmr($reset = false, $timeout = null)
 {
-    return Prggmr::instance()->loop($reset, $timeout);
+    return prggmr::instance()->loop($reset, $timeout);
 }
 
 /**
@@ -237,5 +237,5 @@ function prggmr($reset = false, $timeout = null)
  */
 function shutdown()
 {
-    return Prggmr::instance()->shutdown();
+    return prggmr::instance()->shutdown();
 }

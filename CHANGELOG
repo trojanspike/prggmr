@@ -1,5 +1,10 @@
 v0.2.1
 -----------------------------------
+- Added PRGGMR_EVENTED_ERRORS constant which allows enabling prggmr's evented
+  exceptions.
+- Added prggmr::EXCEPTION constant used for prggmr's evented exceptions
+- Added PRGGMRUNIT_MASTERMIND constant
+- Prggmr is now defined as prggmr (lowercase)
 - Subscriptions now throw a SubscriptionException if an error is encountered.
 - Multiple Signals can now be triggered upon a single fire
 - added the prggmrd bin file

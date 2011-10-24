@@ -229,7 +229,9 @@ class Engine {
      *
      * @param  array  $vars  Array of variables to pass the subscribers
      *
-     * @param  object  $event  Event
+     * @param  object  $event  \prggmr\Event
+     *
+     * @param  array  $stacktrace  Stacktrace array
      *
      * @return  object  Event
      */
@@ -308,7 +310,7 @@ class Engine {
         $queue->rewind();
         
         // add stacktrace
-        if (PRGGMR_DEBUG) {
+        if (PRGGMR_DEBUG === true) {
             if (null === $stacktrace) {
                 if (version_compare(phpversion(), '5.3.6', '>=')) {
                     $event->addTrace(debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT));

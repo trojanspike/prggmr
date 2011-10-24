@@ -20,7 +20,11 @@
  * @copyright  Copyright (c), 2010-11 Nickolas Whiting
  */
 
+// library version
 define('PRGGMR_VERSION', '0.2.0');
+
+// The creator
+define('PRGGMR_MASTERMIND', 'Nickolas Whiting');
 
 $dir = dirname(realpath(__FILE__));
 
@@ -32,23 +36,33 @@ require $dir.'/api.php';
 require $dir.'/queue.php';
 require $dir.'/subscription.php';
 
-// debugging mode disable by default
+// debugging mode disabled by default
 if (!defined('PRGGMR_DEBUG')) {
     define('PRGGMR_DEBUG', false);
+}
+
+// evented exceptions disabled by default
+if (!defined('PRGGMR_EVENTED_EXCEPTIONS')) {
+    define('PRGGMR_EVENTED_EXCEPTIONS', false);
 }
 
 /**
  * The prggmr object is a singleton which allows for a global engine api.
  */
-class Prggmr extends \prggmr\Engine {
-
+class prggmr extends \prggmr\Engine {
+    
+    /**
+     * prggmr 
+     */
+    const EXCEPTION = 0xe4;
+    
     /**
      * @var  object|null  Instanceof the singleton
      */
     private static $_instance = null;
 
     /**
-     * Returns instance of the Prggmr api.
+     * Returns instance of the prggmr api.
      */
     final public static function instance(/* ... */)
     {
@@ -68,4 +82,17 @@ class Prggmr extends \prggmr\Engine {
     {
         return PRGGMR_VERSION;
     }
+}
+
+// turns on prggmr error handling
+// turning errors into exceptions and exceptions into events
+if (PRGGMR_EVENTED_EXCEPTIONS === true) {
+    function evented_exceptions($exception) {
+        fire(prggmr::EXCEPTION, $exception);
+    }
+    function evented_error_handler($errno, $errstr, $errfile, $errline) {
+        throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+    }
+    set_error_handler("evented_error_handler");
+    set_exception_handler("evented_exceptions");
 }

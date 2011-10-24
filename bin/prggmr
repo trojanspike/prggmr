@@ -70,7 +70,7 @@ if (false === $runfile) {
 }
 
 // load prggmr
-if (!class_exists('Prggmr')) {
+if (!class_exists('prggmr')) {
     // attempt to include prggmr lib on include path
     require 'prggmr/lib/prggmr.php';
 }

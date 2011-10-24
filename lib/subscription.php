@@ -107,6 +107,13 @@ class Subscription {
         if (null === $identifier) {
             $identifier = rand(0, 100000);
         }
+        if (!is_callable($function)) {
+            throw new \InvalidArgumentException(sprintf(
+                "prggmr Subscription excepts a callable (%s) given",
+                (is_object($function)) ?
+                get_class($function) : gettype($function)
+            ));
+        }
         // TODO: What should be set on an invalid or negative exhaust?
         if (!is_int($exhaust) || $exhaust <= -1) {
             $exhaust = 0;
