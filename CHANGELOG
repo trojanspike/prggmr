@@ -1,6 +1,6 @@
 v0.2.1
 -----------------------------------
-- Timeouts and intervals can now be set to start at a pre determained time
+- Timeouts and intervals can now be set to start at a pre determined time
 - Added PRGGMR_EVENTED_ERRORS constant which allows enabling prggmr's evented
   exceptions.
 - Added prggmr::EXCEPTION constant used for prggmr's evented exceptions
