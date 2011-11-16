@@ -6,6 +6,7 @@ body {
   margin: 3em auto 3em;
   padding: 0;
   max-width: 50em;
+  background: url('images/page.jpg') repeat-x #fcfcfc;
 }
 
 a {

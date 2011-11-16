@@ -181,7 +181,7 @@ class Event
             if (isset($this->_data[$key])) {
                 return $this->_data[$key];
             } else {
-                return false;
+                return null;
             }
         } else {
             return $this->_data;

@@ -25,16 +25,21 @@
  */
 suite(function($suite){
     
+    //setup(function($test){
+    //    echo "Starting"; 
+    //});
+    //
+    //teardown(function($test){
+    //    echo "Finishing";
+    //});
+    
     test(function($test){
-        
         $signal = new \prggmr\Signal('helloworld');
         $test->true($signal->compare('helloworld'));
         $test->false($signal->compare('HelloWorld'));
-        
     }, 'string test');
     
     test(function($test){
-        
         $signal = new \prggmr\Signal(array(
             0 => 'test'
         ));
@@ -44,81 +49,55 @@ suite(function($suite){
         $test->false($signal->compare(array(
             1 => 'test'
         )));
-        
     }, 'array test');
-    //
-    //public function testStringSignal()
-    //{
-    //    $signal = new \prggmr\Signal('helloworld');
-    //    $this->assertTrue($signal->compare('helloworld'));
-    //    $this->assertFalse($signal->compare('HelloWorld'));
-    //}
-    //
-    //public function testArraySignal()
-    //{
-    //    $signal = new \prggmr\Signal(array(
-    //        0 => 'helloworld'
-    //    ));
-    //    $this->assertTrue($signal->compare(array(
-    //        0 => 'helloworld'
-    //    )));
-    //    $this->assertFalse($signal->compare(array(
-    //        0 => 'HellOworld'
-    //    )));
-    //}
-    //
-    //public function testObjectSignal()
-    //{
-    //    $obj = new \stdClass();
-    //    $obj->hello = 'world';
-    //    $signal = new \prggmr\Signal($obj);
-    //    $this->assertTrue($signal->compare($obj));
-    //    $obj = new \stdClass();
-    //    $obj->hello = 'wORld';
-    //    $this->assertFalse($signal->compare($obj));
-    //}
-    //
-    //public function testTrueSignal()
-    //{
-    //    $signal = new \prggmr\Signal(true);
-    //    $this->assertTrue($signal->compare(true));
-    //    $this->assertFalse($signal->compare(1));
-    //    $this->assertFalse($signal->compare(''));
-    //}
-    //
-    //public function testFalseSignal()
-    //{
-    //    $signal = new \prggmr\Signal(false);
-    //    $this->assertTrue($signal->compare(false));
-    //    $this->assertFalse($signal->compare(0));
-    //}
-    //
-    //public function testIntegerSignal()
-    //{
-    //    $signal = new \prggmr\Signal(100);
-    //    $this->assertTrue($signal->compare(100));
-    //    $this->assertFalse($signal->compare('100'));
-    //}
-    //
-    //public function testFloatSignal()
-    //{
-    //    $signal = new \prggmr\Signal(100.2);
-    //    $this->assertTrue($signal->compare(100.2));
-    //    $this->assertFalse($signal->compare('100.2'));
-    //}
-    //
-    //public function testChains()
-    //{
-    //    $signal = new \prggmr\Signal('test');
-    //    $this->assertNull($signal->getChain());
-    //    $signal->setChain('chain_1');
-    //    $this->assertEquals(array('chain_1'), $signal->getChain());
-    //    $signal->setChain('chain_2');
-    //    $this->assertEquals(array('chain_1', 'chain_2'), $signal->getChain());
-    //    $signal->delChain('chain_1');
-    //    $this->assertEquals(array('chain_2'), $signal->getChain());
-    //    $signal->delChain('chain_2');
-    //    $this->assertNull($signal->getChain());
-    //}
-     
-});
+    
+    test(function($test){
+        $obj = new \stdClass();
+        $obj->hello = 'world';
+        $signal = new \prggmr\Signal($obj);
+        $test->true($signal->compare($obj));
+        $obj = new \stdClass();
+        $obj->hello = 'wORld';
+        $test->false($signal->compare($obj));
+    }, 'testObjectSignal');
+    
+    test(function($test){
+        $signal = new \prggmr\Signal(true);
+        $test->true($signal->compare(true));
+        $test->false($signal->compare(1));
+        $test->false($signal->compare(''));
+    }, 'Boolean True Signal');
+    
+    test(function($test){
+        $signal = new \prggmr\Signal(false);
+        $test->true($signal->compare(false));
+        $test->false($signal->compare(0));
+    }, 'Boolean False Signal');
+    
+    
+    test(function($test){
+        $signal = new \prggmr\Signal(100);
+        $test->true($signal->compare(100));
+        $test->false($signal->compare('100'));
+    }, 'Integer Signal');
+    
+    test(function($test){
+        $signal = new \prggmr\Signal(100.2);
+        $test->true($signal->compare(100.2));
+        $test->false($signal->compare('100.2'));
+    }, 'Float Signal');
+    
+    test(function($test){
+        $signal = new \prggmr\Signal('test');
+        $test->null($signal->getChain());
+        $signal->setChain('chain_1');
+        $test->equal(array('chain_1'), $signal->getChain());
+        $signal->setChain('chain_2');
+        $test->equal(array('chain_1', 'chain_2'), $signal->getChain());
+        $signal->delChain('chain_1');
+        $test->equal(array('chain_2'), $signal->getChain());
+        $signal->delChain('chain_2');
+        $test->null($signal->getChain());
+    }, 'Chains');
+    
+}, 'Signal Testing Suite');
