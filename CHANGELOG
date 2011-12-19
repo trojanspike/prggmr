@@ -1,5 +1,6 @@
-v0.2.1
+v0.2.1 ( Dec 19th, 2011 )
 -----------------------------------
+- Subscription Exceptions contain the file/line and message of the exception.
 - Event::getData now returns null instead of false if the data does not exist.
 - Timeouts and intervals can now be set to start at a pre determined time
 - Added PRGGMR_EVENTED_ERRORS constant which allows enabling prggmr's evented

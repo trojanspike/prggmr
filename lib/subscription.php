@@ -163,9 +163,12 @@ class Subscription {
                     // unset incase we continue
                     unset($this->_pre[$_index]);
                     throw new SubscriptionException(sprintf(
-                        'Subscription pre fire %s failed with error %s',
+                        'Subscription pre fire %s failed 
+                        with error ( %s ) at ( %s : %s )',
                         $this->getIdentifier(),
-                        $e->getMessage()
+                        $e->getMessage(),
+                        $e->getFile(),
+                        $e->getLine()
                     ), $params[0]);
                 }
             }
@@ -176,9 +179,11 @@ class Subscription {
             $result = call_user_func_array($this->_function, $passparams);
         } catch (\Exception $e) {
             throw new SubscriptionException(sprintf(
-				'Subscription %s failed with error %s',
-				$this->getIdentifier(),
-				$e->getMessage()
+				'Subscription %s failed with error ( %s ) at ( %s : %s )',
+                    $this->getIdentifier(),
+                    $e->getMessage(),
+                    $e->getFile(),
+                    $e->getLine()
 			), $params[0]);
         }
 
@@ -191,9 +196,12 @@ class Subscription {
                     // unset incase we continue
                     unset($this->_pre[$_index]);
                     throw new SubscriptionException(sprintf(
-                        'Subscription post fire %s failed with error %s',
+                        'Subscription post fire %s failed with error 
+                        ( %s ) at ( %s : %s )',
                         $this->getIdentifier(),
-                        $e->getMessage()
+                        $e->getMessage(),
+                        $e->getFile(),
+                        $e->getLine()
                     ), $params[0]);
                 }
             }
