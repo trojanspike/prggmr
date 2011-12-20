@@ -21,17 +21,9 @@
  */
 
 /**
- * prggmr prggmrunit signal unit tests
+ * prggmrunit signal unit tests
  */
 suite(function($suite){
-    
-    //setup(function($test){
-    //    echo "Starting"; 
-    //});
-    //
-    //teardown(function($test){
-    //    echo "Finishing";
-    //});
     
     test(function($test){
         $signal = new \prggmr\Signal('helloworld');
@@ -99,5 +91,4 @@ suite(function($suite){
         $signal->delChain('chain_2');
         $test->null($signal->getChain());
     }, 'Chains');
-    
 }, 'Signal Testing Suite');
