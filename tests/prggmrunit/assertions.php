@@ -28,7 +28,7 @@
  * Asserts an event by firing the event signal using the provided engine
  * checking the event return and data associated.
  */
-assertion(function($engine, $signal, $params, $expected){
+assertion(function($test, $engine, $signal, $params, $expected){
     
     $event = $engine->fire($signal, $params);
 

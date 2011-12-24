@@ -43,9 +43,11 @@
 *
 * @return  void
 */
+if (!function_exists('subscribe')){
 function subscribe($subscription, $signal, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
 {
     return prggmr::instance()->subscribe($subscription, $signal, $identifier, $priority, $chain, $exhaust);
+}
 }
 
 /**
@@ -69,9 +71,11 @@ function subscribe($subscription, $signal, $identifier = null, $priority = null,
 *
 * @return  void
 */
+if (!function_exists('once')){
 function once($subscription, $signal, $identifier = null, $priority = null, $chain = null)
 {
     return prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, 1);
+}
 }
 
 /**
@@ -86,9 +90,11 @@ function once($subscription, $signal, $identifier = null, $priority = null, $cha
 * @throws  InvalidArgumentException
 * @return  void
 */
+if (!function_exists('dequeue')){
 function dequeue($signal, $subscription)
 {
     return prggmr::instance()->dequeue($signal, $subscription);   
+}
 }
 
 /**
@@ -99,9 +105,11 @@ function dequeue($signal, $subscription)
  *
  * @return  void
  */
+if (!function_exists('chain')){
 function chain($signal, $chain)
 {
     return prggmr::instance()->queue($signal)->getSignal()->setChain($chain);
+}
 }
 
 /**
@@ -112,9 +120,11 @@ function chain($signal, $chain)
  *
  * @return  void
  */
+if (!function_exists('dechain')){
 function dechain($signal, $chain)
 {
     return prggmr::instance()->queue($signal)->getSignal()->delChain($chain);
+}
 }
 
 /**
@@ -129,6 +139,7 @@ function dechain($signal, $chain)
 *
 * @return  object  Event
 */
+if (!function_exists('fire')){
 function fire($signal, $vars = null, &$event = null)
 {
     if (PRGGMR_DEBUG) {
@@ -140,6 +151,7 @@ function fire($signal, $vars = null, &$event = null)
     } else {
         return prggmr::instance()->fire($signal, $vars, $event);
     }
+}
 }
 
 /**
@@ -161,9 +173,11 @@ function fire($signal, $vars = null, &$event = null)
  *
  * @return  object  Subscription
  */
+if (!function_exists('setInterval')){
 function setInterval($subscription, $interval, $vars = null, $identifier = null, $exhaust = 0, $start = null)
 {
     return prggmr::instance()->setInterval($subscription, $interval, $vars, $identifier, $exhaust, $start);
+}
 }
 
 /**
@@ -185,10 +199,12 @@ function setInterval($subscription, $interval, $vars = null, $identifier = null,
  *
  * @return  object  Subscription
  */
+if (!function_exists('setTimeout')){
 function setTimeout($subscription, $interval, $vars = null, $identifier = null, $start = null)
 {
     // This simply uses set interval and sets an exhaustion rate of 1 ...
     return prggmr::instance()->setTimeout($subscription, $interval, $vars, $identifier, $start);
+}
 }
 
 /**
@@ -199,9 +215,11 @@ function setTimeout($subscription, $interval, $vars = null, $identifier = null, 
  *
  * @return  void
  */
+if (!function_exists('clearInterval')){
 function clearInterval($subscription)
 {
     return prggmr::instance()->clearInterval($subscription);
+}
 }
 
 /**
@@ -212,9 +230,11 @@ function clearInterval($subscription)
  *
  * @return  void
  */
+if (!function_exists('clearTimeout')){
 function clearTimeout($subscription)
 {
     return prggmr::instance()->clearTimeout($subscription);
+}
 }
 
 /**
@@ -225,9 +245,11 @@ function clearTimeout($subscription)
  *
  * @return  void
  */
+if (!function_exists('prggmr')){
 function prggmr($reset = false, $timeout = null)
 {
     return prggmr::instance()->loop($reset, $timeout);
+}
 }
 
 /**
@@ -235,7 +257,9 @@ function prggmr($reset = false, $timeout = null)
  *
  * @return  void
  */
+if (!function_exists('shutdown')){
 function shutdown()
 {
     return prggmr::instance()->shutdown();
+}
 }

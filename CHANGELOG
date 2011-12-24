@@ -1,3 +1,9 @@
+v0.2.2 ( TBD )
+-----------------------------------
+- Added signals/ directory all files are included automatically.
+- Regex Signal was removed from signals.php file.
+- API functions now have the ability to be replaced before loading the API.
+
 v0.2.1 ( Dec 19th, 2011 )
 -----------------------------------
 - Subscription Exceptions contain the file/line and message of the exception.

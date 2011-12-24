@@ -91,4 +91,5 @@ suite(function($suite){
         $signal->delChain('chain_2');
         $test->null($signal->getChain());
     }, 'Chains');
+    
 }, 'Signal Testing Suite');

@@ -44,7 +44,7 @@ suite(function(){
             $event->setData($param1);
         }, 'testEventSingleParameter');
         $test->strict_event($test->engine, 'subscribe-parameter-single',
-            array('helloorld'), array('helloworld')
+            array('helloworld'), array('helloworld')
         );
     }, 'Subscription with Parameters');
 

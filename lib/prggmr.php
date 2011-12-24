@@ -46,6 +46,19 @@ if (!defined('PRGGMR_EVENTED_EXCEPTIONS')) {
     define('PRGGMR_EVENTED_EXCEPTIONS', false);
 }
 
+// include all signals if avaliable
+if (is_dir($dir.'/signals')) {
+    foreach (glob($dir.'/signals/*.php') as $_file) {
+        $_name = explode('/', $_file);
+        $_class = array_map('ucfirst', explode('_', 
+            str_replace('.php', '', end($_name))
+        ));
+        if (!class_exists(implode('', $_class))) {
+            include_once $_file;
+        }
+    }
+}
+
 /**
  * The prggmr object is a singleton which allows for a global engine api.
  */
