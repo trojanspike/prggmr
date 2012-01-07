@@ -1,6 +1,6 @@
 <?php
 /**
- *  Copyright 2010-11 Nickolas Whiting
+ *  Copyright 2010-12 Nickolas Whiting
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  *
  * @author  Nickolas Whiting  <prggmr@gmail.com>
  * @package  prggmr
- * @copyright  Copyright (c), 2010-11 Nickolas Whiting
+ * @copyright  Copyright (c), 2010-12 Nickolas Whiting
  */
 
 

@@ -1,6 +1,6 @@
 <?php
 /**
- *  Copyright 2010-11 Nickolas Whiting
+ *  Copyright 2010-12 Nickolas Whiting
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  *
  * @author  Nickolas Whiting  <prggmr@gmail.com>
  * @package  prggmr
- * @copyright  Copyright (c), 2010-11 Nickolas Whiting
+ * @copyright  Copyright (c), 2010-12 Nickolas Whiting
  */
 
 /**
@@ -81,11 +81,13 @@ suite(function($suite){
     
     test(function($test){
         $signal = new \prggmr\Signal('test');
+        $test->equals(1);
         $test->null($signal->getChain());
         $signal->setChain('chain_1');
         $test->equal(array('chain_1'), $signal->getChain());
         $signal->setChain('chain_2');
         $test->equal(array('chain_1', 'chain_2'), $signal->getChain());
+        $test->endSkip();
         $signal->delChain('chain_1');
         $test->equal(array('chain_2'), $signal->getChain());
         $signal->delChain('chain_2');

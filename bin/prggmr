@@ -10,7 +10,7 @@ Current options:
   -s/--sync     Sync all timer clocks with the loop clock on startup.
   -t/--time     Length of time to run in milliseconds.
   -d/--debug    Run debug mode.
-  -h/--help     Shows this help message.
+  -h/--help     Show this help message.
 ";
 
 if (count($argv) == 1) {
@@ -81,7 +81,7 @@ if (isset($showversion)) exit('prggmr version '.PRGGMR_VERSION."
 if (!file_exists($runfile)) {
     die("Unknown file : $runfile\n");
 } else {
-    require $runfile;
+    require_once $runfile;
 }
 
 // start the loop!!
