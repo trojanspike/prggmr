@@ -1,4 +1,4 @@
-v0.2.2 ( TBD )
+v0.2.2 ( January 10th, 2012 )
 -----------------------------------
 - Fixed a bug causing a Fatal Error when the Event was removed from the arguments
   within a Subscription, this now throws a RuntimeException when encountered.
