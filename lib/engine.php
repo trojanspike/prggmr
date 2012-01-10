@@ -627,6 +627,12 @@ class Engine {
         // TODO Is an additional object validation required at this point?
         $vars[0]->setSubscription($subscription);
         $result = $subscription->fire($vars);
+        if (!$vars[0] instanceof \prggmr\Event) {
+            throw new \RuntimeException(sprintf(
+                'Event object has been replaced in subscription %s',
+                $subscription->getIdentifier()
+            ));
+        }
         if (null !== $result) {
             // anything returned is set to the "return" value
             // note that it is greedy

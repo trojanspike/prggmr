@@ -1,5 +1,7 @@
 v0.2.2 ( TBD )
 -----------------------------------
+- Fixed a bug causing a Fatal Error when the Event was removed from the arguments
+  within a Subscription, this now throws a RuntimeException when encountered.
 - Added signals/ directory all files are included automatically.
 - Regex Signal was removed from signals.php file.
 - API functions now have the ability to be replaced before loading the API.
