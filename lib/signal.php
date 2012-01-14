@@ -47,8 +47,7 @@ interface SignalInterface {
 
 /**
  * The default signal object allows for signals of any type requiring only
- * that they evalute to true on a strict comparison check, otherwise meaning
- * each signal must be exactly equal both in type and value.
+ * that they evaluate to true on a strict comparison check.
  */
 class Signal implements SignalInterface {
 

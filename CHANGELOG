@@ -1,6 +1,15 @@
-v0.2.2 ( January 10th, 2012 )
+v0.3.0
 -----------------------------------
-- Fixed a bug causing a Fatal Error when the Event was removed from the arguments
+- Modified doc block comments.
+- Subscriptions are now refereed to as handles.
+- Added prggmr\handle\Time class. 
+- Subscription class renamed to Handle.
+- once api function renamed to handle_once.
+- fire api function renamed to signal.
+- subscribe api function renamed to handle.
+
+-----------------------------------
+- Fixed a bug causing a Fatal Error when the Event was removed from the arguments.
   within a Subscription, this now throws a RuntimeException when encountered.
 - Added signals/ directory all files are included automatically.
 - Regex Signal was removed from signals.php file.
@@ -13,9 +22,9 @@ v0.2.1 ( Dec 19th, 2011 )
 - Timeouts and intervals can now be set to start at a pre determined time
 - Added PRGGMR_EVENTED_ERRORS constant which allows enabling prggmr's evented
   exceptions.
-- Added prggmr::EXCEPTION constant used for prggmr's evented exceptions
-- Added PRGGMRUNIT_MASTERMIND constant
-- Prggmr is now defined as prggmr (lowercase)
+- Added prggmr::EXCEPTION constant used for prggmr's evented exceptions.
+- Added PRGGMRUNIT_MASTERMIND constant.
+- Prggmr is now defined as prggmr (lowercase).
 - Subscriptions now throw a SubscriptionException if an error is encountered.
 - Multiple Signals can now be triggered upon a single fire
 - added the prggmrd bin file

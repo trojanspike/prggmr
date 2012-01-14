@@ -26,69 +26,66 @@ use \Closure,
     \RuntimeException;
 
 /**
- * The subscriber object is the main object responsible for holding our event
- * bubblers or the function which will execute when our queue says it is time.
+ * A handle is the function which will execute upon a signal call.
  *
- * Though attached to a subscriptton queue the object itself contains no
- * information on what subscription it belongs to, it is possible to couple
- * it into the object if it is really needed but realistically the bubble will
- * recieve of copy of the current event which will ironically contain the
- * subscription object that this event is contained within allowing it to
- * call the event that is currently firing ... and if this seems a bit
- * crazy well thats because it is.
+ * Though attached to a signal queue the object itself contains no
+ * information on what signal it belongs to, it is possible to couple
+ * it into the object if it is needed but the handle will
+ * receive a copy of the event which will contain the
+ * signal object that this handle is attached to.
  */
-class Subscription {
+class Handle {
 
     /**
-     * The lambda function that will execute when this subscription is
+     * The function that will execute when this handle is
      * triggered.
      */
     protected $_function = null;
 
     /**
-     * Count before a subscription is exhausted.
+     * Count before a handle is exhausted.
      *
      * @var  string
      */
     protected $_limit = 0;
 
     /**
-     * The exhaust limit
+     * The exhaust limit.
      *
      * @var  integer
      */
     protected $_count = 0;
 
     /**
-     * Flag determaining if the subscription has exhausted.
+     * Flag determining if the handle has exhausted.
      *
      * @var  boolean
      */
     protected $_exhausted = null;
 
     /**
-     * String identifier for this subscription
+     * String identifier for this handle
      *
      * @var  string
      */
      protected $_identifier = null;
 
     /**
-     * Array of functions to fire pre dispatch
+     * Array of functions to execute pre dispatch
      *
      * @var  object
      */
     protected $_pre = null;
 
     /**
-     * Array of functions to fire post dispatch
+     * Array of functions to execute post dispatch
      *
      * @var  object
      */
     protected $_post = null;
     
     /**
-     * Array of additional parameters to pass.
+     * Array of additional parameters to pass the function executing.
      *
      * @var  array
      */
@@ -96,11 +93,11 @@ class Subscription {
 
 
     /**
-     * Constructs a new subscription object.
+     * Constructs a new handle object.
      *
-     * @param  mixed  $function  A callable variable.
-     * @param  string  $identifier  Identifier of this subscription.
-     * @param  integer  $exhaust  Count to set subscription exhaustion.
+     * @param  mixed  $function  A callable php variable.
+     * @param  string  $identifier  Identifier of this handle.
+     * @param  integer  $exhaust  Count to set handle exhaustion.
      */
     public function __construct($function, $identifier = null, $exhaust = 0)
     {
@@ -109,14 +106,14 @@ class Subscription {
         }
         if (!is_callable($function)) {
             throw new \InvalidArgumentException(sprintf(
-                "prggmr Subscription excepts a callable (%s) given",
+                "handle requires a callable (%s) given",
                 (is_object($function)) ?
                 get_class($function) : gettype($function)
             ));
         }
-        // TODO: What should be set on an invalid or negative exhaust?
+        # Invalid or negative exhausting sets the rate to 1.
         if (!is_int($exhaust) || $exhaust <= -1) {
-            $exhaust = 0;
+            $exhaust = 1;
         }
         $this->_function = $function;
         $this->_identifier = $identifier;
@@ -124,25 +121,28 @@ class Subscription {
     }
 
     /**
-     * Fires this subscriptions function.
+     * Executes this handles function.
      * Allowing for the first parameter as an array of parameters or
      * by passing them directly.
      *
      * @param  array  $params  Array of parameters to pass.
      *
-     * @throws  RuntimeException  When exception thrown within the closure.
-     * @return  mixed  Results of the function
+     * @throws  RuntimeException  If an exception is encountered during execution.
+     *
+     * @return  mixed  Results of handle execution.
      */
-    public function fire(&$params = null)
+    public function execute(&$params = null)
     {
-        // test for exhaustion
+        # test for exhaustion
         if ($this->isExhausted()) return false;
+        
+        # Increase execution count
         $this->_count++;
 
         if (count(func_get_args()) >= 2) {
             $params = func_get_args();
         } else {
-            // force array
+            # force array
             if (!is_array($params)) {
                 $params = array($params);
             }
@@ -154,55 +154,55 @@ class Subscription {
             $passparams = $params;
         }
 
-        // pre fire
+        # pre fire
         if (null !== $this->_pre) {
             foreach ($this->_pre as $_index => $_func) {
                 try {
                     call_user_func_array($_func, $passparams);
                 } catch (\Exception $e) {
-                    // unset incase we continue
+                    # unset incase we continue
                     unset($this->_pre[$_index]);
-                    throw new SubscriptionException(sprintf(
-                        'Subscription pre fire %s failed 
-                        with error ( %s ) at ( %s : %s )',
+                    throw new HandleException(sprintf(
+                        'handle pre fire %s Exception 
+                         ( %s ) at ( %s : %s )',
                         $this->getIdentifier(),
                         $e->getMessage(),
                         $e->getFile(),
                         $e->getLine()
-                    ), $params[0]);
+                    ), $params[0], $this);
                 }
             }
         }
 
-        // subscription fire
+        # handle fire
         try {
             $result = call_user_func_array($this->_function, $passparams);
         } catch (\Exception $e) {
-            throw new SubscriptionException(sprintf(
-				'Subscription %s failed with error ( %s ) at ( %s : %s )',
+            throw new HandleException(sprintf(
+				'handle %s Exception ( %s ) at ( %s : %s )',
                     $this->getIdentifier(),
                     $e->getMessage(),
                     $e->getFile(),
                     $e->getLine()
-			), $params[0]);
+			), $params[0], $this);
         }
 
-        // post fire
+        # post fire
         if (null !== $this->_post) {
             foreach ($this->_post as $_index => $_func) {
                 try {
                     call_user_func_array($_func, $passparams);
                 } catch (\Exception $e) {
-                    // unset incase we continue
+                    # unset incase we continue
                     unset($this->_pre[$_index]);
-                    throw new SubscriptionException(sprintf(
-                        'Subscription post fire %s failed with error 
+                    throw new HandleException(sprintf(
+                        'handle post fire %s Exception 
                         ( %s ) at ( %s : %s )',
                         $this->getIdentifier(),
                         $e->getMessage(),
                         $e->getFile(),
                         $e->getLine()
-                    ), $params[0]);
+                    ), $params[0], $this);
                 }
             }
         }
@@ -211,8 +211,7 @@ class Subscription {
     }
 
     /**
-     * Returns the number of times this subcription is to fire before exhaustion
-     * 0 = infinite.
+     * Returns exhaustion limit.
      *
      * @return  integer
      */
@@ -222,17 +221,17 @@ class Subscription {
     }
 
     /**
-     * Returns the number of times a subscription has fired.
+     * Returns the number of times a handle has executed.
      *
      * @return  integer
      */
-    public function count()
+    public function count(/* ... */)
     {
         return $this->_count;
     }
 
     /**
-     * Determains if the subscription has exhausted.
+     * Determines if the handle has exhausted.
      *
      * @return  boolean
      */
@@ -244,7 +243,6 @@ class Subscription {
             $count = $this->count();
 
             if (!is_int($limit) || 0 === $limit) {
-                $this->_exhausted = false;
                 return false;
             }
 
@@ -262,7 +260,7 @@ class Subscription {
     }
 
     /**
-     * Returns the identifier.
+     * Returns the handle identifier.
      *
      * @return  string
      */
@@ -272,7 +270,7 @@ class Subscription {
     }
 
     /**
-     * Adds a function to trigger before firing the subscription.
+     * Adds a function to execute before executing the handle.
      *
      * @param  object  $closure  Closure
      *
@@ -290,7 +288,7 @@ class Subscription {
     }
 
     /**
-     * Adds a function to trigger after firing the subscription.
+     * Adds a function to execute after executing the handle.
      *
      * @param  object  $closure  Closure
      *
@@ -308,7 +306,7 @@ class Subscription {
     }
     
     /**
-     * Sets an additional set of parameters to pass.
+     * Supplies additional parameters on execution.
      *
      * @param  mixed  $params  Array of additional parameters.
      *
@@ -325,7 +323,7 @@ class Subscription {
 }
 
 
-class SubscriptionException extends \Exception {
+class HandleException extends \Exception {
     
     /**
      * Event associated with the exception.
@@ -334,19 +332,37 @@ class SubscriptionException extends \Exception {
      */
     protected $_event = null;
     
-    public function __construct($message, $event)
+    /**
+     * Handle associated with the exception.
+     *
+     * @param  object  \prggmr\Handle
+     */
+    protected $_handle = null;
+    
+    public function __construct($message, \prggmr\Event $event, \prggmr\Handle $handle)
     {
         $this->_event = $event;
+        $this->_handle = $handle;
         parent::__construct($message);
     }
     
     /**
-     * Returns the event assocaited with this exception.
+     * Returns the event associated with this exception.
      *
      * @return  object  \prggmr\Event
      */
-    public function getEvent()
+    public function getEvent(/* ... */)
     {
         return $this->_event;
+    }
+    
+    /**
+     * Returns the handle associated with this exception.
+     *
+     * @return  object  \prggmr\Handle
+     */
+    public function getHandle(/* ... */)
+    {
+        return $this->_handle;
     }
 }

@@ -21,50 +21,50 @@
  */
 
 /**
-* Creates a subscription to the given signal.
+* Attaches a new handler to a signal.
 *
-* @param  mixed  $signal  Signal the subscription will attach to, this
+* @param  mixed  $signal  Signal the handler will attach to, this
 *         can be a Signal object, the signal representation or an array
 *         for a chained signal.
 *
-* @param  mixed  $subscription  Subscription closure that will trigger on
-*         fire or a Subscription object.
+* @param  mixed  $subscription  Handle closure that will trigger.
 *
-* @param  string  $identifier  String identifier of this subscription.
+* @param  string  $identifier  Identify of the handler.
 *
-* @param  integer $priority  Priority of the subscription
+* @param  integer $priority  Priority of the handler.
 *
-* @param  mixed  $chain  Chain signal
+* @param  mixed  $chain  Chain thrown from this handler.
 *
-* @param  integer  $exhaust  Count to set subscription exhaustion.
+* @param  integer  $exhaust  Rate at which this handler will exhaust.
 *
 * @throws  InvalidArgumentException  Thrown when an invalid callback is
 *          provided.
 *
 * @return  void
 */
-if (!function_exists('subscribe')){
-function subscribe($subscription, $signal, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
+if (!function_exists('handle')){
+function handle($subscription, $signal, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
 {
-    return prggmr::instance()->subscribe($subscription, $signal, $identifier, $priority, $chain, $exhaust);
+    return prggmr::instance()->handle($subscription, $signal, $identifier, $priority, $chain, $exhaust);
 }
 }
 
 /**
-* Attaches a new subscription to a signal queue with an exhaust rate of 1.
+* Attaches a new handler to a signal for one execution loop.
 *
-* @param  mixed  $subscription  Subscription closure that will trigger on
-*         fire or a Subscription object.
-*
-* @param  mixed  $signal  Signal the subscription will attach to, this
+* @param  mixed  $signal  Signal the handler will attach to, this
 *         can be a Signal object, the signal representation or an array
 *         for a chained signal.
 *
-* @param  string  $identifier  String identifier of this subscription.
+* @param  mixed  $subscription  Handle closure that will trigger.
 *
-* @param  integer $priority  Priority of the subscription
+* @param  string  $identifier  Identify of the handler.
 *
-* @param  mixed  $chain  Chain signal
+* @param  integer $priority  Priority of the handler.
+*
+* @param  mixed  $chain  Chain thrown from this handler.
+*
+* @param  integer  $exhaust  Rate at which this handler will exhaust.
 *
 * @throws  InvalidArgumentException  Thrown when an invalid callback is
 *          provided.
@@ -72,36 +72,34 @@ function subscribe($subscription, $signal, $identifier = null, $priority = null,
 * @return  void
 */
 if (!function_exists('once')){
-function once($subscription, $signal, $identifier = null, $priority = null, $chain = null)
+function handle_once($subscription, $signal, $identifier = null, $priority = null, $chain = null)
 {
-    return prggmr::instance()->subscribe($signal, $subscription, $identifier, $priority, $chain, 1);
+    return prggmr::instance()->handle($signal, $subscription, $identifier, $priority, $chain, 1);
 }
 }
 
 /**
-* Removes a subscription from the queue.
+* Removes a handler from a signal.
 *
-* @param  mixed  $signal  Signal the subscription is attached to, this
-*         can be a Signal object or the signal representation.
+* @param  mixed  $signal  Signal handler is attached to.
 *
-* @param  mixed  subscription  String identifier of the subscription or
-*         a Subscription object.
+* @param  mixed  $handler  Handler instance or id.
 *
 * @throws  InvalidArgumentException
 * @return  void
 */
 if (!function_exists('dequeue')){
-function dequeue($signal, $subscription)
+function dequeue($signal, $handler)
 {
-    return prggmr::instance()->dequeue($signal, $subscription);   
+    return prggmr::instance()->dequeue($signal, $handler);   
 }
 }
 
 /**
- * Creates a signal chain.
+ * Establishes a chain between two signals.
  *
- * @param  mixed  $singal  Signal which triggers the chain
- * @param  mixed  $chain  Signal to be chained
+ * @param  mixed  $singal  Signal which triggers the chain.
+ * @param  mixed  $chain  Signal to be chained.
  *
  * @return  void
  */

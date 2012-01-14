@@ -27,24 +27,22 @@ use \SplObjectStorage,
 
 /**
  * The queue object is a priority queue implemented using a heap, it was decided
- * aganist using PHP's implementation of the current PriorityQueue which is not
+ * against using PHP's implementation of the current PriorityQueue which is not
  * to say it isn't useful, only wasteful. This does come at a disadvantage of
  * sacrificing performance over functionality ... even at a small cost.
  *
- * The priority works as a min-heap, which also bring the point that unlike
+ * The priority works as a min-heap, which also brings the point that unlike
  * the implementation in the SPL priority is limited only to integers this is
- * done for performance reasons since sorting integers will be faster than
- * any other method.
+ * done for performance concerns.
  *
  * The heap is implemented using only the priority, the data is ignored.
  *
- * The object itself represents the queue of subscriptions for an event Signal,
- * which is passed as the constructors first parameter.
+ * The Queue maintains handlers attached to a signal.
  */
 class Queue extends \SplObjectStorage {
 
     /**
-     * The event signal for which this queue is attaching subscriptions.
+     * The signal which the queue manages.
      *
      * @var  object  Signal
      */
@@ -70,7 +68,7 @@ class Queue extends \SplObjectStorage {
     }
 
     /**
-     * Returns the event signal this queue represents.
+     * Returns the signal this queue manages.
      *
      * @param  boolean  $signal  True returns the signal rather than the object
      *

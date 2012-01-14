@@ -40,21 +40,21 @@ class Engine {
      *
      * @var  array
      */
-    protected $_indexStorage = null;
+    protected $_index_storage = null;
 
     /**
      * A non index storage of Queue
      *
      * @var  array
      */
-    protected $_storage = null;
+    protected $_non_index_storage = null;
 
     /**
      * Timer based events
      *
      * @var array
      */
-    protected $_timers = array();
+    protected $_timers = null;
 
     /**
      * Current engine state.
@@ -90,9 +90,7 @@ class Engine {
      */
     public function __construct(/* ... */)
     {
-        $this->_storage = array();
-        $this->_indexStorage = array();
-        $this->_state = Engine::RUNNING;
+        $this->flush();
     }
 
     /**
@@ -187,16 +185,16 @@ class Engine {
         $indexable = false;
         if (static::canIndex($signal)) {
             $index = ($obj) ? $signal->signal() : $signal;
-            if (isset($this->_indexStorage[$index])) {
-                return $this->_indexStorage[$index];
+            if (isset($this->_index_storage[$index])) {
+                return $this->_index_storage[$index];
             }
             $indexable = true;
         } else {
-            $length = count($this->_storage);
+            $length = count($this->_non_index_storage);
             for($i=0;$i!=$length;$i++) {
-                if (($obj && $this->_storage[$i]->getSignal() === $signal) ||
-                ($this->_storage[$i]->getSignal(true) === $signal)) {
-                    return $this->_storage[$i];
+                if (($obj && $this->_non_index_storage[$i]->getSignal() === $signal) ||
+                ($this->_non_index_storage[$i]->getSignal(true) === $signal)) {
+                    return $this->_non_index_storage[$i];
                 }
             // this is skipped
             // @codeCoverageIgnoreStart
@@ -214,9 +212,9 @@ class Engine {
 
         // new queue
         if ($indexable) {
-            $this->_indexStorage[$index] = $queue;
+            $this->_index_storage[$index] = $queue;
         } else {
-            $this->_storage[] = $queue;
+            $this->_non_index_storage[] = $queue;
         }
         return $queue;
     }
@@ -268,8 +266,8 @@ class Engine {
         $obj = (is_object($signal) && $signal instanceof Signal);
         if (static::canIndex($signal)) {
             $index = ($obj) ? $signal->getSignal() : $signal;
-            if (isset($this->_indexStorage[$index])) {
-                $_queue = $this->_indexStorage[$index];
+            if (isset($this->_index_storage[$index])) {
+                $_queue = $this->_index_storage[$index];
                 // rewind only
                 $_queue->rewind(false);
                 while($_queue->valid()){
@@ -277,24 +275,24 @@ class Engine {
                         $_queue->current(), 
                         $_queue->getInfo()
                     );
-                    $this->_indexStorage[$index]->next();
+                    $this->_index_storage[$index]->next();
                 }
             }
         }
-        $length = count($this->_storage);
+        $length = count($this->_non_index_storage);
         if (0 !== $length) {
             for($i=0;$i!=$length;$i++) {
                 if (false !==
-                    ($compare = $this->_storage[$i]->getSignal()->compare($signal))) {
+                    ($compare = $this->_non_index_storage[$i]->getSignal()->compare($signal))) {
                     // rewind only
-                    $this->_storage[$i]->rewind(false);
-                    while($this->_storage[$i]->valid()){
-                        $this->_storage[$i]->current()->params($compare);
+                    $this->_non_index_storage[$i]->rewind(false);
+                    while($this->_non_index_storage[$i]->valid()){
+                        $this->_non_index_storage[$i]->current()->params($compare);
                         $queue->enqueue(
-                            $this->_storage[$i]->current(), 
-                            $this->_storage[$i]->getInfo()
+                            $this->_non_index_storage[$i]->current(), 
+                            $this->_non_index_storage[$i]->getInfo()
                         );
-                        $this->_storage[$i]->next();
+                        $this->_non_index_storage[$i]->next();
                     }
                 }
             }
@@ -344,23 +342,26 @@ class Engine {
     }
 
     /**
-     * Flushes the engine.
+     * Flushes the engine and resets its state.
+     *
+     * @return void
      */
     public function flush(/* ... */)
     {
-        $this->_storage = array();
-        $this->_indexStorage = array();
-        $this->_timers = array();
+        $this->_non_index_storage = new \ArrayObject();
+        $this->_index_storage = new \ArrayObject();
+        $this->_timers = new \ArrayObject;
+        $this->_state = Engine::RUNNING;
     }
 
     /**
-     * Returns the count of subsciption queues in the engine.
+     * Returns the count of signals in the engine.
      *
      * @return  integer
      */
-    public function count()
+    public function countSignals()
     {
-        return count($this->_storage) + count($this->_indexStorage);
+        return count($this->_non_index_storage) + count($this->_index_storage);
     }
 
     /**
@@ -389,41 +390,40 @@ class Engine {
     }
 
     /**
-     * Calls an event at the specified intervals of time in microseconds.
+     * Calls a function at the specified intervals of time in microseconds.
      *
-     * @param  mixed  $subscription  Subscription closure that will trigger on
-     *         fire or a Subscription object.
+     * @param  mixed  $callable  Callable php variable.
      *
-     * @param  integer  $interval  Interval of time in microseconds to run
+     * @param  integer  $interval  Interval of time in microseconds to trigger.
      *
      * @param  mixed  $vars  Variables to pass the interval.
      *
-     * @param  string  $identifier  Identifier of this subscription.
+     * @param  string  $identifier  Identifier of the function.
      *
-     * @param  integer  $exhaust  Count to set subscription exhaustion.
+     * @param  integer  $exhaust  Rate at which this handler will exhaust.
      *
-     * @param  mixed  $start  Unix parseable date to start the interval.
+     * @param  mixed  $start  Unix parse able date to start the function interval.
      *
-     * @throws  InvalidArgumentException  Thrown when an invalid callback or
-     *          interval is provided.
+     * @throws  InvalidArgumentException  Thrown when an invalid callback,
+     *          interval or un-parse able date is provided.
      *
-     * @return  object  Subscription
+     * @return  object  Handler
      */
-    public function setInterval($subscription, $interval, $vars = null, $identifier = null, $exhaust = 0, $start = null)
+    public function setInterval($callable, $interval, $vars = null, $identifier = null, $exhaust = 0, $start = null)
     {
-        if (!$subscription instanceof Subscription) {
-            if (!is_callable($subscription)) {
+        if (!$callable instanceof Handler) {
+            if (!is_callable($callable)) {
                 throw new \InvalidArgumentException(
-                    'subscription callback is not a valid callback'
+                    'function callback is not valid'
                 );
             }
-            $subscription = new Subscription($subscription, $identifier, $exhaust);
+            $handler = new Handler($callable, $identifier, $exhaust);
         }
 
         if (!is_int($interval)) {
             throw new \InvalidArgumentException(
                 sprintf(
-                    'invalid time interval expected integer recieved %s',
+                    'invalid time interval expected integer received %s',
                     gettype($interval)
                 )
             );
@@ -443,7 +443,7 @@ class Engine {
                     }
                 } else {
                     throw new \InvalidArgumentException(sprintf(
-                        'Unparseable date given as starting time (%s)',
+                        'Un-parse able date given as starting time (%s)',
                         $start 
                     ));
                 }
@@ -452,76 +452,78 @@ class Engine {
         if (null !== $start) {
             // really this is getting old
             $engine = $this;
-            $this->setTimeout(function() use ($engine, $subscription, $interval, $vars, $exhaust){
-                $engine->setInterval($subscription, $interval, $vars, $identifier, $exhaust, null);
+            $this->setTimeout(function() use ($engine, $handler, $interval, $vars, $exhaust){
+                $engine->setInterval($handler, $interval, $vars, $identifier, $exhaust, null);
             }, ($timestamp - time()) * 1000, null);
             // notice that this does seconds only not milli seconds
         } else {
             $this->_timers[] = array($subscription, $interval, $this->getMilliseconds() + $interval, $vars);
         }
-        return $subscription;
+        return $handler;
     }
 
     /**
-     * Calls an event after the specified amount of time in microseconds.
+     * Calls a function after the specified amount of time in microseconds.
      *
-     * @param  mixed  $subscription  Subscription closure that will trigger on
-     *         fire or a Subscription object.
+     * @param  mixed  $callable  Callable php variable.
      *
-     * @param  integer  $interval  Interval of time in microseconds to run
+     * @param  integer  $interval  Interval of time in microseconds to trigger.
      *
-     * @param  mixed  $vars  Variables to pass the timeout.
+     * @param  mixed  $vars  Variables to pass the interval.
      *
-     * @param  string  $identifier  Identifier of this subscription.
+     * @param  string  $identifier  Identifier of the function.
      *
-     * @param  integer  $exhaust  Count to set subscription exhaustion.
+     * @param  integer  $exhaust  Rate at which this handler will exhaust.
      *
-     * @param  mixed  $start  Unix parseable date to start the interval.
+     * @param  mixed  $start  Unix parse able date to start the function interval.
      *
-     * @throws  InvalidArgumentException  Thrown when an invalid callback or
-     *          interval is provided.
+     * @throws  InvalidArgumentException  Thrown when an invalid callback,
+     *          interval or un-parse able date is provided.
      *
-     * @return  object  Subscription
+     * @return  object  Handler
      */
-    public function setTimeout($subscription, $interval, $vars = null, $identifier = null, $start = null)
+    public function setTimeout($callable, $interval, $vars = null, $identifier = null, $start = null)
     {
         // This simply uses set interval and sets an exhaustion rate of 1 ...
-        return $this->setInterval($subscription, $interval, $vars, $identifier, 1, $start);
+        return $this->setInterval($callable, $interval, $vars, $identifier, 1, $start);
     }
 
     /**
-     * Clears an interval set by setInterval.
+     * Clears a set interval.
      *
-     * @param  mixed  $subscription  Subscription object of the interval or
-     *         identifer.
+     * @param  mixed  $handler  Handler instance of identifier.
      *
-     * @return  void
+     * @return  boolean
      */
-    public function clearInterval($subscription)
+    public function clearInterval($handler)
     {
         $timers = count($this->_timers);
-        $obj = (is_object($subscription) && $subscription instanceof Subscription);
-        foreach($this->_timers as $_index => $_timer) {
-            if (($obj && $_timer[0] === $subscription) ||
-                ($_timer[0]->getIdentifier() === $subscription)) {
-                unset($this->_timers[$_index]);
-                return true;
+        if (is_object($handler) && $handle instanceof Handler) {
+            $index = array_search($handler, $this->_timers);
+            if (false === $index) return false;
+        } else {
+            foreach($this->_timers as $_index => $_timer) {
+                if ($_timer[0]->getIdentifier() === $handler) {
+                    $index = $_index;
+                    break;
+                }
             }
+            if (!isset($index)) return false;
         }
-        return false;
+        unset($this->_timers[$index]);
+        return true;
     }
 
     /**
-     * Clears a timeout set by setTimeout.
+     * Clears a set timeout.
      *
-     * @param  mixed  $subscription  Subscription object of the timeout or
-     *         identifer.
+     * @param  mixed  $handler  Handler instance of identifier.
      *
-     * @return  void
+     * @return  boolean
      */
-    public function clearTimeout($subscription)
+    public function clearTimeout($handler)
     {
-        $this->clearInterval($subscription);
+        $this->clearInterval($handler);
     }
 
     /**
@@ -554,8 +556,8 @@ class Engine {
      */
     public function loop($reset = false, $timeout = null)
     {
+        # Reset all timers
         if ($reset) {
-            $timers = count($this->_timers);
             foreach($this->_timers as $_index => $_timer) {
                 $this->_timers[$_index][2] = $this->getMilliseconds() + $this->_timers[$_index][1];
             }
@@ -570,11 +572,21 @@ class Engine {
                 $engine->shutdown();
             }, $timeout, null, Engine::LOOP_SHUTDOWN_TIMEOUT);
         }
-        while(true) {
-            usleep(100);
-            if ($this->getState() === Engine::SHUTDOWN||
-                $this->getState() ===  Engine::ERROR) {
-                break;
+        #
+        # The loop now runs based on the available handlers. If nothing
+        # is set to be handled the engine will shutdown, otherwise it will
+        # continue to run.
+        #
+        # When running sleep time is determained based on the available 
+        # handlers. If no signal handlers can handle and time handlers
+        # are available the loop will sleep until the next timer needs
+        # to trigger.
+        #
+        while($this->canHandle()) {
+            # Signal shutdown based on the state
+            $engine_state = $this->getState();
+            if (static::SHUTDOWN === $engine_state ||
+                static::ERROR === $engine_state) {
             }
             foreach($this->_timers as $_index => $_timer) {
                 if (!isset($this->_timers[$_index])) {
