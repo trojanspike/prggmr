@@ -54,7 +54,7 @@ class Signal implements SignalInterface {
     /**
      * Chain signal
      *
-     * @var  mixed
+     * @var  array
      */
     protected $_chain = null;
 
@@ -68,7 +68,7 @@ class Signal implements SignalInterface {
     /**
      * Constructs a new signal object.
      *
-     * @param  mixed  $signal  Event signal
+     * @param  mixed  $signal  Signal
      *
      * @return  \prggmr\Queue
      */
@@ -78,22 +78,21 @@ class Signal implements SignalInterface {
     }
 
     /**
-     * Compares the event signal given with itself.
+     * Compares the variable given with the signal.
      *
-     * @param  mixed  $signal  Signal to compare
+     * @param  mixed  $compare  Variable to compare
      *
-     * @return  mixed  False on failure. True if matches. String/Array
-     *          return results found via the match.
+     * @return  boolean
      */
-    public function compare($signal)
+    public function compare($compare)
     {
-        return ($this->_signal === $signal);
+        return ($this->_signal === $compare);
     }
 
     /**
      * Returns the signal.
      *
-     * @return  mixed  Event signal.
+     * @return  mixed  signal.
      */
     public function signal(/* ... */)
     {
@@ -111,9 +110,9 @@ class Signal implements SignalInterface {
     }
 
     /**
-     * Sets the signal chain
+     * Establishes a chain link between the given signal.
      *
-     * @param  mixed  $signal  Chain signal
+     * @param  mixed  $signal  Signal
      *
      * @return  void
      */
@@ -126,13 +125,13 @@ class Signal implements SignalInterface {
     }
 
     /**
-     * Removes a signal chain.
+     * Removes a chain link from the given signal.
      *
-     * @param  mixed  $signal  Chain signal
+     * @param  mixed  $signal  Signal
      *
      * @return  void
      */
-    public function delChain($signal)
+    public function removeChain($signal)
     {
         // does it exist?
         if (null === $this->_chain) return null;
@@ -148,7 +147,7 @@ class Signal implements SignalInterface {
     }
 
     /**
-     * Returns if this signal returns an indexable value.
+     * Returns if signal references an indexable value.
      *
      * @return  boolean
      */

@@ -1,5 +1,15 @@
 v0.3.0
 -----------------------------------
+- 
+- \prggmr\engine\Signals::HANDLE_EXCEPTION signal is signaled when an Exception
+  is encountered during Handle execution.
+- \prggmr\engine\Signals class added
+- Engine::_fire renamed to Engine::_execute
+- Signal::delChain renamed to Signal::removeChain
+- Handle::fire renamed to Handle::execute
+- Engine::loop renamed to Engine::event_loop
+- prggmr function renamed to event_loop
+- Queue::_prioritize now calls flush.
 - Modified doc block comments.
 - Subscriptions are now refereed to as handles.
 - Added prggmr\handle\Time class. 
@@ -8,6 +18,7 @@ v0.3.0
 - fire api function renamed to signal.
 - subscribe api function renamed to handle.
 
+v0.2.2 ( Jan 11th, 2012 )
 -----------------------------------
 - Fixed a bug causing a Fatal Error when the Event was removed from the arguments.
   within a Subscription, this now throws a RuntimeException when encountered.

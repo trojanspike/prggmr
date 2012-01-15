@@ -94,7 +94,7 @@ class Engine {
     }
 
     /**
-     * Attaches a new subscription to a signal queue.
+     * Attaches a new handle to a signal queue.
      *
      * @param  mixed  $subscription  Subscription closure that will trigger on
      *         fire or a Subscription object.
@@ -116,7 +116,7 @@ class Engine {
      *
      * @return  object  Subscription
      */
-    public function subscribe($subscription, $signal, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
+    public function handle($handle, $signal, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
     {
         /***
          * To note about this ... This will allow for "legacy subscribing"
@@ -126,58 +126,55 @@ class Engine {
          * This will be phased out or will it?
          */
         if ($signal instanceof \Closure) {
-            $tmp = $subscription;
-            $subscription = $signal;
+            $tmp = $handle;
+            $handle = $signal;
             $signal = $tmp;
             // pretend this didnt happen
             unset($tmp);
         }
-        if (!$subscription instanceof Subscription) {
-            if (!is_callable($subscription)) {
+        if (!$handle instanceof Handle) {
+            if (!is_callable($handle)) {
                 throw new \InvalidArgumentException(
-                    'subscription callback is not a valid callback'
+                    'callback is not a valid php callback'
                 );
             }
-            $subscription = new Subscription($subscription, $identifier, $exhaust);
+            $handle = new Handle($handle, $identifier, $exhaust);
         }
 
         $queue = $this->queue($signal);
-        $queue->enqueue($subscription, $priority);
+        $queue->enqueue($handle, $priority);
 
         if (null !== $chain) {
             $queue->getSignal()->setChain($chain);
         }
 
-        return $subscription;
+        return $handle;
     }
 
     /**
-    * Removes a subscription from the queue.
+    * Removes a handler from the queue.
     *
-    * @param  mixed  $signal  Signal the subscription is attached to, this
-    *         can be a Signal object or the signal representation.
+    * @param  mixed  $signal  Signal instance or signal.
     *
-    * @param  mixed  subscription  String identifier of the subscription or
-    *         a Subscription object.
+    * @param  mixed  $handle  Handle instance or identifier.
     *
     * @throws  InvalidArgumentException
     * @return  void
     */
-    public function dequeue($signal, $subscription)
+    public function dequeue($signal, $handle)
     {
         $queue = $this->queue($signal, false);
         if (false === $queue) return false;
-        return $queue->dequeue($subscription);
+        return $queue->dequeue($handle);
     }
 
     /**
-     * Locates a Queue object in storage, if not found one is created.
+     * Locates a Queue object in storage.
      *
-     * @param  mixed  $signal  Signal the queue represents.
+     * @param  mixed  $signal  Signal instance or signal.
      * @param  boolean  $generate  Generate the queue if not found.
      *
-     * @return  mixed  Queue object, false if generate is false and queue
-     *          is not found.
+     * @return  mixed  Boolean if generate is false. Queue instance.
      */
     public function queue($signal, $generate = true)
     {
@@ -196,10 +193,7 @@ class Engine {
                 ($this->_non_index_storage[$i]->getSignal(true) === $signal)) {
                     return $this->_non_index_storage[$i];
                 }
-            // this is skipped
-            // @codeCoverageIgnoreStart
             }
-            // @codeCoverageIgnoreEnd
         }
 
         if (!$generate) return false;
@@ -210,7 +204,6 @@ class Engine {
 
         $queue = new Queue($signal);
 
-        // new queue
         if ($indexable) {
             $this->_index_storage[$index] = $queue;
         } else {
@@ -220,12 +213,11 @@ class Engine {
     }
 
     /**
-     * Fires an event signal.
+     * Signals an event signal.
      *
-     * @param  mixed  $signal  The event signal, this can be the signal object
-     *         or the signal representation.
+     * @param  mixed  $signal  Signal instance or signal.
      *
-     * @param  array  $vars  Array of variables to pass the subscribers
+     * @param  array  $vars  Array of variables to pass handles.
      *
      * @param  object  $event  \prggmr\Event
      *
@@ -233,7 +225,7 @@ class Engine {
      *
      * @return  object  Event
      */
-    public function fire($signal, $vars = null, $event = null, $stacktrace = null)
+    public function signal($signal, $vars = null, $event = null, $stacktrace = null)
     {
         // Create a temporary queue
         $queue = new Queue(new Signal($signal));
@@ -249,7 +241,7 @@ class Engine {
         } elseif (!$event instanceof Event) {
             throw new \InvalidArgumentException(
                 sprintf(
-                    'fire expected instance of Event received "%s"'
+                    'signal expected instance of Event received "%s"'
                 , get_class($event))
             );
         }
@@ -323,7 +315,7 @@ class Engine {
         while($queue->valid()) {
             $event->setSignal($queue->getSignal());
             if ($event->isHalted()) break;
-            $this->_fire($queue->getSignal(), $queue->current(), $vars);
+            $this->_execute($queue->getSignal(), $queue->current(), $vars);
             if (!$event->isHalted() &&
                 null !== ($chain = $queue->getSignal()->getChain())) {
                 foreach ($chain as $_chain) {
@@ -554,7 +546,7 @@ class Engine {
      *
      * @return  void
      */
-    public function loop($reset = false, $timeout = null)
+    public function event_loop($reset = false, $timeout = null)
     {
         # Reset all timers
         if ($reset) {
@@ -609,7 +601,7 @@ class Engine {
                         array_unshift($vars, new Event());
                     }
                     if (!$vars[0]->isHalted()){
-                        $this->_fire(null, $_timer[0], $vars);
+                        $this->_execute(null, $_timer[0], $vars);
                     }
                     if (isset($this->_timers[$_index])) {
                         $this->_timers[$_index][3] = $vars;
@@ -626,40 +618,46 @@ class Engine {
     /**
      * Fires a subscription.
      *
-     * @param  object  $signal  Signal
+     * @param  object  $signal  Signal instance.
      *
-     * @param  object  $subscription  Subscription
+     * @param  object  $handle  Handle instance.
      *
-     * @param  array  $vars  Array of variables to pass the subscribers.
+     * @param  object  $event  Event instance.
+     *
+     * @param  array  $vars  Array of variables to pass handles.
      *
      * @return  object  Event
      */
-    protected function _fire($signal, $subscription, &$vars)
+    protected function _execute($signal, $handle, &$event, &$vars)
     {
-        // TODO Is an additional object validation required at this point?
-        $vars[0]->setSubscription($subscription);
-        $result = $subscription->fire($vars);
-        if (!$vars[0] instanceof \prggmr\Event) {
+        $event->setHandle($handle);
+        try {
+            $result = $handle->execute($vars);
+        } catch (\prggmr\HandleException $e) {
+            $event->setState(\prggmr\Event::STATE_ERROR);
+            $this->signal(engine\Signals::HANDLE_EXCEPTION, array(
+                $e, $handle, $event
+            ));
+        }
+        if (!$event instanceof \prggmr\Event) {
             throw new \RuntimeException(sprintf(
-                'Event object has been replaced in subscription %s',
+                'Event object has been replaced in handle %s',
                 $subscription->getIdentifier()
             ));
         }
         if (null !== $result) {
-            // anything returned is set to the "return" value
-            // note that it is greedy
-            $vars[0]->setData($result, 'return');
+            $event->setReturn($result);
             if (false === $result) {
-                $vars[0]->halt();
+                $event->halt();
             } 
         }
-        if ($vars[0]->getState() == Event::STATE_ERROR) {
+        if ($event->getState() == Event::STATE_ERROR) {
             if ($this->getState() === Engine::LOOP) {
-                if (false === $this->clearInterval($subscription)) {
-                    $this->dequeue($signal, $subscription);
+                if (false === $this->clearInterval($handle)) {
+                    $this->dequeue($signal, $handle);
                 }
             } else {
-                $this->dequeue($signal, $subscription);
+                $this->dequeue($signal, $handle);
             }
         }
         if ($subscription->isExhausted()) {

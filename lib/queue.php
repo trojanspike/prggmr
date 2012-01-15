@@ -70,7 +70,7 @@ class Queue extends \SplObjectStorage {
     /**
      * Returns the signal this queue manages.
      *
-     * @param  boolean  $signal  True returns the signal rather than the object
+     * @param  boolean  $signal  Return the signal rather than the object.
      *
      * @return  object
      */
@@ -84,46 +84,44 @@ class Queue extends \SplObjectStorage {
     }
 
     /**
-     * Inserts a subscription into the queue.
+     * Pushes a new handler into the queue.
      *
-     * @param  object  $subscription  \prggmr\Subscription
-     * @param  integer $priority  Priority of the subscription
+     * @param  object  $handle  \prggmr\Handle
+     * @param  integer $priority  Priority of the handle
      *
      * @return  void
      */
-    public function enqueue(Subscription $subscription, $priority = 100)
+    public function enqueue(Handle $handle, $priority = 100)
     {
         $this->dirty = true;
         if (null === $priority || !is_int($priority)) $priority = 100;
         $priority = $priority;
-        parent::attach($subscription, $priority);
+        parent::attach($handle, $priority);
     }
 
     /**
-    * Removes a subscription from the queue.
+    * Removes a handle from the queue.
     *
-    * @param  mixed  subscription  String identifier of the subscription or
-    *         a Subscription object.
+    * @param  mixed  $handle  Handle instance or identifier.
     *
     * @throws  InvalidArgumentException
     * @return  void
     */
-    public function dequeue($subscription)
+    public function dequeue($handle)
     {
-        if (is_string($subscription) && $this->locate($subscription)) {
+        if (is_string($handle) && $this->locate($handle)) {
             parent::detach($this->current());
             $this->dirty = true;
-        } elseif ($subscription instanceof Subscription) {
-            parent::detach($subscription);
+        } elseif ($handle instanceof Handle) {
+            parent::detach($handle);
             $this->dirty = true;
         }
     }
 
     /**
-    * Locates a subscription in the queue by the identifier
-    * setting as the current.
+    * Locates a handle.
     *
-    * @param  string  $identifier  String identifier of the subscription
+    * @param  string  $identifier  Handle identifier.
     *
     * @return  void
     */
@@ -140,8 +138,7 @@ class Queue extends \SplObjectStorage {
     }
 
     /**
-     * Rewinds the iterator to prepare for iteration of the queue, also
-     * triggers prioritizing.
+     * Rewinds the iterator to prepare for iteration.
      *
      * @param  boolean  $prioritize  Flag to prioritize the queue.
      *
@@ -174,7 +171,7 @@ class Queue extends \SplObjectStorage {
             $this->next();
         }
         ksort($tmp, SORT_NUMERIC);
-        $this->removeAll($this);
+        $this->flush($this);
         foreach ($tmp as $priority => $_array) {
             foreach ($_array as $_sub) {
                 parent::attach($_sub, $priority);
