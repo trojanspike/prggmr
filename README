@@ -1,10 +1,19 @@
-prggmr is a high-performance event processing engine, it uses Events, Signals,
-Subscriptions, Queues and an Engine, that have been engineered from the ground
-up to be incredibly lightweight, fast, efficent and robust with simplicity and
-ease of use in mind.
+prggmr is currently undergoing a major rewrite of it's internal workings and 
+using this branch for ANYTHING other development is a terrible idea!
 
-prggmr is much more than an event library, it is a robust standalone event
-processing engine written in PHP, allowing for application &amp; server level
-php programming as if it wasn't even php.
+With the rewrite I am hoping to simplify much of the library, cutdown on 
+much of the unneeded code and speed up performance.
 
-Read More @ http://www.prggmr.org
+Along with that I will be entroducing a more intutive and natural speaking
+API for working with signals.
+
+I do not have an estimated release date.
+
+The latest stable version is 0.2.2.
+
+To install
+
+wget http://distr.prggmr.org/prggmr/v0.2.2/prggmr.tar.gz
+tar -xzvf prggmr.tar.gz
+cd v0.2.2
+sudo php pinstall
