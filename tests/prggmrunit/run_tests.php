@@ -21,5 +21,5 @@
  */
 
 foreach (glob('*.php') as $_test) {
-    require_once $_test;
+	require_once $_test;
 }

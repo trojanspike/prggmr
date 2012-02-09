@@ -1,6 +1,12 @@
-v0.3.0
+v1.0.0-alpha
 -----------------------------------
-- 
+This release incorporates some major changes to how prggmr works. The biggest
+change brought into place is how the event loop works and how signals are handled.
+Previously prggmr would run it's event loop basically forever sleeping for a few
+mircoseconds and then waiting back up ... this created incredible CPU spinning
+typically a prggmr process would consume around 5-10% of the CPU at all times.
+
+
 - \prggmr\engine\Signals::HANDLE_EXCEPTION signal is signaled when an Exception
   is encountered during Handle execution.
 - \prggmr\engine\Signals class added
@@ -12,7 +18,7 @@ v0.3.0
 - Queue::_prioritize now calls flush.
 - Modified doc block comments.
 - Subscriptions are now refereed to as handles.
-- Added prggmr\handle\Time class. 
+- Added prggmr\handle\Time class.
 - Subscription class renamed to Handle.
 - once api function renamed to handle_once.
 - fire api function renamed to signal.
