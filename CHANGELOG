@@ -1,20 +1,11 @@
-v1.0.0-alpha
+v0.3.0-alpha
 -----------------------------------
-This release incorporates some major changes to how prggmr works. The biggest
-change brought into place is how the event loop works and how signals are handled.
-Previously prggmr would run it's event loop basically forever sleeping for a few
-mircoseconds and then waiting back up ... this created incredible CPU spinning
-typically a prggmr process would consume around 5-10% of the CPU at all times.
-
-
 - \prggmr\engine\Signals::HANDLE_EXCEPTION signal is signaled when an Exception
   is encountered during Handle execution.
 - \prggmr\engine\Signals class added
 - Engine::_fire renamed to Engine::_execute
 - Signal::delChain renamed to Signal::removeChain
 - Handle::fire renamed to Handle::execute
-- Engine::loop renamed to Engine::event_loop
-- prggmr function renamed to event_loop
 - Queue::_prioritize now calls flush.
 - Modified doc block comments.
 - Subscriptions are now refereed to as handles.
@@ -31,6 +22,7 @@ v0.2.2 ( Jan 11th, 2012 )
 - Added signals/ directory all files are included automatically.
 - Regex Signal was removed from signals.php file.
 - API functions now have the ability to be replaced before loading the API.
+- prggmrd bin file renamed to prggmr
 
 v0.2.1 ( Dec 19th, 2011 )
 -----------------------------------
