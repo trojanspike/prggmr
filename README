@@ -1,9 +1,19 @@
-This is an experimental branch of prggmr codenamed flare.
+prggmr is currently undergoing a major rewrite of it's internal workings and 
+using this branch for ANYTHING other development is a terrible idea!
 
-flare is intended to be a lighter signal library when the use of
-signals could be utilized but do not need the features provided
-by prggmr.
+With the rewrite I am hoping to simplify much of the library, cutdown on 
+much of the unneeded code and speed up performance.
 
-flare will introduce a more natural API and intergrate directly into
-prggmr if the need was to arise.
+Along with that I will be entroducing a more intutive and natural speaking
+API for working with signals.
 
+I do not have an estimated release date.
+
+The latest stable version is 0.2.2.
+
+To install
+
+wget http://distr.prggmr.org/prggmr/v0.2.2/prggmr.tar.gz
+tar -xzvf prggmr.tar.gz
+cd v0.2.2
+sudo php pinstall

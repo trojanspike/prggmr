@@ -100,13 +100,6 @@ class Event
     protected $_trace = array();
 
     /**
-     * Internal identifier
-     *
-     * @var  string 
-     */
-    private $_id = null;
-
-    /**
      * Constructs a new event object.
      */
     public function __construct()
