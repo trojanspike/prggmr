@@ -60,7 +60,8 @@ if (is_dir($dir.'/signals')) {
 }
 
 /**
- * The prggmr object is a singleton which allows for a global engine api.
+ * The prggmr object works as the global instance used for managing the
+ * global api and the prggmr signaled exceptions hook.
  */
 final class prggmr extends \prggmr\Engine {
 
@@ -101,7 +102,7 @@ final class prggmr extends \prggmr\Engine {
 // turning errors into exceptions and exceptions into events
 if (PRGGMR_EVENTED_EXCEPTIONS === true) {
     function evented_exceptions($exception) {
-        fire(prggmr::EXCEPTION, $exception);
+        signal(prggmr::EXCEPTION, $exception);
     }
     function evented_error_handler($errno, $errstr, $errfile, $errline) {
         throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);

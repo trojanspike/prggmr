@@ -25,75 +25,42 @@ namespace prggmr;
  * Event
  *
  * Represents an executed/executable prggmr event.
+ *
+ * As of v0.3.0 the event now extends the State object.
  */
-class Event
+
+class Event extends State
 {
     /**
-     * Event is actively being called.
+     * Data attached to this event
+     *
+     * @var  mixed
      */
-    const STATE_ACTIVE = 0x01;
+    private $_data = null;
 
     /**
-     * Event is inactive and awaiting for its bubble.
-     */
-    const STATE_INACTIVE = 0x02;
-
-    /**
-     * Event has encountered a failure
-     */
-    const STATE_ERROR = 0x03;
-
-    /**
-     * Current state event in which this event is in.
+     * Current state of the event.
      *
      * @var  int
      */
     protected $_state = Event::STATE_INACTIVE;
 
     /**
-     * Data attached to this event
+     * Halt the event after as soon as possible.
      *
-     * @var  mixed
-     */
-    protected $_data = null;
-
-    /**
-     * Halt the event que after this event finishes.
-     *
-     * @var  boolean  True to propagate | False otherwise
+     * @var  boolean
      */
     protected $_halt = false;
 
     /**
-     * Signal this event represents.
-     *
-     * @var  object  Signal
-     */
-    protected $_signal = null;
-
-    /**
-     * Subscription event is within.
-     *
-     * @var  object  Subscription
-     */
-    protected $_subscription = null;
-
-    /**
-     * Message associated with the current event state.
-     *
-     * @var  string
-     */
-    protected $_stateMessage = null;
-
-    /**
-     * Event which was chained from this event.
+     * Event chained to this event.
      *
      * @var  object  Event
      */
     protected $_chain = null;
     
     /**
-     * Backtrace of where this event was fired from, usefull for debugging.
+     * Backtrace of where this event was fired from only during debugging.
      *
      * @var  array  $trace
      */
@@ -104,47 +71,86 @@ class Event
      */
     public function __construct()
     {
-        // default event state
-        $this->setState(self::STATE_INACTIVE);
+        $this->setState(static::STATE_DECLARED);
     }
 
     /**
-     * Sets the event state.
+     * Get a variable in the event.
      *
-     * @param  integer  $state  State this event is currently in.
-     * @param  string  $msg  Message to associate with this event state.
+     * @param  mixed  $key  Variable name.
      *
-     * @return  boolean  True on success
+     * @return  mixed|null
      */
-    public function setState($state, $msg = null)
+    public function __get($key)
     {
-        $this->_state = (int) $state;
-        $this->_stateMessage = $msg;
+        if (isset($this->_data[$key])) {
+            return $this->_data[$key];
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Checks for a variable in the event.
+     *
+     * @param  mixed  $key  Variable name.
+     *
+     * @return  boolean
+     */
+    public function __isset($key)
+    {
+        return isset($this->_data[$key]);
+    }
+
+    /**
+     * Set a variable in the event.
+     *
+     * @param  string  $key  Name of variable
+     *
+     * @param  mixed  $value  Value to variable
+     *
+     * @return  boolean  True
+     */
+    public function __set($key, $value)
+    {
+        $this->_data[$key] = $value;
         return true;
     }
 
     /**
-     * Returns the current event state message.
+     * Add a new backtrace.
      *
-     * @return  mixed  Current event state message, NULL otherwise.
+     * @param  array  $trace  PHP trace array.
+     *
+     * @return  void
      */
-    public function getStateMessage(/* ... */)
+    public function addTrace($trace)
     {
-        return $this->_stateMessage;
+        $this->_trace[] = $trace;
     }
 
     /**
-     * Returns the current event state.
+     * Get event chain.
      *
-     * @return  integer  Current state of this event.
+     * @return  mixed  array, null if no chain exists.
      */
-    public function getState(/* ... */)
+    public function getChain(/* ... */)
     {
-        return $this->_state;
+        return $this->_chain;
     }
 
     /**
-     * Halts or prevents an event stack including chains.
+     * Returns backtrace information.
+     *
+     * @return  array
+     */
+    public function getTrace(/* ... */)
+    {
+        return $this->_trace;
+    }
+
+    /**
+     * Halts the remaining event stack.
      *
      * @return  void
      */
@@ -154,109 +160,7 @@ class Event
     }
 
     /**
-     * Returns the flag to halt the event stack once this
-     * event completes execution.
-     *
-     * @return  boolean  True to halt | False otherwise
-     */
-    public function isHalted(/* ... */)
-    {
-        return $this->_halt;
-    }
-
-    /**
-     * Returns the current data value of this event.
-     *
-     * This method should also be used to detect if this event currently
-     * has data previously attatched by a subscriber in the same stack to
-     * avoid overwritting results.
-     *
-     * @param  mixed  $key  Index key of specific data to return.
-     *
-     * @return  mixed
-     */
-    public function getData($key = null)
-    {
-        if (null !== $key) {
-            if (isset($this->_data[$key])) {
-                return $this->_data[$key];
-            } else {
-                return null;
-            }
-        } else {
-            return $this->_data;
-        }
-    }
-
-    /**
-     * Sets data in the event.
-     *
-     * @param  mixed  $data  Value to set as the result of this event.
-     *
-     * @return  boolean  True
-     */
-    public function setData($value, $key = false)
-    {
-
-        if (!is_array($this->_data)) {
-            (array) $this->_data[$key] = $value;
-        } else {
-            if (false === $key) {
-                $this->_data[] = $value;
-            } else {
-                $this->_data[$key] = $value;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Sets the signal this event represents.
-     *
-     * @param  object  $signal  Signal
-     *
-     * @return  void
-     */
-    public function setSignal($signal)
-    {
-        $this->_signal = $signal;
-    }
-
-    /**
-     * Returns the event subscription string this event will bubble upon.
-     *
-     * @return  string
-     */
-    public function getSignal(/* ... */)
-    {
-        return $this->_signal;
-    }
-
-    /**
-     * Sets the subscription this event is within.
-     *
-     * @param  object  $subscription  Subscription
-     *
-     * @return  void
-     */
-    public function setSubscription($subscription)
-    {
-        $this->_subscription = $subscription;
-    }
-
-    /**
-     * Returns the event subscription string this event will bubble upon.
-     *
-     * @return  string
-     */
-    public function getSubscription(/* ... */)
-    {
-        return $this->_subscription;
-    }
-
-    /**
-     * Sets the chained event.
+     * Set an event chain.
      *
      * @param  object  $chain  Event
      */
@@ -269,34 +173,12 @@ class Event
     }
 
     /**
-     * Returns the chained events array.
+     * Returns the halt flag.
      *
-     * @return  mixed  array, null if no chain exists.
+     * @return  boolean
      */
-    public function getChain(/* ... */)
+    public function willHalt(/* ... */)
     {
-        return $this->_chain;
-    }
-    
-    /**
-     * Adds a new location from where this event fired from.
-     *
-     * @param  array  $trace  PHP trace array.
-     *
-     * @return  void
-     */
-    public function addTrace($trace)
-    {
-        $this->_trace[] = $trace;
-    }
-    
-    /**
-     * Returns the backtrace information for debugging purposes.
-     *
-     * @return  array
-     */
-    public function getTrace(/* ... */)
-    {
-        return $this->_trace;
+        return $this->_halt;
     }
 }

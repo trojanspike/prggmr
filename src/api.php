@@ -240,10 +240,10 @@ function clearTimeout($handle)
  *
  * @return  void
  */
-if (!function_exists('event_loop')){
-function prggmr($reset = false, $timeout = null)
+if (!function_exists('prggmr_loop')){
+function prggmr_loop($reset = false, $timeout = null)
 {
-    return prggmr::instance()->event_loop($reset, $timeout);
+    return prggmr::instance()->loop($reset, $timeout);
 }
 }
 
@@ -253,7 +253,7 @@ function prggmr($reset = false, $timeout = null)
  * @return  void
  */
 if (!function_exists('shutdown')){
-function shutdown()
+function prggmr_shutdown()
 {
     return prggmr::instance()->shutdown();
 }

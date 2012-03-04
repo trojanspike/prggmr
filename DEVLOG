@@ -1,0 +1,11 @@
+[ 03042012 - 0810 ]
+
+- Added the State class that will now be used for any object which will have a
+  state, this is done to standardize states throughout prggmr and will be used
+  for the Engine and Event objects.
+
+[ 03032012 - 1930 ]
+
+- Added the DEVLOG file, this file is to log out the thoughts and ideas which
+  have gone into the development of prggmr, mainly for my own purposes when I
+  come back and refactor old code.

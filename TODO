@@ -1,4 +1,3 @@
-* What should be set on an invalid or negative exhaust rate for subscriptions?
 * When handling the firing of a subscription within the engine and an error
   state while not in daemon mode is encountered should it only remove the
   subscriber?

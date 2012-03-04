@@ -1,5 +1,15 @@
-v0.3.0-alpha
------------------------------------
+[ 0.3.0 0000 ]
+- Event now extends State class
+- Engine now extends State class
+- Added State class
+- Improved LOG formatting
+- Removed Event::state_message property
+- Removed Event::getStateMessage, Event::setStateMessage
+- Added Engine properties active_signal, active_handle
+- Events no longer carry a reference to the signal or handle in 
+  execution.
+- Added Event states (DECLARED, RUNNING, EXITED, ERROR, RECYCLED)
+- Removed Event states (ACTIVE, ERRROR, INACTIVE)
 - \prggmr\engine\Signals::HANDLE_EXCEPTION signal is signaled when an Exception
   is encountered during Handle execution.
 - \prggmr\engine\Signals class added

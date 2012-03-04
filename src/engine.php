@@ -33,7 +33,7 @@ use \Closure,
  * signals (objects, floats, booleans, arrays and non-indexable Signal objects)
  * are placed in the non-indexed storage and require loop through lookups.
  *
- * As of v0.3.0 the loop is now run in respect to the currently available events,
+ * As of v0.3.0 the loop is now run in respect to the currently available handles,
  * this prevents the engine from running contionusly forever when there isn't anything
  * that it needs to do.
  *
@@ -41,8 +41,10 @@ use \Closure,
  * the default routines are based on time which calculates the time an event is
  * to run and sleeps the engine until, the other processes the available signals
  * and shutdowns the engine when no more are available for running.
+ *
+ * The Engine now extends the State object.
  */
-class Engine {
+class Engine extends State {
 
     /**
      * An indexed storage of Queues.
@@ -57,6 +59,13 @@ class Engine {
      * @var  array
      */
     protected $_non_index_storage = null;
+
+    /**
+     * Timer Queue
+     *
+     * @var  object
+     */
+    protected $_timers = null;
 
     /**
      * Current engine state.
@@ -292,7 +301,7 @@ class Engine {
     /**
      * Attaches a handle to a signal.
      *
-     * @param  mixed  $handle  Function to execute on handle.
+     * @param  mixed  $callable  Function to execute on handle.
      *
      * @param  mixed  $signal  Signal which triggers the handle.
      *
@@ -309,29 +318,15 @@ class Engine {
      *
      * @return  object  Subscription
      */
-    public function handle($handle, $signal, $identifier = null, $priority = null, $chain = null, $exhaust = 1)
+    public function handle($callable, $signal, $identifier = null, $priority = null, $chain = null, $exhaust = 1)
     {
-        /***
-         * To note about this ... This will allow for "legacy subscribing"
-         * putting the signal first, but after alot of use the function
-         * should be first.
-         *
-         * This will be phased out or will it?
-         */
-        if ($signal instanceof \Closure) {
-            $tmp = $handle;
-            $handle = $signal;
-            $signal = $tmp;
-            // pretend this didnt happen
-            unset($tmp);
-        }
-        if (!$handle instanceof Handle) {
-            if (!is_callable($handle)) {
+        if (!$callable instanceof Handle) {
+            if (!is_callable($callable)) {
                 throw new \InvalidArgumentException(
-                    'callback is not a valid php callback'
+                    'callable is not a valid php callback'
                 );
             }
-            $handle = new Handle($handle, $identifier, $exhaust);
+            $handle = new Handle($callable, $identifier, $exhaust);
         }
 
         $queue = $this->queue($signal);
@@ -389,7 +384,7 @@ class Engine {
     }
 
     /**
-     * Signals an event signal.
+     * Signals an event.
      *
      * @param  mixed  $signal  Signal instance or signal.
      *
@@ -495,7 +490,7 @@ class Engine {
             if (!$event->isHalted() &&
                 null !== ($chain = $queue->getSignal()->getChain())) {
                 foreach ($chain as $_chain) {
-                    $link = $this->fire($_chain, $vars);
+                    $link = $this->signal($_chain, $vars, $event, $stacktrace);
                     if (false !== $chain) {
                         $event->setChain($link);
                     }
@@ -632,7 +627,7 @@ class Engine {
                 $e, $handle, $event
             ));
         }
-        if (!$event instanceof \prggmr\Event || $event->isSafe()) {
+        if (!$event instanceof \prggmr\Event) {
             throw new \RuntimeException(sprintf(
                 'Event object has been replaced in handle %s',
                 $subscription->getIdentifier()
@@ -653,10 +648,10 @@ class Engine {
                 $this->dequeue($signal, $handle);
             }
         }
-        if ($subscription->isExhausted()) {
+        if ($handle->isExhausted()) {
             $this->dequeue($signal, $subscription);
         }
-        return $vars[0];
+        return $event;
     }
 
     /**
