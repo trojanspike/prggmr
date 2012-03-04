@@ -68,26 +68,6 @@ class Engine extends State {
     protected $_timers = null;
 
     /**
-     * Current engine state.
-     *
-     * @var  integer
-     */
-    protected $_state = null;
-
-    /**
-     * Engine states.
-     */
-    const RUNNING  = 0x64;
-    const LOOP     = 0x65;
-    const SHUTDOWN = 0x66;
-    const ERROR    = 0x67;
-
-    /**
-     * Loop shutdown timeout.
-     */
-    const LOOP_SHUTDOWN_TIMEOUT = 'loop_shutdown';
-
-    /**
      * Engine stacktrace.
      *
      * @var  array
@@ -101,6 +81,7 @@ class Engine extends State {
      */
     public function __construct(/* ... */)
     {
+        parent::_construct();
         $this->flush();
     }
 
@@ -216,16 +197,6 @@ class Engine extends State {
     public function getMilliseconds()
     {
         return round(microtime(true) * 1000);
-    }
-
-    /**
-     * Returns the current engine state.
-     *
-     * @return  integer
-     */
-    public function getState()
-    {
-        return $this->_state;
     }
 
     /**
@@ -661,6 +632,6 @@ class Engine extends State {
      */
     public function shutdown()
     {
-        $this->_state = Engine::SHUTDOWN;
+        $this->setState(State::HALTED);
     }
 }

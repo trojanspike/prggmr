@@ -33,4 +33,9 @@ class Signals {
      * @param  object  $event  Event instance
      */
     const HANDLE_EXCEPTION = 0xE001;
+    
+    /**
+     * Engine shutdown initiated.
+     */
+    const SHUTDOWN = 0xE002;
 }

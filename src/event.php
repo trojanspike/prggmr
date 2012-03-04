@@ -39,13 +39,6 @@ class Event extends State
     private $_data = null;
 
     /**
-     * Current state of the event.
-     *
-     * @var  int
-     */
-    protected $_state = Event::STATE_INACTIVE;
-
-    /**
      * Halt the event after as soon as possible.
      *
      * @var  boolean
