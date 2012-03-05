@@ -147,12 +147,17 @@ class Signal implements SignalInterface {
     }
 
     /**
-     * Returns if signal references an indexable value.
+     * Returns if the provided param is indexable in a php array.
+     *
+     * @param  mixed  $param
      *
      * @return  boolean
      */
-    public function canIndex()
+    public function canIndex($param)
     {
-        return Engine::canIndex($this->_signal);
+        if (is_object($param) && $param instanceof Signal) {
+            return $param->canIndex();
+        }
+        return is_int($param) || is_string($param);
     }
 }

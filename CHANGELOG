@@ -1,4 +1,6 @@
 [ 0.3.0 0000 ]
+- Engine::canIndex has been moved into the Signal::canIndex.
+- Removed Engine::canIndex method.
 - Added Handle::__invoke magic method, this throws a BadMethodCallException
   to disallow directly invoking a handle and requiring use of execute.
 - Added Event::__unset, __get, __set and __isset magic methods.

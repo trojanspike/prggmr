@@ -85,22 +85,6 @@ class Engine extends State {
         $this->flush();
     }
 
-
-    /**
-     * Returns if the provided param is indexable in a php array.
-     *
-     * @param  mixed  $param
-     *
-     * @return  boolean
-     */
-    public static function canIndex($param)
-    {
-        if (is_object($param) && $param instanceof Signal) {
-            return $param->canIndex();
-        }
-        return is_int($param) || is_string($param);
-    }
-
     /**
      * Clears a set interval.
      *

@@ -6,6 +6,9 @@
   a BadMethodCallException, if it wasn't for PHP not passing by reference this
   would not be the case.
 
+- The coupling that existed in the Signal has been cleaned up ... not even sure
+  why I did it this way.
+
 [ 03042012 - 0810 ]
 
 - Added the State class that will now be used for any object which will have a
