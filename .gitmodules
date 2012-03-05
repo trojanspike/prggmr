@@ -1,3 +1,0 @@
-[submodule "lib/signals"]
-	path = lib/signals
-	url = git://github.com/nwhitingx/signals.git
