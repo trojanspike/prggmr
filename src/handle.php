@@ -37,8 +37,10 @@ use \Closure,
  * by default, this is done under the theory that any handle which
  * is registered is done so to run at least once, otherwise it wouldn't
  * exist.
+ *
+ * Handles are now also a stateful object extending the State class.
  */
-class Handle {
+class Handle extends State {
 
     /**
      * The function that will execute when this handle is

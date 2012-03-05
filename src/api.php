@@ -21,9 +21,9 @@
  */
 
 /**
-* Attaches a new handle to a signal.
+* Create a new sig handler.
 *
-* @param  mixed  $signal  Signal the handle will attach to, this
+* @param  mixed  $signal  Signal to handle, this
 *         can be a Signal object, the signal representation or an array
 *         for a chained signal.
 *

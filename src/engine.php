@@ -365,7 +365,7 @@ class Engine extends State {
      *
      * @param  array  $stacktrace  Stacktrace array
      *
-     * @return  object  Event
+     * @return  object  EventGG
      */
     public function signal($signal, $vars = null, $event = null, $stacktrace = null)
     {
