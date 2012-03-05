@@ -9,6 +9,12 @@
 - The coupling that existed in the Signal has been cleaned up ... not even sure
   why I did it this way.
 
+- I am attempting to trim down the all prggmr objects as much as possible, which 
+  should provide some performance gains and really simplify the objects. I'm 
+  still wondering how I can trim down the Engine and find a way to move the Time
+  based signals into their own little world without having to have the Engine
+  do anything special with them.
+
 [ 03042012 - 0810 ]
 
 - Added the State class that will now be used for any object which will have a
