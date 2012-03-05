@@ -1,3 +1,11 @@
+[ 03052012 - 0845 ]
+
+- I have made handles a stateful object since the engine does handle them 
+  internally it may be usefull at some point to know exactly what is happening
+  with the object, I also added the __invoke magic method to Handle which throws
+  a BadMethodCallException, if it wasn't for PHP not passing by reference this
+  would not be the case.
+
 [ 03042012 - 0810 ]
 
 - Added the State class that will now be used for any object which will have a

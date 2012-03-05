@@ -1,4 +1,12 @@
 [ 0.3.0 0000 ]
+- Added Handle::__invoke magic method, this throws a BadMethodCallException
+  to disallow directly invoking a handle and requiring use of execute.
+- Added Event::__unset, __get, __set and __isset magic methods.
+- Removed Event::getData, Event::setData methods.
+- Event now uses overloading for setting and getting any data.
+- Removed Event::halt, Event::isHalted methods and Event::_halt property
+- ArrayContainsSignal can now be set to strict mode on construction
+- Removed ArrayContainsSignalStrict class
 - Event now extends State class
 - Engine now extends State class
 - Added State class

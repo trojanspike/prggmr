@@ -127,6 +127,21 @@ class Handle extends State {
     }
 
     /**
+     * Invoke the handle, since PHP disallows passing by reference this throws
+     * a BadMethodCallException.
+     *
+     * @throws  BadMethodCallException
+     *
+     * @return  boolean|void
+     */
+    public function __invoke() 
+    {
+        throw new \BadMethodCallException(
+            'Handles cannot be invoked, use of execute method required.'
+        );
+    }
+
+    /**
      * Executes this handles function.
      * Allowing for the first parameter as an array of parameters or
      * by passing them directly.

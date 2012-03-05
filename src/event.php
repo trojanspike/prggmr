@@ -39,13 +39,6 @@ class Event extends State
     private $_data = null;
 
     /**
-     * Halt the event after as soon as possible.
-     *
-     * @var  boolean
-     */
-    protected $_halt = false;
-
-    /**
      * Event chained to this event.
      *
      * @var  object  Event
@@ -111,6 +104,18 @@ class Event extends State
     }
 
     /**
+     * Deletes a variable in the event.
+     *
+     * @param  mixed  $key  Variable name.
+     *
+     * @return  boolean
+     */
+    public function __unset($key)
+    {
+        return unset($this->_data[$key]);
+    }
+
+    /**
      * Add a new backtrace.
      *
      * @param  array  $trace  PHP trace array.
@@ -143,16 +148,6 @@ class Event extends State
     }
 
     /**
-     * Halts the remaining event stack.
-     *
-     * @return  void
-     */
-    public function halt(/* ... */)
-    {
-        $this->_halt = true;
-    }
-
-    /**
      * Set an event chain.
      *
      * @param  object  $chain  Event
@@ -163,15 +158,5 @@ class Event extends State
             $this->_chain = array();
         }
         $this->_chain[] = $chain;
-    }
-
-    /**
-     * Returns the halt flag.
-     *
-     * @return  boolean
-     */
-    public function willHalt(/* ... */)
-    {
-        return $this->_halt;
     }
 }
