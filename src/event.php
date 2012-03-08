@@ -29,8 +29,10 @@ namespace prggmr;
  * As of v0.3.0 the event now extends the State object.
  */
 
-class Event extends State
-{
+class Event {
+
+    use State;
+
     /**
      * Data attached to this event
      *
@@ -112,7 +114,7 @@ class Event extends State
      */
     public function __unset($key)
     {
-        return unset($this->_data[$key]);
+        unset($this->_data[$key]);
     }
 
     /**

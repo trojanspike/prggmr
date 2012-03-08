@@ -1,3 +1,28 @@
+[ 03082012 - 1300 ]
+
+- With the release of 5.4 this month I'm making PHP 5.4 a requirement, 
+  after putting alot of thought into it and having so many places in the 
+  code where I need to hack around a Closure not having a bind there 
+  is no reason not to ... well other than noone will support it until 2015 
+  but thats not my problem is it.
+
+- The utils ... the odd ball ... I really wasn't sure what to name this file,
+  but I needed somewhere to place misc functions that didn't fit anywhere else.
+
+- I believe I have finally come to a conclusion on the Queue implementation
+  although I am still not pleased with it. The Queue is now a FixedArray
+  object which, if PHP does as they say it does should be much faster than
+  the old Queue.
+
+  Along with that I need to ensure I convert any normal PHP array into a 
+  FixedArray, at least the arrays used within the Engine.
+
+[ 03062012 - 1350 ]
+
+- It has occured to me that the queues do not need a reference to the signal
+  their handlers will be dispatched upon since this is already handled by the 
+  engine, removing this reference decouples the queue.
+
 [ 03052012 - 0845 ]
 
 - I have made handles a stateful object since the engine does handle them 

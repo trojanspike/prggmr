@@ -40,7 +40,9 @@ use \Closure,
  *
  * Handles are now also a stateful object extending the State class.
  */
-class Handle extends State {
+class Handle {
+
+    use State;
 
     /**
      * The function that will execute when this handle is
@@ -170,7 +172,7 @@ class Handle extends State {
         }
         
         if (null !== $this->_params) {
-            $passparams = array_merge(&$params, &$this->_params);
+            $passparams = array_merge($params, $this->_params);
         } else {
             $passparams = $params;
         }

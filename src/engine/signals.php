@@ -22,7 +22,7 @@ namespace prggmr\engine;
  */
 
 /**
- * prggmr Engine Signals
+ * Engine Signals.
  */
 class Signals {
     /**
@@ -38,4 +38,14 @@ class Signals {
      * Engine shutdown initiated.
      */
     const SHUTDOWN = 0xE002;
+
+    /**
+     * Global exception signal.
+     */
+    const GLOBAL_EXCEPTION = 0xE003;
+
+    /**
+     * Global error signal.
+     */
+    const GLOBAL_ERROR = 0xE003;
 }

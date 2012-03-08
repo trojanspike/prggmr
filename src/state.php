@@ -53,43 +53,44 @@ namespace prggmr;
  * STATE_HALTED
  * The object has declared itself as halted to interrupt any further execution.
  */
-class State
+
+/**
+ * Object has been declared.
+ */
+define('STATE_DECLARED', 0x00001);
+
+/**
+ * Object is currently running.
+ */
+define('STATE_RUNNING', 0x00002);
+
+/**
+ * Object has finished execution.
+ */
+define('STATE_EXITED', 0x00003);
+
+/**
+ * Object has become corrupted.
+ */
+define('STATE_CORRUPTED', 0x00004);
+
+/**
+ * Object has been recycled.
+ */
+define('STATE_RECYCLED', 0x00005);
+
+/**
+ * Object has been recovered from a runtime error.
+ */
+define('STATE_RECOVERED', 0x00006);
+
+/**
+ * Object requires halting further execution.
+ */
+define('STATE_HALTED', 0x00007);
+
+trait State
 {
-    /**
-     * Object has been declared.
-     */
-    const STATE_DECLARED = 0x01;
-
-    /**
-     * Object is currently running.
-     */
-    const STATE_RUNNING = 0x02;
-
-    /**
-     * Object has finished execution.
-     */
-    const STATE_EXITED = 0x03;
-
-    /**
-     * Object has become corrupted.
-     */
-    const STATE_CORRUPTED = 0x04;
-
-    /**
-     * Object has been recycled.
-     */
-    const STATE_RECYCLED = 0x05;
-
-    /**
-     * Object has been recovered from a runtime error.
-     */
-    const STATE_RECOVERED = 0x06;
-
-    /**
-     * Object requires halting further execution.
-     */
-    const STATE_HALTED = 0x07;
-
     /**
      * Current state of the object.
      *

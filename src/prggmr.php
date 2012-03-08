@@ -21,7 +21,7 @@
  */
 
 // library version
-define('PRGGMR_VERSION', '0.3.0beta');
+define('PRGGMR_VERSION', '0.3.0B');
 
 // The creator
 define('PRGGMR_MASTERMIND', 'Nickolas Whiting');
@@ -29,12 +29,15 @@ define('PRGGMR_MASTERMIND', 'Nickolas Whiting');
 $dir = dirname(realpath(__FILE__));
 
 // start'er up
+require $dir.'/utils.php';
+require $dir.'/engine/signals.php';
+require $dir.'/state.php';
 require $dir.'/engine.php';
 require $dir.'/signal.php';
 require $dir.'/event.php';
-require $dir.'/api.php';
 require $dir.'/queue.php';
-require $dir.'/subscription.php';
+require $dir.'/handle.php';
+require $dir.'/api.php';
 
 // debugging mode disabled by default
 if (!defined('PRGGMR_DEBUG')) {
@@ -44,19 +47,6 @@ if (!defined('PRGGMR_DEBUG')) {
 // evented exceptions disabled by default
 if (!defined('PRGGMR_EVENTED_EXCEPTIONS')) {
     define('PRGGMR_EVENTED_EXCEPTIONS', false);
-}
-
-// include all signals if avaliable
-if (is_dir($dir.'/signals')) {
-    foreach (glob($dir.'/signals/*.php') as $_file) {
-        $_name = explode('/', $_file);
-        $_class = array_map('ucfirst', explode('_',
-            str_replace('.php', '', end($_name))
-        ));
-        if (!class_exists(implode('', $_class))) {
-            include_once $_file;
-        }
-    }
 }
 
 /**
@@ -98,15 +88,11 @@ final class prggmr extends \prggmr\Engine {
     }
 }
 
-// turns on prggmr error handling
-// turning errors into exceptions and exceptions into events
+/**
+ * Enables prggmr to transform any errors and exceptions into a 
+ * catchable signal.
+ */
 if (PRGGMR_EVENTED_EXCEPTIONS === true) {
-    function evented_exceptions($exception) {
-        signal(prggmr::EXCEPTION, $exception);
-    }
-    function evented_error_handler($errno, $errstr, $errfile, $errline) {
-        throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
-    }
-    set_error_handler("evented_error_handler");
-    set_exception_handler("evented_exceptions");
+    set_error_handler("signalExceptions");
+    set_exception_handler("signalErrors");
 }

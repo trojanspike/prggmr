@@ -21,120 +21,131 @@ namespace prggmr;
  * @copyright  Copyright (c), 2010-12 Nickolas Whiting
  */
 
-use \SplObjectStorage,
+use \SplFixedArray,
     \InvalidArgumentException;
 
+/**
+ * Defines the maximum number of items allowed within a Queue.
+ *
+ */
+if (!defined('QUEUE_MAX_SIZE')) {
+    define('QUEUE_MAX_SIZE', 15);
+}
 
 /**
- * The queue object is a priority queue implemented using a heap, it was decided
- * against using PHP's implementation of the current PriorityQueue which is not
- * to say it isn't useful, only wasteful. This does come at a disadvantage of
- * sacrificing performance over functionality ... even at a small cost.
+ * As of v0.3.0 Queues no longer maintain a reference to a signal and rather
+ * carry only a "data" property which the engine will pass to a signal for
+ * handling determination.
  *
- * The priority works as a min-heap, which also brings the point that unlike
- * the implementation in the SPL priority is limited only to integers this is
- * done for performance concerns.
+ * The Queue is still a representation of a PriorityQueue and will remain so 
+ * until the issues with PHP's current implementation are addressed.
  *
- * The heap is implemented using only the priority, the data is ignored.
+ * To offset some of the performance Queue are now a SplFixedArray.
  *
- * The Queue maintains handlers attached to a signal.
+ * The queue is still a MinHeap.
  */
-class Queue extends \SplObjectStorage {
+class Queue extends \SplFixedArray {
 
     /**
-     * The signal which the queue manages.
+     * The data which the queue represents.
      *
-     * @var  object  Signal
+     * @var  mixed
      */
-    protected $_signal = null;
+    protected $_data = null;
 
     /**
-     * Flag for the prioritizing the queue.
-     *
+     * Flag for queue prioritizing.
+     * 
      * @var  boolean
      */
-    public $dirty = false;
+    protected $_dirty = false;
 
     /**
      * Constructs a new queue object.
      *
-     * @param  object  $signal  Signal
+     * @param  mixed  $data  Data the queue represents
      *
-     * @return  \prggmr\Queue
+     * @return  void
      */
-    public function __construct(Signal $signal)
+    public function __construct($data)
     {
-        $this->_signal = $signal;
+        $this->_data = $data;
     }
 
     /**
-     * Returns the signal this queue manages.
-     *
-     * @param  boolean  $signal  Return the signal rather than the object.
+     * Returns the data the queue represents.
      *
      * @return  object
      */
-    public function getSignal($signal = false)
+    public function getRepresentation(/* ... */)
     {
-        if (!$signal) {
-            return $this->_signal;
-        } else {
-            return $this->_signal->signal();
-        }
+        return $this->_data;
     }
 
     /**
      * Pushes a new handler into the queue.
      *
-     * @param  object  $handle  \prggmr\Handle
-     * @param  integer $priority  Priority of the handle
+     * @param  callable  $callable  Callable variable
+     * @param  integer $priority  Priority of the callable
+     *
+     * @throws  OverflowException  If max size exceeded
      *
      * @return  void
      */
-    public function enqueue(Handle $handle, $priority = 100)
+    public function enqueue($callable, $priority = 100)
     {
-        $this->dirty = true;
+        $size = $this->getSize();
+        if ($size > QUEUE_MAX_SIZE - 1) {
+            throw new \OverflowException(
+                'Queue max size reached'
+            );
+        }
+        $this->setSize($size + 1);
+        $this->_dirty = true;
         if (null === $priority || !is_int($priority)) $priority = 100;
-        $priority = $priority;
-        parent::attach($handle, $priority);
+        $node = new \SplFixedArray(2);
+        $node->offsetSet(0, $callable);
+        $node->offsetSet(1, $priority);
+        parent::offsetSet($size, $node);
     }
 
     /**
     * Removes a handle from the queue.
     *
-    * @param  mixed  $handle  Handle instance or identifier.
+    * @param  mixed  $callable  Reference to callable
     *
     * @throws  InvalidArgumentException
-    * @return  void
+    * @return  boolean
     */
-    public function dequeue($handle)
+    public function dequeue($callable)
     {
-        if (is_string($handle) && $this->locate($handle)) {
-            parent::detach($this->current());
-            $this->dirty = true;
-        } elseif ($handle instanceof Handle) {
-            parent::detach($handle);
-            $this->dirty = true;
+        $size = $this->getSize();
+        while($this->valid()) {
+            if ($this->current() === $callable) {
+                $this->_dirty = true;
+                parent::offsetUnset($this->key());
+                // decrease size by 1
+                $this->setSize($size - 1);
+                return true;
+            }
         }
+        return false;
     }
 
     /**
-    * Locates a handle.
-    *
-    * @param  string  $identifier  Handle identifier.
-    *
-    * @return  void
-    */
-    public function locate($identifier)
+     * Returns the current array node.
+     * 
+     * @param  boolean  $priority  Return the node containing priority.
+     * 
+     * @return  callable, array
+     */
+    public function current($priority = false) 
     {
-        $this->rewind(false);
-        while($this->valid()) {
-            if ($this->current()->getIdentifier() == $identifier) {
-                return true;
-            }
-            $this->next();
+        $current = parent::current();
+        if ($priority) {
+            return $current;
         }
-        return false;
+        return $current[0];
     }
 
     /**
@@ -159,35 +170,32 @@ class Queue extends \SplObjectStorage {
      */
     protected function _prioritize(/* ... */)
     {
-        if (!$this->dirty) return null;
+        /**
+         * I really do not like having to do this ...
+         * PHP should really consider allowing for usort to accept an
+         * ArrayAccess object.
+         */
+        // already prioritized?
+        if (!$this->_dirty) return null;
         $tmp = array();
         $this->rewind(false);
         while($this->valid()) {
-            $pri = $this->getInfo();
-            if (!isset($tmp[$pri])) {
-                $tmp[$pri] = array();
+            $node = $this->current(true);
+            $priority = $node[1];
+            if (!isset($tmp[$priority])) {
+                $tmp[$priority] = array();
             }
-            $tmp[$pri][] = $this->current();
+            $tmp[$priority][] = $node[0];
             $this->next();
         }
         ksort($tmp, SORT_NUMERIC);
-        $this->flush($this);
-        foreach ($tmp as $priority => $_array) {
-            foreach ($_array as $_sub) {
-                parent::attach($_sub, $priority);
+        $this->flush();
+        foreach ($tmp as $_priority => $_nodes) {
+            foreach ($_nodes as $_node) {
+                $this->enqueue($_node, $_priority);
             }
         }
-        $this->dirty = false;
-    }
-
-    public function attach($object, $data = null)
-    {
-        throw new \Exception('attach method disallowed; use of enqueue required');
-    }
-
-    public function detach($object)
-    {
-        throw new \Exception('detach method disallowed; use of dequeue required');
+        $this->_dirty = false;
     }
 
     /**
@@ -197,6 +205,20 @@ class Queue extends \SplObjectStorage {
      */
     public function flush(/* ... */)
     {
-        $this->removeAll($this);
+        $this->setSize(0);
+    }
+
+    public function offsetSet($index, $data = null)
+    {
+        throw new \Exception(
+            'offsetSet method disallowed; use of enqueue required'
+        );
+    }
+
+    public function offsetUnset($object)
+    {
+        throw new \Exception(
+            'offsetUnset method disallowed; use of dequeue required'
+        );
     }
 }

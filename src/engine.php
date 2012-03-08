@@ -23,7 +23,7 @@ namespace prggmr;
 
 
 use \Closure,
-    \ArrayObject,
+    \SplFixedArray,
     \InvalidArgumentException;
 
 /**
@@ -42,30 +42,18 @@ use \Closure,
  * to run and sleeps the engine until, the other processes the available signals
  * and shutdowns the engine when no more are available for running.
  *
- * The Engine now extends the State object.
+ * The Engine now uses the State trait.
  */
-class Engine extends State {
+class Engine {
+
+    use State;
 
     /**
-     * An indexed storage of Queues.
+     * The queue storage.
      *
      * @var  array
      */
-    protected $_index_storage = null;
-
-    /**
-     * A non index storage of Queue
-     *
-     * @var  array
-     */
-    protected $_non_index_storage = null;
-
-    /**
-     * Timer Queue
-     *
-     * @var  object
-     */
-    protected $_timers = null;
+    protected $_storage = null;
 
     /**
      * Engine stacktrace.
@@ -81,7 +69,7 @@ class Engine extends State {
      */
     public function __construct(/* ... */)
     {
-        parent::_construct();
+        $this->_storage = new \SplFixedArray();
         $this->flush();
     }
 
@@ -167,20 +155,8 @@ class Engine extends State {
      */
     public function flush(/* ... */)
     {
-        $this->_non_index_storage = new \ArrayObject();
-        $this->_index_storage = new \ArrayObject();
-        $this->_timers = new \ArrayObject;
-        $this->_state = Engine::RUNNING;
-    }
-
-    /**
-     * Returns the current time in millseconds.
-     *
-     * @return  integer
-     */
-    public function getMilliseconds()
-    {
-        return round(microtime(true) * 1000);
+        $this->_storage->setSize(0);
+        $this->setState(STATE_DECLARED);
     }
 
     /**
@@ -353,6 +329,10 @@ class Engine extends State {
      */
     public function signal($signal, $vars = null, $event = null, $stacktrace = null)
     {
+        if (!$signal instanceof $signal) {
+            
+        }
+        
         // Create a temporary queue
         $queue = new Queue(new Signal($signal));
 
@@ -378,25 +358,30 @@ class Engine extends State {
             $vars = array_merge(array(&$event), $vars);
         }
 
-        $event->setState(Event::STATE_ACTIVE);
+        $hashandles = false;
+
+        // Event is now running
+        $event->setState(State::RUNNING);
 
         // index lookup
         $obj = (is_object($signal) && $signal instanceof Signal);
-        if (static::canIndex($signal)) {
-            $index = ($obj) ? $signal->getSignal() : $signal;
-            if (isset($this->_index_storage[$index])) {
-                $_queue = $this->_index_storage[$index];
-                // rewind only
-                $_queue->rewind(false);
-                while($_queue->valid()){
-                    $queue->enqueue(
-                        $_queue->current(),
-                        $_queue->getInfo()
-                    );
-                    $this->_index_storage[$index]->next();
-                }
-            }
-        }
+
+        // if () {
+        //     $index = ($obj) ? $signal->getSignal() : $signal;
+        //     if (isset($this->_index_storage[$index])) {
+        //         $_queue = $this->_index_storage[$index];
+        //         // rewind only
+        //         $_queue->rewind(false);
+        //         while($_queue->valid()){
+        //             $queue->enqueue(
+        //                 $_queue->current(),
+        //                 $_queue->getInfo()
+        //             );
+        //             $this->_index_storage[$index]->next();
+        //         }
+        //     }
+        // }
+
         $length = count($this->_non_index_storage);
         if (0 !== $length) {
             for($i=0;$i!=$length;$i++) {
@@ -616,6 +601,6 @@ class Engine extends State {
      */
     public function shutdown()
     {
-        $this->setState(State::HALTED);
+        $this->setState(STATE_HALTED);
     }
 }

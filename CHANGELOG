@@ -1,4 +1,19 @@
 [ 0.3.0 0000 ]
+- The State class is now a Trait
+- PHP 5.4 is now required
+- AUTHORS is now CREDITS
+- Added \prggmr\engine\Signal::GLOBAL_EXCEPTION and GLOBAL_ERROR constants.
+- Added signal_exceptions and signal_errors functions
+- Queue no longer requires a Handle object for enqueue
+- Added Queue::offsetSet, offsetUnset methods
+- A Queue will now throw a OverflowException if QUEUE_MAX_SIZE is exceeded
+- Added QUEUE_MAX_SIZE constant
+- Queue now extends a SplFixedArray
+- Added get_milliseconds function
+- Added utils.php file
+- Removed Engine::getMilliseconds method
+- Added Queue::_data property and Queue::getRepresentation method
+- Removed Queue::getSignal method, Queue::_signal property
 - Engine::canIndex has been moved into the Signal::canIndex.
 - Removed Engine::canIndex method.
 - Added Handle::__invoke magic method, this throws a BadMethodCallException

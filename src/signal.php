@@ -42,7 +42,7 @@ interface SignalInterface {
      *
      * @return  boolean
      */
-    public function canIndex();
+    public function canIndex($param);
 }
 
 /**

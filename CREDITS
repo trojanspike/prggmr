@@ -1,0 +1,18 @@
+    This is at best a list of people or organizations that have contributed to
+    or sponsored the development of prggmr, I was researching the Linux source 
+    and liked how the CREDITS file is organized so I have adopted the same 
+    formatting. It is sorted by contribution date with the fields name (N),
+    email (E), description (D) and website (W).
+
+----------
+
+N: Nickolas Whiting 
+E: prggmr@gmail.com
+D: Original Author and Maintainer
+
+N: X Studios Inc
+W: http://www.xstudiosinc.com
+D: Supporter
+
+N: Igal Alkon
+D: Strict error fix for Kohana integration
