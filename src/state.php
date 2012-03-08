@@ -54,40 +54,13 @@ namespace prggmr;
  * The object has declared itself as halted to interrupt any further execution.
  */
 
-/**
- * Object has been declared.
- */
-define('STATE_DECLARED', 0x00001);
-
-/**
- * Object is currently running.
- */
-define('STATE_RUNNING', 0x00002);
-
-/**
- * Object has finished execution.
- */
-define('STATE_EXITED', 0x00003);
-
-/**
- * Object has become corrupted.
- */
+define('STATE_DECLARED' , 0x00001);
+define('STATE_RUNNING'  , 0x00002);
+define('STATE_EXITED'   , 0x00003);
 define('STATE_CORRUPTED', 0x00004);
-
-/**
- * Object has been recycled.
- */
-define('STATE_RECYCLED', 0x00005);
-
-/**
- * Object has been recovered from a runtime error.
- */
+define('STATE_RECYCLED' , 0x00005);
 define('STATE_RECOVERED', 0x00006);
-
-/**
- * Object requires halting further execution.
- */
-define('STATE_HALTED', 0x00007);
+define('STATE_HALTED'   , 0x00007);
 
 trait State
 {
@@ -97,14 +70,6 @@ trait State
      * @var  int
      */
     protected $_state = null;
-
-    /**
-     * Constructs a new state object.
-     */
-    public function __construct()
-    {
-        $this->setState(static::STATE_DECLARED);
-    }
 
     /**
      * Returns the current event state.
