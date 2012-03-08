@@ -1,4 +1,5 @@
-[ 0.3.0 0000 ]
+[ 0.3.0 00002012 ]
+------------------
 - The State class is now a Trait
 - PHP 5.4 is now required
 - AUTHORS is now CREDITS
@@ -50,8 +51,8 @@
 - fire api function renamed to signal.
 - subscribe api function renamed to handle.
 
-v0.2.2 ( Jan 11th, 2012 )
------------------------------------
+[ 0.2.2 01112012 ]
+------------------
 - Fixed a bug causing a Fatal Error when the Event was removed from the arguments.
   within a Subscription, this now throws a RuntimeException when encountered.
 - Added signals/ directory all files are included automatically.
@@ -59,8 +60,8 @@ v0.2.2 ( Jan 11th, 2012 )
 - API functions now have the ability to be replaced before loading the API.
 - prggmrd bin file renamed to prggmr
 
-v0.2.1 ( Dec 19th, 2011 )
------------------------------------
+[ 0.2.1 12192011 ]
+------------------
 - Subscription Exceptions contain the file/line and message of the exception.
 - Event::getData now returns null instead of false if the data does not exist.
 - Timeouts and intervals can now be set to start at a pre determined time
@@ -81,8 +82,8 @@ v0.2.1 ( Dec 19th, 2011 )
   subscription
 - clearInterval now returns false if a interval isnt cleared
 
-v0.2.0 ( July 9th, 2011 )
------------------------------------
+[ 0.2.0 07092011 ]
+------------------
 - Added PRGGMR_DEBUG constant
 - Added the "getSignal()" method to Event which returns the Event Signal object
 - Added a key parameter to Event::getData to allow for direct data access
@@ -108,14 +109,14 @@ v0.2.0 ( July 9th, 2011 )
 - Engine now removes exhausted events.
 - Added subscription exhaustion.
 
-v0.1.2 ( June 21st, 2011 )
------------------------------------
+[ 0.1.2 06212011 ]
+------------------
 - Engine no longer uses an SplObjectStorage for queue storage
 - Added _indexStorage and _storage arrays to engine, these are used for queue
   storage
 
-v0.1.1 ( May 30th, 2011 )
------------------------------------
+[ 0.1.1 05302011 ]
+------------------
 - Added the SignalInterface interface
 - Added the Signal object
 - Added the Subscription object
@@ -146,6 +147,10 @@ v0.1.1 ( May 30th, 2011 )
   regex string
 - New api implemented (fire, subscribe) removed benchmark, bubble
 
-v0.1.0 ( March 9th, 2011 )
------------------------------------
+[ 0.1.0 03092011 ]
+------------------
 - Inital Release
+
+[ 0.0.0 11112010 ]
+------------------
+- It begins
