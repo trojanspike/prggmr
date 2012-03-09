@@ -1,19 +1,42 @@
 prggmr is currently undergoing a major rewrite of it's internal workings and 
-using this branch for ANYTHING other development is a terrible idea!
+using this branch for ANYTHING other development and expirementing is not wise.
 
-With the rewrite I am hoping to simplify much of the library, cutdown on 
-much of the unneeded code and speed up performance.
+0.3.0 Roadmap
+-------------
+- Event Driven I/O
+- Major Performance overhaul
+- Possible integration with epoll, kqueue and select
 
-Along with that I will be entroducing a more intutive and natural speaking
-API for working with signals.
 
-I do not have an estimated release date.
+Production use
+--------------
+prggmr 0.2.0 is fully baked and ready to go for any production system.
 
-The latest stable version is 0.2.2.
+Installation
+------------
+You can install prggmr using the prggmr distribution network with the following
+commands.
 
-To install
+Easy Install
+------------
 
-wget http://distr.prggmr.org/prggmr/v0.2.2/prggmr.tar.gz
-tar -xzvf prggmr.tar.gz
-cd v0.2.2
-sudo php pinstall
+    wget http://distr.prggmr.org/prggmr/v0.2.2/prggmr.tar.gz
+    tar -xzvf prggmr.tar.gz
+    cd v0.2.2
+    sudo php pinstall
+
+If your prefer to manually install prggmr you can download it using either the
+Github tag for 0.2 or download it directly using this link.
+
+Tar Archive
+-----------
+1.1MB - http://distr.prggmr.org/prggmr/v0.2.2/prggmr.tar.gz
+
+Zip Archive
+-----------
+1.3MB - http://distr.prggmr.org/prggmr/v0.2.2/prggmr.zip
+
+
+Documentation
+-------------
+Documentation is available @ http://prggmr.org
