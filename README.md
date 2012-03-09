@@ -1,12 +1,13 @@
-prggmr is currently undergoing a major rewrite of it's internal workings and 
-using this branch for ANYTHING other development and expirementing is not wise.
+prggmr is currently undergoing a major rewrite.
+
+The master is highly experimental and subject to change without notice,
+use for production is very dangerous.
 
 0.3.0 Roadmap
 -------------
 - Event Driven I/O
 - Major Performance overhaul
 - Possible integration with epoll, kqueue and select
-
 
 Production use
 --------------
