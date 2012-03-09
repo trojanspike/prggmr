@@ -21,16 +21,29 @@ namespace prggmr;
  * @copyright  Copyright (c), 2010-12 Nickolas Whiting
  */
 
-use \SplFixedArray,
-    \InvalidArgumentException;
+use \InvalidArgumentException;
+
+require 'fixed_array.php';
 
 /**
  * Defines the maximum number of items allowed within a Queue.
- *
  */
 if (!defined('QUEUE_MAX_SIZE')) {
-    define('QUEUE_MAX_SIZE', 15);
+    define('QUEUE_MAX_SIZE', 24);
 }
+
+/**
+ * Queue Heap Types available.
+ * 
+ * QUEUE_MIN_HEAP
+ * Queue functions as a min-heap.
+ * 
+ * QUEUE_MAX_HEAP
+ * Queue functions as a max-heap.
+ */
+define('QUEUE_MIN_HEAP', 0xBF01);
+define('QUEUE_MAX_HEAP', 0xBF02);
+
 
 /**
  * As of v0.3.0 Queues no longer maintain a reference to a signal and rather
@@ -42,9 +55,9 @@ if (!defined('QUEUE_MAX_SIZE')) {
  *
  * To offset some of the performance Queue are now a SplFixedArray.
  *
- * The queue is still a MinHeap.
+ * The queue can also be explicity set to a MIN or MAX heap upon construction.
  */
-class Queue extends \SplFixedArray {
+class Queue extends FixedArray {
 
     /**
      * The data which the queue represents.
@@ -61,15 +74,23 @@ class Queue extends \SplFixedArray {
     protected $_dirty = false;
 
     /**
+     * Heap type.
+     * 
+     * @var  integer
+     */
+    protected $_type = 0;
+
+    /**
      * Constructs a new queue object.
      *
      * @param  mixed  $data  Data the queue represents
      *
      * @return  void
      */
-    public function __construct($data)
+    public function __construct($data, $type = QUEUE_MIN_HEAP)
     {
         $this->_data = $data;
+        $this->_type = $type;
     }
 
     /**
@@ -100,13 +121,11 @@ class Queue extends \SplFixedArray {
                 'Queue max size reached'
             );
         }
-        $this->setSize($size + 1);
         $this->_dirty = true;
         if (null === $priority || !is_int($priority)) $priority = 100;
-        $node = new \SplFixedArray(2);
-        $node->offsetSet(0, $callable);
-        $node->offsetSet(1, $priority);
-        parent::offsetSet($size, $node);
+        $node = new FixedArray();
+        $node->push($callable, $priority);
+        return $this->push($node);
     }
 
     /**
@@ -124,8 +143,8 @@ class Queue extends \SplFixedArray {
             if ($this->current() === $callable) {
                 $this->_dirty = true;
                 parent::offsetUnset($this->key());
-                // decrease size by 1
-                $this->setSize($size - 1);
+                // collect garbage
+                $this->gc();
                 return true;
             }
         }
@@ -170,42 +189,22 @@ class Queue extends \SplFixedArray {
      */
     protected function _prioritize(/* ... */)
     {
-        /**
-         * I really do not like having to do this ...
-         * PHP should really consider allowing for usort to accept an
-         * ArrayAccess object.
-         */
-        // already prioritized?
         if (!$this->_dirty) return null;
-        $tmp = array();
-        $this->rewind(false);
-        while($this->valid()) {
-            $node = $this->current(true);
-            $priority = $node[1];
-            if (!isset($tmp[$priority])) {
-                $tmp[$priority] = array();
+        $tmp = $this->toArray();
+        array_walk($tmp, function($_v, $_i) use (&$tmp){
+            if (!is_int($_i)) {
+                unset($tmp[$_i]);
             }
-            $tmp[$priority][] = $node[0];
-            $this->next();
-        }
-        ksort($tmp, SORT_NUMERIC);
+        });
         $this->flush();
-        foreach ($tmp as $_priority => $_nodes) {
-            foreach ($_nodes as $_node) {
-                $this->enqueue($_node, $_priority);
+        usort($tmp, function($a, $b){
+            if ($this->_type === QUEUE_MAX_HEAP) {
+                return $a[1] < $b[1];
             }
-        }
+            return $a[1] > $b[1];
+        });
+        call_user_func_array(array($this, 'push'), $tmp);
         $this->_dirty = false;
-    }
-
-    /**
-     * Flushes the queue.
-     *
-     * @return  void
-     */
-    public function flush(/* ... */)
-    {
-        $this->setSize(0);
     }
 
     public function offsetSet($index, $data = null)

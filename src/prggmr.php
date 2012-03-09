@@ -30,6 +30,7 @@ $dir = dirname(realpath(__FILE__));
 
 // start'er up
 require $dir.'/utils.php';
+require $dir.'/fixed_array.php';
 require $dir.'/engine/signals.php';
 require $dir.'/state.php';
 require $dir.'/engine.php';

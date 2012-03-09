@@ -1,3 +1,12 @@
+[ 03082012 - 2100 ]
+
+- I believe I have also found a Queue that satisfies my needs, although it still
+  may consume more memory during prioritization that what I would like,
+  the FixedArray has the same issue so I can live with it. 
+
+- The FixedArray ... quite an improvement performance wise, might as well
+  make it a bit easier to use and make it the standard for any prggmr array.
+
 [ 03082012 - 1300 ]
 
 - With the release of 5.4 this month I'm making PHP 5.4 a requirement, 

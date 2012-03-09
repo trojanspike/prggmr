@@ -1,5 +1,9 @@
 [ 0.3.0 00002012 ]
 ------------------
+- Queue can now be set as min or max upon construction
+- Added constants QUEUE_MIN_HEAP, QUEUE_MAX_HEAP
+- Queue now extends the FixedArray class.
+- Added \prggmr\FixedArray class.
 - The State class is now a Trait
 - PHP 5.4 is now required
 - AUTHORS is now CREDITS
