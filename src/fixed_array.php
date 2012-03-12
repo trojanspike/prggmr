@@ -30,10 +30,6 @@ use \SplFixedArray, \BadMethodCallException;
  * and __get are disallowed.
  * 
  * gc is provided as a cleanup and will remove any node with a value of NULL.
- * 
- * The object itself consumes roughly 1 + n(s) KB, this
- * provides a small decrease in size and increase in performance over a 
- * non fixed array.
  */
 class FixedArray extends \SplFixedArray {
 
@@ -128,6 +124,42 @@ class FixedArray extends \SplFixedArray {
     public function flush(/* ... */)
     {
         $this->setSize(0);
+    }
+
+    /**
+     * Performs a binary search for the given node returning the index.
+     * 
+     * @param  mixed  $node  The node to locate
+     * 
+     * @return  int, boolean  Int if found, boolean otherwise
+     */
+    public function binary_search($node, $compare)
+    {
+        $low = 0;
+        $high = $this->getSize() - 1;
+        
+        while ($low <= $high) {
+            $mid = ($low + $high) >> 1;
+            echo $mid . PHP_EOL;
+            $nval = $this->offsetGet($mid);
+            $cmp = $compare($nval, $node);
+            switch (true) {
+                case $cmp === true:
+                    return $mid;
+                    break;
+                case $cmp === 0:
+                    $low = $mid + 1;
+                    break;
+                case $cmp === 1:
+                    $high = $mid - 1;
+                    break;
+                default:
+                    return null;
+                    break;
+            }
+        }
+
+        return null;
     }
 
     /**

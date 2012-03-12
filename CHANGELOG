@@ -13,7 +13,6 @@
 - Added Queue::offsetSet, offsetUnset methods
 - A Queue will now throw a OverflowException if QUEUE_MAX_SIZE is exceeded
 - Added QUEUE_MAX_SIZE constant
-- Queue now extends a SplFixedArray
 - Added get_milliseconds function
 - Added utils.php file
 - Removed Engine::getMilliseconds method
@@ -31,14 +30,13 @@
 - Removed ArrayContainsSignalStrict class
 - Event now extends State class
 - Engine now extends State class
-- Added State class
 - Improved LOG formatting
 - Removed Event::state_message property
 - Removed Event::getStateMessage, Event::setStateMessage
 - Added Engine properties active_signal, active_handle
 - Events no longer carry a reference to the signal or handle in 
   execution.
-- Added Event states (DECLARED, RUNNING, EXITED, ERROR, RECYCLED)
+- Added state constants (DECLARED, RUNNING, EXITED, ERROR, RECYCLED, HALTED)
 - Removed Event states (ACTIVE, ERRROR, INACTIVE)
 - \prggmr\engine\Signals::HANDLE_EXCEPTION signal is signaled when an Exception
   is encountered during Handle execution.

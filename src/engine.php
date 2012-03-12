@@ -23,16 +23,9 @@ namespace prggmr;
 
 
 use \Closure,
-    \SplFixedArray,
     \InvalidArgumentException;
 
 /**
- * As of v0.1.2 the engine uses 2 different storages, indexed and non-indexed
- * for performance. Indexable signals (integers and strings) are placed in
- * the indexed storage and allow for index based lookups, non-indexable
- * signals (objects, floats, booleans, arrays and non-indexable Signal objects)
- * are placed in the non-indexed storage and require loop through lookups.
- *
  * As of v0.3.0 the loop is now run in respect to the currently available handles,
  * this prevents the engine from running contionusly forever when there isn't anything
  * that it needs to do.
@@ -44,16 +37,12 @@ use \Closure,
  *
  * The Engine now uses the State trait.
  */
-class Engine {
-
-    use State;
+class Engine extends FixedArray {
 
     /**
-     * The queue storage.
-     *
-     * @var  array
+     * Statefull object
      */
-    protected $_storage = null;
+    use State;
 
     /**
      * Engine stacktrace.
@@ -61,17 +50,6 @@ class Engine {
      * @var  array
      */
     protected $_stacktrace = array();
-
-    /**
-     * Construction inits our empty storage array and sets default state.
-     *
-     * @return  void
-     */
-    public function __construct(/* ... */)
-    {
-        $this->_storage = new \SplFixedArray();
-        $this->flush();
-    }
 
     /**
      * Clears a set interval.
@@ -132,7 +110,7 @@ class Engine {
     }
 
     /**
-    * Removes a handler from the queue.
+    * Remove a handle from the queue.
     *
     * @param  mixed  $signal  Signal instance or signal.
     *
