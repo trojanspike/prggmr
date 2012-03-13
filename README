@@ -1,6 +1,8 @@
-This is a HIGHLY EXPERIMENTAL port of prggmr to Python.
+prggmr is currently undergoing a major rewrite.
 
-This could be deleted tommorrow so don't get your hopes up.
+The master is highly experimental and subject to change without notice,
+
+Use for production is very dangerous.
 
 0.3.0 Roadmap
 -------------
