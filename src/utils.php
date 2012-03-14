@@ -30,7 +30,7 @@ function get_milliseconds(/* ... */) {
 }
 
 /**
- * Transforms error into a signal.
+ * Transforms PHP exceptions into a signal.
  * 
  * The signal fired is \prggmr\engine\Signal::GLOBAL_EXCEPTION
  * 
@@ -43,7 +43,7 @@ function signal_exceptions($exception) {
 }
 
 /**
- * Transforms error into a signal.
+ * Transforms PHP errors into a signal.
  * 
  * The signal fired is \prggmr\engine\Signal::GLOBAL_ERROR
  * 
@@ -58,4 +58,56 @@ function signal_errors($errno, $errstr, $errfile, $errline) {
     signal(\prggmr\engine\Signal::GLOBAL_ERROR, array(
         $errstr, 0, $errno, $errfile, $errline
     ));
+}
+
+/**
+ * Performs a binary search for the given node returning the index.
+ * 
+ * @param  mixed  $needle  Needle to locate
+ * @param  array  $haystack  Array to search
+ * @param  closure  $compare  Comparison function
+ * 
+ * @return  int  > 0 if found
+ */
+function bin_search($needle, $haystack, $compare = null)
+{
+
+    if (null === $compare) {
+        $compare = function($node, $needle) {
+            if ($node < $needle) {
+                return 0;
+            }
+            if ($node > $needle) {
+                return 1;
+            }
+            if ($node === $needle) {
+                return true;
+            }
+        };
+    }
+
+    $low = 0;
+    $high = count($haystack) - 1;
+    
+    while ($low <= $high) {
+        $mid = ($low + $high) >> 1;
+        $node = $hackstack[$mid];
+        $cmp = $compare($node, $needle);
+        switch (true) {
+            case $cmp === true:
+                return $mid;
+                break;
+            case $cmp === 0:
+                $low = $mid + 1;
+                break;
+            case $cmp === 1:
+                $high = $mid - 1;
+                break;
+            default:
+                return -1;
+                break;
+        }
+    }
+
+    return -1;
 }

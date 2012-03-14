@@ -23,10 +23,8 @@ namespace prggmr;
 
 use \InvalidArgumentException;
 
-require 'fixed_array.php';
-
 /**
- * Defines the maximum number of items allowed within a Queue.
+ * Defines the maximum number of handlers allowed within a Queue.
  */
 if (!defined('QUEUE_MAX_SIZE')) {
     define('QUEUE_MAX_SIZE', 24);
@@ -44,30 +42,22 @@ if (!defined('QUEUE_MAX_SIZE')) {
 define('QUEUE_MIN_HEAP', 0xBF01);
 define('QUEUE_MAX_HEAP', 0xBF02);
 
+require 'storage.php';
 
 /**
- * As of v0.3.0 Queues no longer maintain a reference to a signal and rather
- * carry only a "data" property which the engine will pass to a signal for
- * handling determination.
+ * As of v0.3.0 Queues no longer maintain a reference to a signal.
  *
  * The Queue is still a representation of a PriorityQueue and will remain so 
  * until the issues with PHP's current implementation are addressed.
- *
- * To offset some of the performance Queue are now a SplFixedArray.
- *
+ * 
  * The queue can also be explicity set to a MIN or MAX heap upon construction.
  */
-class Queue extends FixedArray {
+class Queue {
+
+    use Storage;
 
     /**
-     * The data which the queue represents.
-     *
-     * @var  mixed
-     */
-    protected $_data = null;
-
-    /**
-     * Flag for queue prioritizing.
+     * Flag for prioritizing.
      * 
      * @var  boolean
      */
@@ -83,141 +73,71 @@ class Queue extends FixedArray {
     /**
      * Constructs a new queue object.
      *
-     * @param  mixed  $data  Data the queue represents
+     * @param  int  $type  Queue type
      *
      * @return  void
      */
-    public function __construct($data, $type = QUEUE_MIN_HEAP)
+    public function __construct($type = QUEUE_MIN_HEAP)
     {
-        $this->_data = $data;
         $this->_type = $type;
-    }
-
-    /**
-     * Returns the data the queue represents.
-     *
-     * @return  object
-     */
-    public function getRepresentation(/* ... */)
-    {
-        return $this->_data;
     }
 
     /**
      * Pushes a new handler into the queue.
      *
-     * @param  callable  $callable  Callable variable
+     * @param  mixed  $node  Variable to store
      * @param  integer $priority  Priority of the callable
      *
      * @throws  OverflowException  If max size exceeded
      *
      * @return  void
      */
-    public function enqueue($callable, $priority = 100)
+    public function enqueue($node, $priority = 100)
     {
-        $size = $this->getSize();
-        if ($size > QUEUE_MAX_SIZE - 1) {
+        if ($this->count() > QUEUE_MAX_SIZE) {
             throw new \OverflowException(
                 'Queue max size reached'
             );
         }
         $this->_dirty = true;
         if (null === $priority || !is_int($priority)) $priority = 100;
-        $node = new FixedArray();
-        $node->push($callable, $priority);
-        return $this->push($node);
+        $this->_storage[] = [$node, $priority];
     }
 
     /**
     * Removes a handle from the queue.
     *
-    * @param  mixed  $callable  Reference to callable
+    * @param  mixed  $node  Reference to the node.
     *
     * @throws  InvalidArgumentException
     * @return  boolean
     */
-    public function dequeue($callable)
+    public function dequeue($node)
     {
-        $size = $this->getSize();
         while($this->valid()) {
-            if ($this->current() === $callable) {
-                $this->_dirty = true;
-                parent::offsetUnset($this->key());
-                // collect garbage
-                $this->gc();
+            if ($this->current()[0] === $node) {
+                unset($this->_storage[$this->key()]);
                 return true;
             }
+            $this->next();
         }
         return false;
     }
 
     /**
-     * Returns the current array node.
-     * 
-     * @param  boolean  $priority  Return the node containing priority.
-     * 
-     * @return  callable, array
-     */
-    public function current($priority = false) 
-    {
-        $current = parent::current();
-        if ($priority) {
-            return $current;
-        }
-        return $current[0];
-    }
-
-    /**
-     * Rewinds the iterator to prepare for iteration.
-     *
-     * @param  boolean  $prioritize  Flag to prioritize the queue.
+     * Sorts the queue as a MIN or MAX heap.
      *
      * @return  void
      */
-    public function rewind($prioritize = true)
-    {
-        if ($prioritize) {
-            $this->_prioritize();
-        }
-        return parent::rewind();
-    }
-
-    /**
-     * Prioritizes the queue.
-     *
-     * @return  void
-     */
-    protected function _prioritize(/* ... */)
+    public function sort(/* ... */)
     {
         if (!$this->_dirty) return null;
-        $tmp = $this->toArray();
-        array_walk($tmp, function($_v, $_i) use (&$tmp){
-            if (!is_int($_i)) {
-                unset($tmp[$_i]);
-            }
-        });
-        $this->flush();
-        usort($tmp, function($a, $b){
+        $this->usort(function($a, $b){
             if ($this->_type === QUEUE_MAX_HEAP) {
                 return $a[1] < $b[1];
             }
             return $a[1] > $b[1];
         });
-        call_user_func_array(array($this, 'push'), $tmp);
         $this->_dirty = false;
-    }
-
-    public function offsetSet($index, $data = null)
-    {
-        throw new \Exception(
-            'offsetSet method disallowed; use of enqueue required'
-        );
-    }
-
-    public function offsetUnset($object)
-    {
-        throw new \Exception(
-            'offsetUnset method disallowed; use of dequeue required'
-        );
     }
 }

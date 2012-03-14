@@ -37,12 +37,12 @@ use \Closure,
  *
  * The Engine now uses the State trait.
  */
-class Engine extends FixedArray {
+class Engine {
 
     /**
      * Statefull object
      */
-    use State;
+    use State, Storage;
 
     /**
      * Engine stacktrace.

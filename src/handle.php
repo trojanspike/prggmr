@@ -56,7 +56,7 @@ class Handle {
      * @var  string
      */
     protected $_limit = 0;
-
+    
     /**
      * The exhaust limit.
      *

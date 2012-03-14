@@ -30,9 +30,9 @@ $dir = dirname(realpath(__FILE__));
 
 // start'er up
 require $dir.'/utils.php';
-require $dir.'/fixed_array.php';
-require $dir.'/engine/signals.php';
+require $dir.'/storage.php';
 require $dir.'/state.php';
+require $dir.'/engine/signals.php';
 require $dir.'/engine.php';
 require $dir.'/signal.php';
 require $dir.'/event.php';
@@ -94,6 +94,6 @@ final class prggmr extends \prggmr\Engine {
  * catchable signal.
  */
 if (PRGGMR_EVENTED_EXCEPTIONS === true) {
-    set_error_handler("signalExceptions");
-    set_exception_handler("signalErrors");
+    set_error_handler("signal_exceptions");
+    set_exception_handler("signal_errors");
 }

@@ -1,1 +1,8 @@
-Nothing in the TODO!
+TODO [ 0.3.0 ]
+---------------------------------------
+- Refactor Engine class to be faster!
+- Cleanup Signal class
+- Cleanup Event class
+- Setup Engine loop to run based on available handlers
+- Refactor Handle, Engine and Signal to handle time signals without an extra
+  storage.
