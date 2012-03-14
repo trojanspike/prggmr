@@ -42,8 +42,6 @@ if (!defined('QUEUE_MAX_SIZE')) {
 define('QUEUE_MIN_HEAP', 0xBF01);
 define('QUEUE_MAX_HEAP', 0xBF02);
 
-require 'storage.php';
-
 /**
  * As of v0.3.0 Queues no longer maintain a reference to a signal.
  *
