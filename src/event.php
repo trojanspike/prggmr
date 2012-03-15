@@ -48,7 +48,7 @@ class Event {
     protected $_chain = null;
     
     /**
-     * Backtrace of where this event was fired from only during debugging.
+     * Backtrace of this event.
      *
      * @var  array  $trace
      */
@@ -130,7 +130,7 @@ class Event {
     }
 
     /**
-     * Get event chain.
+     * Gets the event chain.
      *
      * @return  mixed  array, null if no chain exists.
      */
@@ -150,7 +150,7 @@ class Event {
     }
 
     /**
-     * Set an event chain.
+     * Sets an event chain.
      *
      * @param  object  $chain  Event
      */

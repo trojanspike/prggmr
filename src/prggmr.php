@@ -34,7 +34,9 @@ require $dir.'/storage.php';
 require $dir.'/state.php';
 require $dir.'/engine/signals.php';
 require $dir.'/engine.php';
+require $dir.'/signal/interface.php';
 require $dir.'/signal.php';
+require $dir.'/signal/complex.php';
 require $dir.'/event.php';
 require $dir.'/queue.php';
 require $dir.'/handle.php';
@@ -55,11 +57,6 @@ if (!defined('PRGGMR_EVENTED_EXCEPTIONS')) {
  * global api and the prggmr signaled exceptions hook.
  */
 final class prggmr extends \prggmr\Engine {
-
-    /**
-     * prggmr
-     */
-    const EXCEPTION = 0xe4;
 
     /**
      * @var  object|null  Instanceof the singleton

@@ -27,6 +27,9 @@ namespace prggmr;
  * The Storage trait is designed to allow objects to act as a storage, the
  * trait only provides an interface to the normal PHP functions used for
  * transversing an array, keeping all data within a central storage.
+ * 
+ * See the PHP Manual for more information regarding the functions used
+ * in this trait.
  */
 trait Storage {
     /**
@@ -37,9 +40,7 @@ trait Storage {
     protected $_storage = [];
 
     /**
-     * Storage procedures.
-     * 
-     * See the PHP Manual for more information regarding these functions.
+     * Procedures.
      */
     public function count(/* ... */)
     {

@@ -1,5 +1,5 @@
 <?php
-namespace prggmr;
+namespace prggmr\signal;
 /**
  *  Copyright 2010-12 Nickolas Whiting
  *
@@ -25,14 +25,14 @@ namespace prggmr;
   * Array contains signal fires true when the given variable is contained 
   * within the given array allowing for strict mode.
   */
-class ArrayContainsSignal extends \prggmr\Signal {
+class ArrayContainsSignal extends \prggmr\signal\Complex {
 
     /**
      * Use strict mode.
      *
      * @var  boolean
      */
-    $this->_strict = false;
+    private $this->_strict = false;
 
     /**
      * Constructs a new array contains signal object.
@@ -43,7 +43,7 @@ class ArrayContainsSignal extends \prggmr\Signal {
     public function __construct($signal, $strict = false)
     {
         $this->_strict = $strict;
-        parent::__construct($signal);
+        $this->_signal = $signal;
     }
     
     /**
@@ -53,22 +53,11 @@ class ArrayContainsSignal extends \prggmr\Signal {
      *
      * @return  mixed  False on failure. True if matches.
      */
-    public function compare($signal)
+    public function evalute($signal)
     {
         if (array_search($signal, $this->_signal, $this->_strict) !== false) {
             return true;
         }
         return false;
     }
-
-    /**
-     * Returns if this signal returns an indexable value.
-     *
-     * @return  boolean
-     */
-    public function canIndex()
-    {
-        return false;
-    }
-    
 }

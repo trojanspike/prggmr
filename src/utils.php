@@ -21,6 +21,12 @@
  */
 
 /**
+ * Utilities
+ * 
+ * These are utility functions used within or in conjunction with prggmr.
+ */
+
+/**
  * Returns the current UNIX timestamp in milliseconds.
  * 
  * @return  integer
@@ -39,7 +45,7 @@ function get_milliseconds(/* ... */) {
  * @return void
  */
 function signal_exceptions($exception) {
-    signal(\prggmr\engine\Signal::GLOBAL_EXCEPTION, $exception);
+    signal(\prggmr\engine\Signals::GLOBAL_EXCEPTION, $exception);
 }
 
 /**
@@ -55,7 +61,7 @@ function signal_exceptions($exception) {
  * @return  void
  */
 function signal_errors($errno, $errstr, $errfile, $errline) {
-    signal(\prggmr\engine\Signal::GLOBAL_ERROR, array(
+    signal(\prggmr\engine\Signals::GLOBAL_ERROR, array(
         $errstr, 0, $errno, $errfile, $errline
     ));
 }
@@ -63,28 +69,35 @@ function signal_errors($errno, $errstr, $errfile, $errline) {
 /**
  * Performs a binary search for the given node returning the index.
  * 
+ * Logic:
+ * 
+ * 0 - Match
+ * > 0 - Move backwards
+ * < 0 - Move forwards
+ * 
  * @param  mixed  $needle  Needle to locate
  * @param  array  $haystack  Array to search
  * @param  closure  $compare  Comparison function
  * 
- * @return  int  > 0 if found
+ * @return  null|int  integer index location, null locate failure
  */
-function bin_search($needle, $haystack, $compare = null)
-{
+function bin_search($needle, $haystack, $compare = null) {
 
     if (null === $compare) {
         $compare = function($node, $needle) {
             if ($node < $needle) {
-                return 0;
+                return -1;
             }
             if ($node > $needle) {
                 return 1;
             }
             if ($node === $needle) {
-                return true;
+                return 0;
             }
         };
     }
+
+    if (count($haystack) === 0) return null;
 
     $low = 0;
     $high = count($haystack) - 1;
@@ -94,20 +107,21 @@ function bin_search($needle, $haystack, $compare = null)
         $node = $hackstack[$mid];
         $cmp = $compare($node, $needle);
         switch (true) {
-            case $cmp === true:
+            case $cmp === 0:
                 return $mid;
                 break;
-            case $cmp === 0:
+            case $cmp < 0:
                 $low = $mid + 1;
                 break;
-            case $cmp === 1:
+            case $cmp > 0:
                 $high = $mid - 1;
                 break;
             default:
-                return -1;
+            case $cmp === null:
+                return null;
                 break;
         }
     }
 
-    return -1;
+    return null;
 }

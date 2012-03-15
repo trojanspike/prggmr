@@ -38,7 +38,7 @@ use \Closure,
  * is registered is done so to run at least once, otherwise it wouldn't
  * exist.
  *
- * Handles are now also a stateful object extending the State class.
+ * Handles are now also a stateful object inheriting the State trait.
  */
 class Handle {
 
@@ -93,7 +93,7 @@ class Handle {
     protected $_post = null;
     
     /**
-     * Array of additional parameters to pass the function executing.
+     * Array of additional parameters to pass the executing function.
      *
      * @var  array
      */
@@ -172,16 +172,14 @@ class Handle {
         }
         
         if (null !== $this->_params) {
-            $passparams = array_merge($params, $this->_params);
-        } else {
-            $passparams = $params;
+            $params = array_merge($params, $this->_params);
         }
 
         # pre fire
         if (null !== $this->_pre) {
             foreach ($this->_pre as $_index => $_func) {
                 try {
-                    call_user_func_array($_func, $passparams);
+                    call_user_func_array($_func, $params);
                 } catch (\Exception $e) {
                     # unset incase we continue
                     unset($this->_pre[$_index]);
@@ -199,7 +197,7 @@ class Handle {
 
         # handle fire
         try {
-            $result = call_user_func_array($this->_function, $passparams);
+            $result = call_user_func_array($this->_function, $params);
         } catch (\Exception $e) {
             throw new HandleException(sprintf(
 				'handle %s Exception ( %s ) at ( %s : %s )',
@@ -214,7 +212,7 @@ class Handle {
         if (null !== $this->_post) {
             foreach ($this->_post as $_index => $_func) {
                 try {
-                    call_user_func_array($_func, $passparams);
+                    call_user_func_array($_func, $params);
                 } catch (\Exception $e) {
                     # unset incase we continue
                     unset($this->_pre[$_index]);

@@ -1,5 +1,11 @@
 [ 0.3.0 00002012 ]
 ------------------
+- \prggmr\Engine::queue now uses binary searching for finding queues
+- \prggmr\Engine::queue now returns an array
+- \prggmr\Engine::queue params changed to ($signal, $type)
+- Regex and ArrayContains now extend \prggmr\Signal\Complex
+- Moved \prggmr\SignalInterface to \prggmr\signal\SignalInterface
+- Added \prggmr\signal\Complex class
 - Queue uses Storage trait
 - Added bin_search function
 - Added Storage trait

@@ -31,11 +31,20 @@ use \Closure,
  * that it needs to do.
  *
  * To achieve this the engine uses routines for calculating when to run,
- * the default routines are based on time which calculates the time an event is
- * to run and sleeps the engine until, the other processes the available signals
- * and shutdowns the engine when no more are available for running.
+ * the default routines are based on time which calculates the time a handle is
+ * to run and sleeps the until then, the other processes the available handles
+ * and shutdowns the engine when no more are available.
  *
- * The Engine now uses the State trait.
+ * The Engine uses the State and Storage traits, and will also attempt to
+ * gracefully handle exceptions.
+ * 
+ * The queue storage has also been improved in 0.3.0, previously the storage used
+ * a non-index and index based storage, the storage now uses only a single array.
+ * 
+ * The major improvement is the storage uses a binary search algorithm for
+ * locating the queues, the algorithm works with strings, integers and 
+ * \prggmr\signal\Complex objects providing a major performance increase over
+ * the previous implementation.
  */
 class Engine {
 
@@ -45,7 +54,24 @@ class Engine {
     use State, Storage;
 
     /**
-     * Engine stacktrace.
+     * Returns of calling queue.
+     * 
+     * QUEUE_NEW
+     * A new empty queue was created.
+     * 
+     * QUEUE_EMPTY
+     * An empty queue was found.
+     * 
+     * QUEUE_NONEMPTY
+     * A non-empty queue was found.
+     */
+    const QUEUE_NEW = '0xA01';
+    const QUEUE_EMPTY = '0xA02';
+    const QUEUE_NONEMPTY = '0xA03';
+
+    /**
+     * Current engine stacktrace, this is keep for when a handle errors out
+     * and php does not maintain the actual trace to the call.
      *
      * @var  array
      */
@@ -110,16 +136,17 @@ class Engine {
     }
 
     /**
-    * Remove a handle from the queue.
+    * Removes a signal handler.
     *
     * @param  mixed  $signal  Signal instance or signal.
     *
     * @param  mixed  $handle  Handle instance or identifier.
     *
     * @throws  InvalidArgumentException
+    * 
     * @return  void
     */
-    public function dequeue($signal, $handle)
+    public function removeHandle($signal, $handle)
     {
         $queue = $this->queue($signal, false);
         if (false === $queue) return false;
@@ -127,13 +154,13 @@ class Engine {
     }
 
     /**
-     * Flushes the engine and resets its state.
+     * Empties the storage and clears the current state.
      *
      * @return void
      */
     public function flush(/* ... */)
     {
-        $this->_storage->setSize(0);
+        $this->_storage = [];
         $this->setState(STATE_DECLARED);
     }
 
@@ -249,47 +276,134 @@ class Engine {
     }
 
     /**
-     * Locates a Queue object in storage.
+     * Locates a signal Queue in storage.
+     * 
+     * The storage is designed to place any sortable types [int, strings and
+     * sortable objects] at top of the stack and place any unstortable types 
+     * [complex objects] at the bottom.
+     * 
+     * A visual representation:
+     * 
+     * [
+     *     1,2,object(3),4
+     *     'a','b',object('c'),'d'
+     *     object(c2), object(c2)
+     * ]
+     * 
+     * The storage is sorted automatically when a sortable signal is added. 
+     * 
+     * Queues are located using a binary search algorithm.
      *
-     * @param  mixed  $signal  Signal instance or signal.
-     * @param  boolean  $generate  Generate the queue if not found.
+     * @param  string|integer|object  $signal  Signal
+     * @param  integer  $type  [QUEUE_MIN_HEAP,QUEUE_MAX_HEAP]
      *
-     * @return  mixed  Boolean if generate is false. Queue instance.
+     * @return  array  [QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, object]
      */
-    public function queue($signal, $generate = true)
+    public function queue($signal, $type = QUEUE_MIN_HEAP)
     {
-        $obj = (is_object($signal) && $signal instanceof Signal);
-        $indexable = false;
-        if (static::canIndex($signal)) {
-            $index = ($obj) ? $signal->signal() : $signal;
-            if (isset($this->_index_storage[$index])) {
-                return $this->_index_storage[$index];
+        $complex = false;
+        $queue = false;
+
+        if ($signal instanceof Signal) {
+            if ($signal instanceof \prggmr\signal\Complex) {
+                $complex = true;
             }
-            $indexable = true;
         } else {
-            $length = count($this->_non_index_storage);
-            for($i=0;$i!=$length;$i++) {
-                if (($obj && $this->_non_index_storage[$i]->getSignal() === $signal) ||
-                ($this->_non_index_storage[$i]->getSignal(true) === $signal)) {
-                    return $this->_non_index_storage[$i];
+            try {
+                $signal = new Signal($signal);
+            } catch (\InvalidArgumentException $e) {
+                return false;
+            }
+        }
+
+        if ($complex) {
+            // start at the bottom of the stack and go in reverse
+            $this->end();
+            while ($this->valid()) {
+                if ($this->current()[0] === $signal) {
+                    $queue = $this->current();
+                    break;
                 }
+                if (!$this->current()[0] instanceof \prggmr\signal\Complex) {
+                    // stop looking no longer in complex storage
+                    break;
+                }
+                $this->prev();
+            }
+        } else {
+            $index = bin_search($signal->getSignal(), $this->_storage, function ($_node, $_needle) {
+                if ($_node === null) {
+                    return null;
+                }
+                if ($_node instanceof \prggmr\signal\Complex) {
+                    return 1;
+                }
+                $_node = $_node[0]->getSignal();
+                if (is_string($_node)) {
+                    // to far move up
+                    if (is_int($_node)) {
+                        return 1;
+                    }
+                    return strcmp($_node, $_needle);
+                } 
+                if (is_int($_node)) {
+                    // to far move back
+                    if (is_string($_node)) {
+                        return -1;
+                    }
+                    if ($node < $needle) {
+                        return -1;
+                    }
+                    if ($node > $needle) {
+                        return 1;
+                    }
+                    if ($node === $needle) {
+                        return 0;
+                    }
+                }
+            });
+
+            if (null !== $index) {
+                $queue = $this->_storage[$index][1]; 
             }
         }
 
-        if (!$generate) return false;
-
-        if (!(is_object($signal) && $signal instanceof Signal)) {
-            $signal = new Signal($signal);
-        }
-
-        $queue = new Queue($signal);
-
-        if ($indexable) {
-            $this->_index_storage[$index] = $queue;
+        if (!$queue) {
+            $queue = new Queue($type);
+            $this->_storage[] = [$signal, $queue];
+            if (!$signal instanceof \prggmr\signal\Complex) {
+                $this->usort(function($_node1, $_node2){
+                    if ($_node1[0] instanceof \prggmr\signal\Complex) {
+                        return 1;
+                    }
+                    if ($_node2[0] instanceof \prggmr\signal\Complex) {
+                        return -1;
+                    }
+                    $_node1 = $_node1[0]->getSignal();
+                    $_node2 = $_node2[0]->getSignal();
+                    if (is_int($_node1)){
+                        if (is_string($_node2)) {
+                            return -1;
+                        }
+                        if ($_node1 > $_node2) return 1;
+                        if ($_node1 < $_node2) return -1;
+                        if ($_node1 == $_node2) return 0;
+                    }
+                    if (is_string($_node1)) {
+                        if (is_int($node_2)) {
+                            return 1;
+                        }
+                        return strcmp($_node1, $_node2);
+                    }
+                });
+            }
+            return [self::QUEUE_NEW, $queue];
         } else {
-            $this->_non_index_storage[] = $queue;
+            if ($queue->count() === 0) {
+                return [self::QUEUE_EMPTY, $queue];
+            }
+            return [self::QUEUE_NONEMPTY, $queue];
         }
-        return $queue;
     }
 
     /**

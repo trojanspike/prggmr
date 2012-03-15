@@ -21,35 +21,16 @@ namespace prggmr;
  * @copyright  Copyright (c), 2010-12 Nickolas Whiting
  */
 
-/**
- * The signal object represents the signal passed to the engine
- * to fire a subscription queue.
- */
-interface SignalInterface {
-
-    /**
-     * Compares the event signal given aganist itself.
-     *
-     * @param  mixed  $signal  Signal to compare
-     *
-     * @return  mixed  False on failure. True if matches. String/Array
-     *          return results found via the match.
-     */
-    public function compare($signal);
-
-    /**
-     * Returns if this signal returns an indexable value.
-     *
-     * @return  boolean
-     */
-    public function canIndex($param);
-}
+use \InvalidArgumentException;
 
 /**
- * The default signal object allows for signals of any type requiring only
- * that they evaluate to true on a strict comparison check.
+ * As of v0.3.0 the default signal object allows for signals of only strings
+ * and integers. 
+ * 
+ * Other signal types such as regex are considered "complex" and use the
+ * \prggmr\signal\Complex class.
  */
-class Signal implements SignalInterface {
+class Signal implements \prggmr\signal\SignalInterface {
 
     /**
      * Chain signal
@@ -59,34 +40,39 @@ class Signal implements SignalInterface {
     protected $_chain = null;
 
     /**
-     * Identifier for signal.
+     * Event the signal represents.
      *
      * @var  string|integer
      */
-    protected $_id = null;
+    protected $_signal = null;
 
     /**
-     * Constructs a new signal object.
+     * Constructs a new signal.
      *
-     * @param  mixed  $signal  Signal
+     * @param  string|integer  $signal  Signal
      *
-     * @return  \prggmr\Queue
+     * @return  void
      */
     public function __construct($signal)
     {
+        if (!is_int($signal) && !is_string($signal)) {
+            throw new \InvalidArgumentException(
+                'Invalid signal type given'
+            );
+        }
         $this->_signal = $signal;
     }
 
     /**
-     * Compares the variable given with the signal.
+     * Evalutes if the given variable matches this signal.
      *
-     * @param  mixed  $compare  Variable to compare
+     * @param  string|integer  $var  Variable to evalute.
      *
      * @return  boolean
      */
-    public function compare($compare)
+    public function evaluate($var)
     {
-        return ($this->_signal === $compare);
+        return ($this->_signal === $var);
     }
 
     /**
@@ -94,10 +80,16 @@ class Signal implements SignalInterface {
      *
      * @return  mixed  signal.
      */
-    public function signal(/* ... */)
+    public function getSignal(/* ... */)
     {
         return $this->_signal;
     }
+
+    /**
+     * TODO
+     * 
+     * Fix the below! 
+     */
 
     /**
      * Returns the signal chain.
@@ -144,20 +136,5 @@ class Signal implements SignalInterface {
             // really should be a better way to do this
             $this->_chain = array_values($this->_chain);
         }
-    }
-
-    /**
-     * Returns if the provided param is indexable in a php array.
-     *
-     * @param  mixed  $param
-     *
-     * @return  boolean
-     */
-    public function canIndex($param)
-    {
-        if (is_object($param) && $param instanceof Signal) {
-            return $param->canIndex();
-        }
-        return is_int($param) || is_string($param);
     }
 }

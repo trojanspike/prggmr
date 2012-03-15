@@ -89,7 +89,7 @@ function handle_once($subscription, $signal, $identifier = null, $priority = nul
 * @return  void
 */
 if (!function_exists('dequeue')){
-function dequeue($signal, $handle)
+function handle_remove($signal, $handle)
 {
     return prggmr::instance()->dequeue($signal, $handle);   
 }

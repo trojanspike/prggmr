@@ -1,5 +1,5 @@
 <?php
-namespace prggmr\signals;
+namespace prggmr\signal;
 /**
  *  Copyright 2010-12 Nickolas Whiting
  *
@@ -27,7 +27,7 @@ namespace prggmr\signals;
  * Allows for signals using regular expresssions and :var param
  * query strings
  */
-class Regex extends \prggmr\Signal {
+class Regex extends \prggmr\signal\Complex {
 
     /**
      * Constructs a regular expression signal.
@@ -44,7 +44,7 @@ class Regex extends \prggmr\Signal {
         $regex = str_replace('fix\(', '(', $regex);
         $regex = str_replace('fix\)', ')', $regex);
         $regex = '#' . $regex . '$#i';
-        parent::__construct($regex);
+        $this->_signal = $regex;
     }
 
     /**
@@ -56,7 +56,7 @@ class Regex extends \prggmr\Signal {
      * @return  mixed  False on failure. True if matches. String/Array
      *          return results found via the match.
      */
-    public function compare($signal)
+    public function evalute($signal)
     {
         if (preg_match($this->_signal, $signal, $matches)) {
             array_shift($matches);
@@ -70,17 +70,6 @@ class Regex extends \prggmr\Signal {
             }
             return true;
         }
-        return false;
-    }
-
-    /**
-     * Returns if this signal returns an indexable value.
-     * Regex signals cannot be index, this return false always.
-     *
-     * @return  boolean
-     */
-    public function canIndex()
-    {
         return false;
     }
 }
