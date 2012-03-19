@@ -1,24 +1,9 @@
 <?php
 namespace prggmr;
 /**
- *  Copyright 2010-12 Nickolas Whiting
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- *
- * @author  Nickolas Whiting  <prggmr@gmail.com>
- * @package  prggmr
- * @copyright  Copyright (c), 2010-12 Nickolas Whiting
+ * Copyright 2010-12 Nickolas Whiting. All rights reserved.
+ * Use of this source code is governed by the Apache 2 license
+ * that can be found in the LICENSE file.
  */
 
 use \Closure,
@@ -55,14 +40,7 @@ class Handle {
      *
      * @var  string
      */
-    protected $_limit = 0;
-    
-    /**
-     * The exhaust limit.
-     *
-     * @var  integer
-     */
-    protected $_count = 0;
+    protected $_exhaustion = null;
 
     /**
      * Flag determining if the handle has exhausted.
@@ -125,7 +103,7 @@ class Handle {
         }
         $this->_function = $function;
         $this->_identifier = $identifier;
-        $this->_limit = $exhaust;
+        $this->_exhaustion = $exhaust;
     }
 
     /**
@@ -160,7 +138,9 @@ class Handle {
         if ($this->isExhausted()) return false;
         
         # Increase execution count
-        $this->_count++;
+        if (null !== $this->_exhaustion) {
+            $this->_exhaustion;
+        }
 
         if (count(func_get_args()) >= 2) {
             $params = func_get_args();
@@ -179,12 +159,12 @@ class Handle {
         if (null !== $this->_pre) {
             foreach ($this->_pre as $_index => $_func) {
                 try {
-                    call_user_func_array($_func, $params);
+                $result = call_user_func_array($_func, $params);
                 } catch (\Exception $e) {
                     # unset incase we continue
                     unset($this->_pre[$_index]);
                     throw new HandleException(sprintf(
-                        'handle pre fire %s Exception 
+                        'handle %s pre-execution function Exception 
                          ( %s ) at ( %s : %s )',
                         $this->getIdentifier(),
                         $e->getMessage(),
@@ -193,6 +173,11 @@ class Handle {
                     ), $params[0], $this);
                 }
             }
+        }
+
+        // allow for pre-execution to halt the handles execution
+        if (false === $result) {
+            return $result;
         }
 
         # handle fire
@@ -208,16 +193,16 @@ class Handle {
 			), $params[0], $this);
         }
 
-        # post fire
+        # post execution
         if (null !== $this->_post) {
             foreach ($this->_post as $_index => $_func) {
                 try {
-                    call_user_func_array($_func, $params);
+                $result = call_user_func_array($_func, $params);
                 } catch (\Exception $e) {
                     # unset incase we continue
                     unset($this->_pre[$_index]);
                     throw new HandleException(sprintf(
-                        'handle post fire %s Exception 
+                        'handle %s post-execution Exception 
                         ( %s ) at ( %s : %s )',
                         $this->getIdentifier(),
                         $e->getMessage(),
@@ -232,23 +217,13 @@ class Handle {
     }
 
     /**
-     * Returns exhaustion limit.
+     * Returns count until handle becomes exhausted
      *
      * @return  integer
      */
-    public function limit(/* ... */)
+    public function exhaustion(/* ... */)
     {
-        return $this->_limit;
-    }
-
-    /**
-     * Returns the number of times a handle has executed.
-     *
-     * @return  integer
-     */
-    public function count(/* ... */)
-    {
-        return $this->_count;
+        return $this->_exhaustion;
     }
 
     /**
@@ -258,26 +233,19 @@ class Handle {
      */
     public function isExhausted()
     {
-        if (null === $this->_exhausted) {
-
-            $limit = $this->limit();
-            $count = $this->count();
-
-            if (!is_int($limit) || 0 === $limit) {
-                return false;
-            }
-
-            if (0 === $count) return false;
-
-            if ($count >= $limit) {
-                $this->_exhausted = true;
-                return true;
-            }
-
+        if (null === $this->_exhaustion) {
             return false;
-        } else {
-            return $this->_exhausted;
         }
+
+        if (true === $this->_exhausted) {
+            return true;
+        }
+
+        if (0 === $this->_exhaustion) {
+            $this->_exhausted = true;
+        }
+
+        return true;
     }
 
     /**
@@ -297,7 +265,7 @@ class Handle {
      *
      * @return  void
      */
-    public function preFire($closure)
+    public function preExecution($closure)
     {
         if (!is_callable($closure)) {
             throw new \InvalidArgumentException(
@@ -315,7 +283,7 @@ class Handle {
      *
      * @return  void
      */
-    public function postFire($closure)
+    public function postExecution($closure)
     {
         if (!is_callable($closure)) {
             throw new \InvalidArgumentException(
@@ -327,9 +295,9 @@ class Handle {
     }
     
     /**
-     * Supplies additional parameters during runtime.
+     * Supply additional parameters to be passed to the handle.
      *
-     * @param  mixed  $params  Array of runtime parameters.
+     * @param  mixed  $params  Array of parameters.
      *
      * @return  void
      */
@@ -343,7 +311,12 @@ class Handle {
     }
 }
 
-
+/**
+ * Exception thrown when a handle encounters an exception.
+ * 
+ * This allows for retrieving both the handle and event that were in runtime
+ * when the Exception took place.
+ */
 class HandleException extends \Exception {
     
     /**

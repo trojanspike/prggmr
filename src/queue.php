@@ -1,24 +1,9 @@
 <?php
 namespace prggmr;
 /**
- *  Copyright 2010-12 Nickolas Whiting
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- *
- * @author  Nickolas Whiting  <prggmr@gmail.com>
- * @package  prggmr
- * @copyright  Copyright (c), 2010-12 Nickolas Whiting
+ * Copyright 2010-12 Nickolas Whiting. All rights reserved.
+ * Use of this source code is governed by the Apache 2 license
+ * that can be found in the LICENSE file.
  */
 
 use \InvalidArgumentException;
@@ -28,6 +13,13 @@ use \InvalidArgumentException;
  */
 if (!defined('QUEUE_MAX_SIZE')) {
     define('QUEUE_MAX_SIZE', 24);
+}
+
+/**
+ * Defines the default priority of queue nodes
+ */
+if (!defined('QUEUE_DEFAULT_PRIORITY')) {
+    define('QUEUE_DEFAULT_PRIORITY', 100);
 }
 
 /**
@@ -90,7 +82,7 @@ class Queue {
      *
      * @return  void
      */
-    public function enqueue($node, $priority = 100)
+    public function enqueue($node, $priority = QUEUE_DEFAULT_PRIORITY)
     {
         if ($this->count() > QUEUE_MAX_SIZE) {
             throw new \OverflowException(
@@ -98,7 +90,9 @@ class Queue {
             );
         }
         $this->_dirty = true;
-        if (null === $priority || !is_int($priority)) $priority = 100;
+        if (null === $priority || !is_int($priority)) {
+            $priority = QUEUE_DEFAULT_PRIORITY;
+        }
         $this->_storage[] = [$node, $priority];
     }
 

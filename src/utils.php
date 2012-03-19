@@ -1,23 +1,8 @@
 <?php
 /**
- *  Copyright 2010-12 Nickolas Whiting
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- *
- * @author  Nickolas Whiting  <prggmr@gmail.com>
- * @package  prggmr
- * @copyright  Copyright (c), 2010-12 Nickolas Whiting
+ * Copyright 2010-12 Nickolas Whiting. All rights reserved.
+ * Use of this source code is governed by the Apache 2 license
+ * that can be found in the LICENSE file.
  */
 
 /**
@@ -75,14 +60,13 @@ function signal_errors($errno, $errstr, $errfile, $errline) {
  * > 0 - Move backwards
  * < 0 - Move forwards
  * 
- * @param  mixed  $needle  Needle to locate
- * @param  array  $haystack  Array to search
+ * @param  mixed  $needle  Needle
+ * @param  array  $haystack  Hackstack
  * @param  closure  $compare  Comparison function
  * 
  * @return  null|int  integer index location, null locate failure
  */
 function bin_search($needle, $haystack, $compare = null) {
-
     if (null === $compare) {
         $compare = function($node, $needle) {
             if ($node < $needle) {
@@ -96,7 +80,7 @@ function bin_search($needle, $haystack, $compare = null) {
             }
         };
     }
-
+    
     if (count($haystack) === 0) return null;
 
     $low = 0;
@@ -104,18 +88,22 @@ function bin_search($needle, $haystack, $compare = null) {
     
     while ($low <= $high) {
         $mid = ($low + $high) >> 1;
-        $node = $hackstack[$mid];
+        $node = $haystack[$mid];
         $cmp = $compare($node, $needle);
         switch (true) {
+            # match
             case $cmp === 0:
                 return $mid;
                 break;
-            case $cmp < 0:
+            # backwards
+            case $cmp > 0:
                 $low = $mid + 1;
                 break;
-            case $cmp > 0:
+            # forwards
+            case $cmp < 0:
                 $high = $mid - 1;
                 break;
+            # null
             default:
             case $cmp === null:
                 return null;

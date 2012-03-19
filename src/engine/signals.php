@@ -1,51 +1,43 @@
 <?php
 namespace prggmr\engine;
 /**
- *  Copyright 2010-12 Nickolas Whiting
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- *
- * @author  Nickolas Whiting  <prggmr@gmail.com>
- * @package  prggmr
- * @copyright  Copyright (c), 2010-12 Nickolas Whiting
+ * Copyright 2010-12 Nickolas Whiting. All rights reserved.
+ * Use of this source code is governed by the Apache 2 license
+ * that can be found in the LICENSE file.
  */
 
 /**
  * Engine Signals.
+ * 
+ * 0xE001 - 0xE015
+ * Any signals which are directly related to the engine running, e.g. invalid 
+ * signal registration, routine calculation failure, handle execution failure, 
+ * handle exceptions, shutdown etc...
+ * 
+ * 0xE016 - 0xE02A
+ * Unrelated signals handled directly by or represented by the engine.
  */
 class Signals {
     /**
      * Exception encountered during handle execution.
-     * 
-     * @param  object  $exception  Exception instance
-     * @param  object  $handle  Handle instance
-     * @param  object  $event  Event instance
      */
     const HANDLE_EXCEPTION = 0xE001;
-    
+    /**
+     * Invalid or unknown callable provided to sig handler.
+     */
+    const INVALID_HANDLE = 0xE002;
     /**
      * Engine shutdown initiated.
      */
-    const SHUTDOWN = 0xE002;
+    const SHUTDOWN = 0xE015;
 
     /**
      * Global exception signal.
      */
-    const GLOBAL_EXCEPTION = 0xE003;
+    const GLOBAL_EXCEPTION = 0xE016;
 
     /**
      * Global error signal.
      */
-    const GLOBAL_ERROR = 0xE003;
+    const GLOBAL_ERROR = 0xE017;
 }

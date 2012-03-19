@@ -1,29 +1,21 @@
 <?php
 namespace prggmr;
 /**
- *  Copyright 2010-12 Nickolas Whiting
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- *
- * @author  Nickolas Whiting  <prggmr@gmail.com>
- * @package  prggmr
- * @copyright  Copyright (c), 2010-12 Nickolas Whiting
+ * Copyright 2010-12 Nickolas Whiting. All rights reserved.
+ * Use of this source code is governed by the Apache 2 license
+ * that can be found in the LICENSE file.
  */
 
-
 use \Closure,
-    \InvalidArgumentException;
+    \InvalidArgumentException,
+    \prggmr\engine\Signals as esig;
+
+/**
+ * When to begin binary searching.
+ */
+if (!defined('BINARY_ENGINE_SEARCH')) {
+    define('BINARY_ENGINE_SEARCH', 75);
+}
 
 /**
  * As of v0.3.0 the loop is now run in respect to the currently available handles,
@@ -32,7 +24,7 @@ use \Closure,
  *
  * To achieve this the engine uses routines for calculating when to run,
  * the default routines are based on time which calculates the time a handle is
- * to run and sleeps the until then, the other processes the available handles
+ * to run and sleeps until then, the other processes the available handles
  * and shutdowns the engine when no more are available.
  *
  * The Engine uses the State and Storage traits, and will also attempt to
@@ -65,9 +57,29 @@ class Engine {
      * QUEUE_NONEMPTY
      * A non-empty queue was found.
      */
-    const QUEUE_NEW = '0xA01';
-    const QUEUE_EMPTY = '0xA02';
-    const QUEUE_NONEMPTY = '0xA03';
+    const QUEUE_NEW = 0xA01;
+    const QUEUE_EMPTY = 0xA02;
+    const QUEUE_NONEMPTY = 0xA03;
+
+    /**
+     * Search Results
+     * 
+     * SEARCH_NULL
+     * Found no results
+     * 
+     * SEARCH_FOUND
+     * Found a single result
+     * 
+     * SEARCH_NOOP
+     * Search is non-operational (looking for non-searchable)
+     */
+    const SEARCH_NULL = 0xA04;
+    const SEARCH_FOUND = 0xA05;
+    const SEARCH_NOOP = 0xA06;
+
+    /**
+     * Allows for 
+     */
 
     /**
      * Current engine stacktrace, this is keep for when a handle errors out
@@ -78,62 +90,12 @@ class Engine {
     protected $_stacktrace = array();
 
     /**
-     * Clears a set interval.
-     *
-     * @param  mixed  $handler  Handler instance of identifier.
-     *
-     * @return  boolean
+     * Determins if queue storage needs to be sorted.
+     * 
+     * @var  boolean
      */
-    public function clearInterval($handler)
-    {
-        $timers = count($this->_timers);
-        if (is_object($handler) && $handle instanceof Handler) {
-            $index = array_search($handler, $this->_timers);
-            if (false === $index) return false;
-        } else {
-            foreach($this->_timers as $_index => $_timer) {
-                if ($_timer[0]->getIdentifier() === $handler) {
-                    $index = $_index;
-                    break;
-                }
-            }
-            if (!isset($index)) return false;
-        }
-        unset($this->_timers[$index]);
-        return true;
-    }
+    protected $_unsorted = false;
 
-    /**
-     * Clears a set timeout.
-     *
-     * @param  mixed  $handler  Handler instance of identifier.
-     *
-     * @return  boolean
-     */
-    public function clearTimeout($handler)
-    {
-        $this->clearInterval($handler);
-    }
-
-    /**
-     * Returns the count of signals in the engine.
-     *
-     * @return  integer
-     */
-    public function countSignals()
-    {
-        return count($this->_non_index_storage) + count($this->_index_storage);
-    }
-
-    /**
-     * Returns the number of timers in the engine.
-     *
-     * @return integer
-     */
-    public function countTimers()
-    {
-        return count($this->_timers);
-    }
 
     /**
     * Removes a signal handler.
@@ -146,11 +108,11 @@ class Engine {
     * 
     * @return  void
     */
-    public function removeHandle($signal, $handle)
+    public function dehandle($signal, $handle)
     {
-        $queue = $this->queue($signal, false);
-        if (false === $queue) return false;
-        return $queue->dequeue($handle);
+        $slot = $this->queue($signal);
+        if ($slot[0] <= self::QUEUE_EMPTY) return false;
+        return $slot[1]->dequeue($handle);
     }
 
     /**
@@ -235,7 +197,7 @@ class Engine {
     }
 
     /**
-     * Attaches a handle to a signal.
+     * Attach a new handle to a signal.
      *
      * @param  mixed  $callable  Function to execute on handle.
      *
@@ -245,38 +207,34 @@ class Engine {
      *
      * @param  integer $priority  Handle priority.
      *
-     * @param  mixed  $chain  Signal to chain after handle execution.
-     *
      * @param  integer  $exhaust  Rate at which handle exhausts. DEFAULT = 1
      *
-     * @throws  InvalidArgumentException  Thrown when an invalid callback is
-     *          provided.
-     *
-     * @return  object  Subscription
+     * @return  object|boolean  Handle, boolean if error
      */
-    public function handle($callable, $signal, $identifier = null, $priority = null, $chain = null, $exhaust = 1)
+    public function handle($callable, $signal, $identifier = null, $priority = QUEUE_DEFAULT_PRIORITY, $exhaust = 1)
     {
         if (!$callable instanceof Handle) {
             if (!is_callable($callable)) {
-                throw new \InvalidArgumentException(
-                    'callable is not a valid php callback'
-                );
+                $this->signal(esig\Signal::INVALID_HANDLE, array(
+                    func_get_args()
+                ));
+                return false;
             }
             $handle = new Handle($callable, $identifier, $exhaust);
         }
 
-        $queue = $this->queue($signal);
-        $queue->enqueue($handle, $priority);
+        $slot = $this->sigHandler($signal);
+        $slot[1]->enqueue($handle, $priority);
 
         if (null !== $chain) {
-            $queue->getSignal()->setChain($chain);
+            $slot[2]->setChain($chain);
         }
 
         return $handle;
     }
 
     /**
-     * Locates a signal Queue in storage.
+     * Locates or creates a signal Queue in storage.
      * 
      * The storage is designed to place any sortable types [int, strings and
      * sortable objects] at top of the stack and place any unstortable types 
@@ -290,16 +248,12 @@ class Engine {
      *     object(c2), object(c2)
      * ]
      * 
-     * The storage is sorted automatically when a sortable signal is added. 
-     * 
-     * Queues are located using a binary search algorithm.
-     *
      * @param  string|integer|object  $signal  Signal
      * @param  integer  $type  [QUEUE_MIN_HEAP,QUEUE_MAX_HEAP]
      *
-     * @return  array  [QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, object]
+     * @return  array  [QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, queue, signal]
      */
-    public function queue($signal, $type = QUEUE_MIN_HEAP)
+    public function sigHandler($signal, $type = QUEUE_MIN_HEAP)
     {
         $complex = false;
         $queue = false;
@@ -312,6 +266,7 @@ class Engine {
             try {
                 $signal = new Signal($signal);
             } catch (\InvalidArgumentException $e) {
+                $this->signal()
                 return false;
             }
         }
@@ -331,40 +286,11 @@ class Engine {
                 $this->prev();
             }
         } else {
-            $index = bin_search($signal->getSignal(), $this->_storage, function ($_node, $_needle) {
-                if ($_node === null) {
-                    return null;
-                }
-                if ($_node instanceof \prggmr\signal\Complex) {
-                    return 1;
-                }
-                $_node = $_node[0]->getSignal();
-                if (is_string($_node)) {
-                    // to far move up
-                    if (is_int($_node)) {
-                        return 1;
-                    }
-                    return strcmp($_node, $_needle);
-                } 
-                if (is_int($_node)) {
-                    // to far move back
-                    if (is_string($_node)) {
-                        return -1;
-                    }
-                    if ($node < $needle) {
-                        return -1;
-                    }
-                    if ($node > $needle) {
-                        return 1;
-                    }
-                    if ($node === $needle) {
-                        return 0;
-                    }
-                }
-            });
-
+            $index = $this->_search($signal);
             if (null !== $index) {
                 $queue = $this->_storage[$index][1]; 
+            } else {
+                $this->_unsorted = true;
             }
         }
 
@@ -372,37 +298,104 @@ class Engine {
             $queue = new Queue($type);
             $this->_storage[] = [$signal, $queue];
             if (!$signal instanceof \prggmr\signal\Complex) {
-                $this->usort(function($_node1, $_node2){
-                    if ($_node1[0] instanceof \prggmr\signal\Complex) {
-                        return 1;
-                    }
-                    if ($_node2[0] instanceof \prggmr\signal\Complex) {
-                        return -1;
-                    }
-                    $_node1 = $_node1[0]->getSignal();
-                    $_node2 = $_node2[0]->getSignal();
-                    if (is_int($_node1)){
-                        if (is_string($_node2)) {
-                            return -1;
-                        }
-                        if ($_node1 > $_node2) return 1;
-                        if ($_node1 < $_node2) return -1;
-                        if ($_node1 == $_node2) return 0;
-                    }
-                    if (is_string($_node1)) {
-                        if (is_int($node_2)) {
-                            return 1;
-                        }
-                        return strcmp($_node1, $_node2);
-                    }
-                });
+                $this->_unsorted = true;
             }
-            return [self::QUEUE_NEW, $queue];
+            return [self::QUEUE_NEW, $queue, $signal];
         } else {
             if ($queue->count() === 0) {
-                return [self::QUEUE_EMPTY, $queue];
+                return [self::QUEUE_EMPTY, $queue, $signal];
             }
-            return [self::QUEUE_NONEMPTY, $queue];
+            return [self::QUEUE_NONEMPTY, $queue, $signal];
+        }
+    }
+
+    /**
+     * Sorts the storage.
+     * 
+     * @return  void
+     */
+    public function _sort(/* ... */) 
+    {
+        if (!$this->_unsorted) return null;
+
+        $this->usort(function($_node1, $_node2){
+            if ($_node1[0] instanceof \prggmr\signal\Complex) {
+                return 1;
+            }
+            if ($_node2[0] instanceof \prggmr\signal\Complex) {
+                return -1;
+            }
+            $_node1 = $_node1[0]->getSignal();
+            $_node2 = $_node2[0]->getSignal();
+            if (is_int($_node1)){
+                if (is_string($_node2)) {
+                    return -1;
+                }
+                if ($_node1 > $_node2) return 1;
+                if ($_node1 < $_node2) return -1;
+                if ($_node1 == $_node2) return 0;
+            }
+            if (is_string($_node1)) {
+                if (is_int($node_2)) {
+                    return 1;
+                }
+                return strcmp($_node1, $_node2);
+            }
+        });
+
+        $this->_unsorted = false;
+    }
+
+    /**
+     * Searches for a queue in storage.
+     * 
+     * @param  string|int|object  $signal  Signal for queue
+     * 
+     * @return  array  [SEARCH_NULL|SEARCH_FOUND|SEARCH_NOOP, object]
+     */
+    public function _search($signal) 
+    {
+        if ($signal instanceof \prggmr\signal\Complex) {
+            return [self::SEARCH_NOOP, null];
+        }
+        if ($this->count() >= BINARY_ENGINE_SEARCH) {
+            if ($this->_unsorted) $this->_sort();
+            $signal = ($signal instanceof \prggmr\Signal) ? $signal->getSignal() : $signal;
+            /**
+             * Performs a binary search for the given node. 
+             * This will perform much faster in larger systems where anything
+             * more than a few dozen signals could be registered.
+             */
+            return bin_search($signal, $this->_storage, function($_node1, $_node2){
+                if ($_node1[0] instanceof \prggmr\signal\Complex) {
+                    return 1;
+                }
+                $_node1 = $_node1[0]->getSignal();
+                if (is_int($_node1)){
+                    if (is_string($_node2)) {
+                        return -1;
+                    }
+                    if ($_node1 > $_node2) return 1;
+                    if ($_node1 < $_node2) return -1;
+                    if ($_node1 == $_node2) return 0;
+                }
+                if (is_string($_node1)) {
+                    if (is_int($node_2)) {
+                        return 1;
+                    }
+                    return strcmp($_node1, $_node2);
+                }
+            });
+        } else {
+            $this->reset();
+            $is_object = is_object($signal);
+            while ($this->valid()) {
+                if ($is_object && $this->current()[0] === $signal ||
+                    $this->current()[0]->getSignal() === $signal) {
+                    return $this->current();
+                }
+                $this->next();
+            }
         }
     }
 
@@ -537,6 +530,93 @@ class Engine {
     }
 
     /**
+     * Fires a handle.
+     *
+     * @param  object  $signal  Signal instance.
+     *
+     * @param  object  $handle  Handle instance.
+     *
+     * @param  object  $event  Event instance.
+     *
+     * @param  array  $vars  Array of variables to pass handles.
+     *
+     * @return  object  Event
+     */
+    protected function _execute($signal, $handle, &$event, &$vars)
+    {
+        $event->setHandle($handle);
+        try {
+            $result = $handle->execute($vars);
+        } catch (\prggmr\HandleException $e) {
+            $event->setState(\prggmr\Event::STATE_ERROR);
+            $this->signal(engine\Signals::HANDLE_EXCEPTION, array(
+                $e, $handle, $event
+            ));
+        }
+        if (!$event instanceof \prggmr\Event) {
+            throw new \RuntimeException(sprintf(
+                'Event object has been replaced in handle %s',
+                $subscription->getIdentifier()
+            ));
+        }
+        if (null !== $result) {
+            $event->setReturn($result);
+            if (false === $result) {
+                $event->halt();
+            }
+        }
+        if ($event->getState() == Event::STATE_ERROR) {
+            if ($this->getState() === Engine::LOOP) {
+                if (false === $this->clearInterval($handle)) {
+                    $this->dequeue($signal, $handle);
+                }
+            } else {
+                $this->dequeue($signal, $handle);
+            }
+        }
+        if ($handle->isExhausted()) {
+            $this->dequeue($signal, $subscription);
+        }
+        return $event;
+    }
+
+    /**
+     * Sends the engine the shutdown signal while in loop mode.
+     *
+     * @return  void
+     */
+    public function shutdown()
+    {
+        $this->setState(STATE_HALTED);
+    }
+
+    /**
+     * Clears a set interval.
+     *
+     * @param  mixed  $handler  Handler instance of identifier.
+     *
+     * @return  boolean
+     */
+    public function clearInterval($handler)
+    {
+        $timers = count($this->_timers);
+        if (is_object($handler) && $handle instanceof Handler) {
+            $index = array_search($handler, $this->_timers);
+            if (false === $index) return false;
+        } else {
+            foreach($this->_timers as $_index => $_timer) {
+                if ($_timer[0]->getIdentifier() === $handler) {
+                    $index = $_index;
+                    break;
+                }
+            }
+            if (!isset($index)) return false;
+        }
+        unset($this->_timers[$index]);
+        return true;
+    }
+
+    /**
      * Calls a function at the specified intervals of time in microseconds.
      *
      * @param  mixed  $callable  Callable php variable.
@@ -609,90 +689,10 @@ class Engine {
         return $handler;
     }
 
-    /**
-     * Calls a function after the specified amount of time in microseconds.
-     *
-     * @param  mixed  $callable  Callable php variable.
-     *
-     * @param  integer  $interval  Interval of time in microseconds to trigger.
-     *
-     * @param  mixed  $vars  Variables to pass the interval.
-     *
-     * @param  string  $identifier  Identifier of the function.
-     *
-     * @param  integer  $exhaust  Rate at which this handler will exhaust.
-     *
-     * @param  mixed  $start  Unix parse able date to start the function interval.
-     *
-     * @throws  InvalidArgumentException  Thrown when an invalid callback,
-     *          interval or un-parse able date is provided.
-     *
-     * @return  object  Handler
-     */
     public function setTimeout($callable, $interval, $vars = null, $identifier = null, $start = null)
     {
         // This simply uses set interval and sets an exhaustion rate of 1 ...
         return $this->setInterval($callable, $interval, $vars, $identifier, 1, $start);
     }
 
-    /**
-     * Fires a handle.
-     *
-     * @param  object  $signal  Signal instance.
-     *
-     * @param  object  $handle  Handle instance.
-     *
-     * @param  object  $event  Event instance.
-     *
-     * @param  array  $vars  Array of variables to pass handles.
-     *
-     * @return  object  Event
-     */
-    protected function _execute($signal, $handle, &$event, &$vars)
-    {
-        $event->setHandle($handle);
-        try {
-            $result = $handle->execute($vars);
-        } catch (\prggmr\HandleException $e) {
-            $event->setState(\prggmr\Event::STATE_ERROR);
-            $this->signal(engine\Signals::HANDLE_EXCEPTION, array(
-                $e, $handle, $event
-            ));
-        }
-        if (!$event instanceof \prggmr\Event) {
-            throw new \RuntimeException(sprintf(
-                'Event object has been replaced in handle %s',
-                $subscription->getIdentifier()
-            ));
-        }
-        if (null !== $result) {
-            $event->setReturn($result);
-            if (false === $result) {
-                $event->halt();
-            }
-        }
-        if ($event->getState() == Event::STATE_ERROR) {
-            if ($this->getState() === Engine::LOOP) {
-                if (false === $this->clearInterval($handle)) {
-                    $this->dequeue($signal, $handle);
-                }
-            } else {
-                $this->dequeue($signal, $handle);
-            }
-        }
-        if ($handle->isExhausted()) {
-            $this->dequeue($signal, $subscription);
-        }
-        return $event;
-    }
-
-    /**
-     * Sends the engine the shutdown signal while in loop mode.
-     *
-     * @return  void
-     */
-    public function shutdown()
-    {
-        $this->setState(STATE_HALTED);
-    }
 }

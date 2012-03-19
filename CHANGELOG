@@ -1,5 +1,6 @@
 [ 0.3.0 00002012 ]
 ------------------
+- \prggmr\Engine::queue renamed to \prggmr\Engine::sigHandler
 - \prggmr\Engine::queue now uses binary searching for finding queues
 - \prggmr\Engine::queue now returns an array
 - \prggmr\Engine::queue params changed to ($signal, $type)
