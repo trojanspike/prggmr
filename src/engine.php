@@ -213,6 +213,11 @@ class Engine {
      */
     public function handle($callable, $signal, $identifier = null, $priority = QUEUE_DEFAULT_PRIORITY, $exhaust = 1)
     {
+        if (is_int($signal) && $signal >= 0xE001 && $signal <= 0xE02A) {
+            $this->signal(esig\Signal::INVALID_HANDLE, array(
+                func_get_args()
+            ));
+        }
         if (!$callable instanceof Handle) {
             if (!is_callable($callable)) {
                 $this->signal(esig\Signal::INVALID_HANDLE, array(

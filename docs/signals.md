@@ -9,6 +9,9 @@ be worth noting.
 All built-in signals are contained in the \prggmr\engine namespace defined in 
 the Signals class.
 
+Registering any signals within the range of 0xE001 - 0xE02A will result in a
+RESTRICTED_SIGNAL signal being trigged.
+
 ## HANDLE_EXCEPTION (0xE001)
 Exception encountered during the execution of a sig handler.
 
