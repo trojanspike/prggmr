@@ -8,6 +8,8 @@ know what you are doing.
 
 ## Engine
 
+### PRGGMR_EVENTED_EXCEPTIONS
+
 ### BINARY_ENGINE_SEARCH
 __Default :__ 75
 
@@ -31,8 +33,8 @@ __Default :__ 100
 
 Default priority for a handle entered into the queue.
 
-## QUEUE_MIN_HEAP
+### QUEUE_MIN_HEAP
 Instruct the queue to perform as a MIN heap where 0 comes first.
 
-## QUEUE_MAX_HEAP
+### QUEUE_MAX_HEAP
 Instruct the queue to perform as a MAX heap where 0 comes last.

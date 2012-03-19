@@ -218,7 +218,7 @@ class Engine {
                 func_get_args()
             ));
         }
-        
+
         if (!$callable instanceof Handle) {
             if (!is_callable($callable)) {
                 $this->signal(esig\Signal::INVALID_HANDLE, array(
@@ -272,7 +272,9 @@ class Engine {
             try {
                 $signal = new Signal($signal);
             } catch (\InvalidArgumentException $e) {
-                $this->signal()
+                $this->signal(esig\Signal::INVALID_SIGNAL, array(
+                    func_get_args()
+                ));
                 return false;
             }
         }
@@ -320,7 +322,7 @@ class Engine {
      * 
      * @return  void
      */
-    public function _sort(/* ... */) 
+    protected function _sort(/* ... */) 
     {
         if (!$this->_unsorted) return null;
 
@@ -359,7 +361,7 @@ class Engine {
      * 
      * @return  array  [SEARCH_NULL|SEARCH_FOUND|SEARCH_NOOP, object]
      */
-    public function _search($signal) 
+    protected function _search($signal) 
     {
         if ($signal instanceof \prggmr\signal\Complex) {
             return [self::SEARCH_NOOP, null];
@@ -386,7 +388,7 @@ class Engine {
                     if ($_node1 == $_node2) return 0;
                 }
                 if (is_string($_node1)) {
-                    if (is_int($node_2)) {
+                    if (is_int($_node2)) {
                         return 1;
                     }
                     return strcmp($_node1, $_node2);
@@ -394,10 +396,11 @@ class Engine {
             });
         } else {
             $this->reset();
-            $is_object = is_object($signal);
+            if ($signal instanceof Signal) {
+                $signal = $signal->getSignal();
+            }
             while ($this->valid()) {
-                if ($is_object && $this->current()[0] === $signal ||
-                    $this->current()[0]->getSignal() === $signal) {
+                if ($this->current()[0]->getSignal() === $signal) {
                     return $this->current();
                 }
                 $this->next();
@@ -587,7 +590,7 @@ class Engine {
     }
 
     /**
-     * Sends the engine the shutdown signal while in loop mode.
+     * Sends the engine the shutdown signal.
      *
      * @return  void
      */

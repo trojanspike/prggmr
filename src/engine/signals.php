@@ -31,6 +31,10 @@ class Signals {
      */
     const RESTRICTED_SIGNAL = 0xE003;
     /**
+     * Invalid or unknown signal provided.
+     */
+    const INVALID_SIGNAL = 0xE004;
+    /**
      * Engine shutdown initiated.
      */
     const SHUTDOWN = 0xE015;
