@@ -1,8 +1,7 @@
 # Configuration Options
-This page contains options that can be set for prggmr.
+This page contains options that can be set or used within prggmr.
 
-All options are set using constants defined before loading prggmr with a 
-numerical or hexidecimal value.
+Configuration options must be set before loading prggmr.
 
 Changing any configuration can drastically reduce performance, make sure you
 know what you are doing.
@@ -31,3 +30,9 @@ Maximum number of handles that can be assigned to a signal.
 __Default :__ 100
 
 Default priority for a handle entered into the queue.
+
+## QUEUE_MIN_HEAP
+Instruct the queue to perform as a MIN heap where 0 comes first.
+
+## QUEUE_MAX_HEAP
+Instruct the queue to perform as a MAX heap where 0 comes last.
