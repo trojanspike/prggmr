@@ -10,21 +10,24 @@ All built-in signals are contained in the \prggmr\engine namespace defined in
 the Signals class.
 
 Registering any signals within the range of 0xE001 - 0xE02A will result in a
-RESTRICTED_SIGNAL signal being trigged.
+RESTRICTED_SIGNAL signal.
 
 ## HANDLE_EXCEPTION (0xE001)
-Exception encountered during the execution of a sig handler.
+Exception encountered during the execution of a signal handler.
 
 ## INVALID_HANDLE (0xE002)
-Invalid or unknown callable function given to register as a sig handler.
+Invalid or unknown callable variable given to register as a signal handler.
+
+## RESTRICTED_SIGNAL (0xE003)
+A handle has been registered for a built-in signal.
 
 ## SHUTDOWN (0xE015)
-Engine shutdown is starting.
+Engine shutdown has been initiated.
 
 ## GLOBAL_EXCEPTION (0xE016)
 Global exception signal used for any non-prggmr exceptions when using the prggmr
-exception and error handler.
+exception handler.
 
 ## GLOBAL_ERROR (0xE017)
 Global error signal used for any non-prggmr errors when using the prggmr
-exception and error handler.
+error handler.

@@ -27,15 +27,17 @@ class Signals {
      */
     const INVALID_HANDLE = 0xE002;
     /**
+     * Signal registered within the range of engine signals.
+     */
+    const RESTRICTED_SIGNAL = 0xE003;
+    /**
      * Engine shutdown initiated.
      */
     const SHUTDOWN = 0xE015;
-
     /**
      * Global exception signal.
      */
     const GLOBAL_EXCEPTION = 0xE016;
-
     /**
      * Global error signal.
      */
