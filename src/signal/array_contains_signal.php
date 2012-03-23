@@ -10,14 +10,14 @@ namespace prggmr\signal;
   * Array contains signal fires true when the given variable is contained 
   * within the given array allowing for strict mode.
   */
-class ArrayContainsSignal extends \prggmr\signal\Complex {
+class ArrayContains extends \prggmr\signal\Complex {
 
     /**
      * Use strict mode.
      *
      * @var  boolean
      */
-    private $this->_strict = false;
+    private $_strict = false;
 
     /**
      * Constructs a new array contains signal object.

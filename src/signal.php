@@ -49,18 +49,6 @@ class Signal implements \prggmr\signal\SignalInterface {
     }
 
     /**
-     * Evalutes if the given variable matches this signal.
-     *
-     * @param  string|integer  $var  Variable to evalute.
-     *
-     * @return  boolean
-     */
-    public function evaluate($var)
-    {
-        return ($this->_signal === $var);
-    }
-
-    /**
      * Returns the signal.
      *
      * @return  mixed  signal.

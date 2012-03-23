@@ -18,6 +18,21 @@ if (!defined('BINARY_ENGINE_SEARCH')) {
 }
 
 /**
+ * Engine Hash table
+ */
+define('ENGINE_HASH_STORAGE', 1);
+/**
+ * Engine binary storage
+ */
+define('ENGINE_BINARY_STORAGE', 2);
+
+if (defined('ENGINE_USE_BINARY')) {
+    define('ENGINE_STORAGE_TYPE', ENGINE_BINARY_STORAGE);
+} else {
+    define('ENGINE_STORAGE_TYPE', ENGINE_HASH_STORAGE);
+}
+
+/**
  * As of v0.3.0 the loop is now run in respect to the currently available handles,
  * this prevents the engine from running contionusly forever when there isn't anything
  * that it needs to do.
@@ -33,10 +48,10 @@ if (!defined('BINARY_ENGINE_SEARCH')) {
  * The queue storage has also been improved in 0.3.0, previously the storage used
  * a non-index and index based storage, the storage now uses only a single array.
  * 
- * The major improvement is the storage uses a binary search algorithm for
- * locating the queues, the algorithm works with strings, integers and 
- * \prggmr\signal\Complex objects providing a major performance increase over
- * the previous implementation.
+ * The major improvement is the storage uses a binary search algorithm or a 
+ * direct index lookup for locating the queues, the algorithm works with 
+ * strings, integers and \prggmr\signal\Complex objects providing a major 
+ * performance increase over the previous implementation.
  */
 class Engine {
 
@@ -272,39 +287,31 @@ class Engine {
             try {
                 $signal = new Signal($signal);
             } catch (\InvalidArgumentException $e) {
-                $this->signal(esig\Signal::INVALID_SIGNAL, array(
-                    func_get_args()
-                ));
+                $this->signal(esig\Signal::INVALID_SIGNAL, array($signal));
                 return false;
             }
         }
 
         if ($complex) {
-            // start at the bottom of the stack and go in reverse
-            $this->end();
-            while ($this->valid()) {
-                if ($this->current()[0] === $signal) {
-                    $queue = $this->current();
-                    break;
-                }
-                if (!$this->current()[0] instanceof \prggmr\signal\Complex) {
-                    // stop looking no longer in complex storage
-                    break;
-                }
-                $this->prev();
+            $search = $this->_complexSearch($signal);
+            if ($search[0] === self::SEARCH_FOUND) {
+                $queue = $search[1];
             }
         } else {
-            $index = $this->_search($signal);
-            if (null !== $index) {
-                $queue = $this->_storage[$index][1]; 
-            } else {
-                $this->_unsorted = true;
+            $search = $this->_search($signal);
+            if ($search[0] === self::SEARCH_FOUND) {
+                $queue = $search[1];
             }
         }
 
         if (!$queue) {
             $queue = new Queue($type);
-            $this->_storage[] = [$signal, $queue];
+            if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE && !$complex) {
+                $this->_storage[$signal->getSignal()] = [$signal, $queue];
+                $this->_unsorted = true;
+            } else {
+                $this->_storage[] = [$signal, $queue];
+            }
             if (!$signal instanceof \prggmr\signal\Complex) {
                 $this->_unsorted = true;
             }
@@ -333,6 +340,7 @@ class Engine {
             if ($_node2[0] instanceof \prggmr\signal\Complex) {
                 return -1;
             }
+            if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE) return 0;
             $_node1 = $_node1[0]->getSignal();
             $_node2 = $_node2[0]->getSignal();
             if (is_int($_node1)){
@@ -355,57 +363,104 @@ class Engine {
     }
 
     /**
-     * Searches for a queue in storage.
+     * Searches for a string or integer signal queue in storage.
      * 
      * @param  string|int|object  $signal  Signal for queue
      * 
-     * @return  array  [SEARCH_NULL|SEARCH_FOUND|SEARCH_NOOP, object]
+     * @return  array  [SEARCH_NULL|SEARCH_FOUND|SEARCH_NOOP, object|null]
      */
     protected function _search($signal) 
     {
-        if ($signal instanceof \prggmr\signal\Complex) {
+        if ($signal instanceof \prggmr\signal\Complex || !is_string($signal) && 
+            !is_int($signal)) {
             return [self::SEARCH_NOOP, null];
         }
-        if ($this->count() >= BINARY_ENGINE_SEARCH) {
-            if ($this->_unsorted) $this->_sort();
-            $signal = ($signal instanceof \prggmr\Signal) ? $signal->getSignal() : $signal;
-            /**
-             * Performs a binary search for the given node. 
-             * This will perform much faster in larger systems where anything
-             * more than a few dozen signals could be registered.
-             */
-            return bin_search($signal, $this->_storage, function($_node1, $_node2){
-                if ($_node1[0] instanceof \prggmr\signal\Complex) {
-                    return 1;
-                }
-                $_node1 = $_node1[0]->getSignal();
-                if (is_int($_node1)){
-                    if (is_string($_node2)) {
-                        return -1;
-                    }
-                    if ($_node1 > $_node2) return 1;
-                    if ($_node1 < $_node2) return -1;
-                    if ($_node1 == $_node2) return 0;
-                }
-                if (is_string($_node1)) {
-                    if (is_int($_node2)) {
+        if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE) {
+            if (isset($this->_storage[$signal])) {
+                return [self::SEARCH_FOUND, $this->_storage[$signal][1]];
+            }
+        } else {
+            if ($this->count() >= BINARY_ENGINE_SEARCH) {
+                if ($this->_unsorted) $this->_sort();
+                $signal = ($signal instanceof \prggmr\Signal) ? $signal->getSignal() : $signal;
+                return bin_search($signal, $this->_storage, function($_node1, $_node2){
+                    if ($_node1[0] instanceof \prggmr\signal\Complex) {
                         return 1;
                     }
-                    return strcmp($_node1, $_node2);
+                    $_node1 = $_node1[0]->getSignal();
+                    if (is_int($_node1)){
+                        if (is_string($_node2)) {
+                            return -1;
+                        }
+                        if ($_node1 > $_node2) return 1;
+                        if ($_node1 < $_node2) return -1;
+                        if ($_node1 == $_node2) return 0;
+                    }
+                    if (is_string($_node1)) {
+                        if (is_int($_node2)) {
+                            return 1;
+                        }
+                        return strcmp($_node1, $_node2);
+                    }
+                });
+            } else {
+                $this->reset();
+                if ($signal instanceof Signal) {
+                    $signal = $signal->getSignal();
                 }
-            });
-        } else {
-            $this->reset();
-            if ($signal instanceof Signal) {
-                $signal = $signal->getSignal();
-            }
-            while ($this->valid()) {
-                if ($this->current()[0]->getSignal() === $signal) {
-                    return $this->current();
+                while ($this->valid()) {
+                    if ($this->current()[0]->getSignal() === $signal) {
+                        return [self::SEARCH_FOUND, $this->current()[1]];
+                    }
+                    $this->next();
                 }
-                $this->next();
             }
         }
+        return [self::SEARCH_NULL, null];
+    }
+
+    /**
+     * Searches for a complex signal. If given a complex signal object
+     * it will attempt to locate the signal, otherwise it will attempt to locate
+     * any signal handlers. 
+     * 
+     * @param  string|int|object  $signal  Signal(s) to lookup.
+     * 
+     * @return  array  [SEARCH_NULL|SEARCH_FOUND|SEARCH_NOOP, object|array|null]
+     */
+    public function _searchComplex($signal)
+    {
+        if (is_string($signal) || is_int($signal)) {
+            $locate = true;
+            $found = array();
+        } elseif (!$signal instanceof \prggmr\signal\Complex) {
+            $this->signal(esig\Signal::INVALID_SIGNAL, array($signal));
+            return [self::SEARCH_NOOP, null]
+        }
+
+        $this->end();
+        while ($this->valid()) {
+            if ($locate) {
+                $eval = $this->current()[0]->evaluate($signal);
+                if ($eval !== false) {
+                    $found[] = [$this->current()[1], $eval];
+                }
+            } else {
+                if ($this->current()[0] === $signal) {
+                    return [self::SEARCH_FOUND, $signal];
+                }
+            }
+            if (!$this->current()[0] instanceof \prggmr\signal\Complex) {
+                // stop looking no longer in complex storage
+                break;
+            }
+            $this->prev();
+        }
+
+        if ($locate && count($found) !== 0) {
+            return [self::SEARCH_FOUND, $found];
+        }
+        return [self::SEARCH_NULL, null];
     }
 
     /**
@@ -421,15 +476,8 @@ class Engine {
      *
      * @return  object  EventGG
      */
-    public function signal($signal, $vars = null, $event = null, $stacktrace = null)
+    public function signal($signal, &$vars = null, &$event = null, $stacktrace = null)
     {
-        if (!$signal instanceof $signal) {
-            
-        }
-        
-        // Create a temporary queue
-        $queue = new Queue(new Signal($signal));
-
         if (null !== $vars) {
             if (!is_array($vars)) {
                 $vars = array($vars);
@@ -439,60 +487,25 @@ class Engine {
         if (null === $event || !is_object($event)) {
             $event = new Event();
         } elseif (!$event instanceof Event) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    'signal expected instance of Event received "%s"'
-                , get_class($event))
-            );
+            $this->signal(esig\Signals::INVALID_EVENT, array($event));
+            $event = new Event();
         }
-
-        if (0 === count($vars)) {
-            $vars = array(&$event);
-        } else {
-            $vars = array_merge(array(&$event), $vars);
+        $queue = new Queue();
+        $event->setState(STATE_RUNNING);
+        $stack = $this->_search($signal);
+        if ($stack[0] === self::SEARCH_FOUND) {
+            $queue->merge($stack[1]->storage());
         }
-
-        $hashandles = false;
-
-        // Event is now running
-        $event->setState(State::RUNNING);
-
-        // index lookup
-        $obj = (is_object($signal) && $signal instanceof Signal);
-
-        // if () {
-        //     $index = ($obj) ? $signal->getSignal() : $signal;
-        //     if (isset($this->_index_storage[$index])) {
-        //         $_queue = $this->_index_storage[$index];
-        //         // rewind only
-        //         $_queue->rewind(false);
-        //         while($_queue->valid()){
-        //             $queue->enqueue(
-        //                 $_queue->current(),
-        //                 $_queue->getInfo()
-        //             );
-        //             $this->_index_storage[$index]->next();
-        //         }
-        //     }
-        // }
-
-        $length = count($this->_non_index_storage);
-        if (0 !== $length) {
-            for($i=0;$i!=$length;$i++) {
-                if (false !==
-                    ($compare = $this->_non_index_storage[$i]->getSignal()->compare($signal))) {
-                    // rewind only
-                    $this->_non_index_storage[$i]->rewind(false);
-                    while($this->_non_index_storage[$i]->valid()){
-                        $this->_non_index_storage[$i]->current()->params($compare);
-                        $queue->enqueue(
-                            $this->_non_index_storage[$i]->current(),
-                            $this->_non_index_storage[$i]->getInfo()
-                        );
-                        $this->_non_index_storage[$i]->next();
-                    }
+        $complex = $this->_searchComplex($signal);
+        if ($complex[0] === self::SEARCH_FOUND) {
+            array_walk(function($node) use ($queue){
+                if (is_bool($node[1]) === false) {
+                    $node[0]->walk(function($handle) use ($node[1]){
+                        $handle->params($node[1]);
+                    });
                 }
-            }
+                $queue->merge($node[0]->storage());
+            }, $nodes[1]);
         }
 
         // keep the event in an active state until everything completes

@@ -14,7 +14,7 @@ use \LogicException;
  * Complex signals are anything that is not a string or integer and requires
  * anything but a simple comparison (===) for evaluation.
  */
-class Complex extends \prggmr\Signal {
+abstract class Complex extends \prggmr\Signal {
     /**
      * Force implementation of a new constructor.
      */
@@ -23,5 +23,27 @@ class Complex extends \prggmr\Signal {
         throw new \LogicException(
             'Signal not implemented properly'
         );
+    }
+
+    /**
+     * Compares the event signal given aganist itself.
+     *
+     * @param  string|integer  $signal  Signal to evaluate
+     *
+     * @return  boolean|string|array  False on failure. True if matches. String
+     *                                or array indicate results to pass handlers
+     */
+    abstract public function evaluate($var);
+
+    /**
+     * Runs the signal routine calculation.
+     * 
+     * SUBJECT TO CHANGE
+     * 
+     * @return  boolean|integer
+     */
+    public function routine()
+    {
+        return false;
     }
 }

@@ -12,16 +12,6 @@ namespace prggmr\signal;
 interface SignalInterface {
 
     /**
-     * Compares the event signal given aganist itself.
-     *
-     * @param  mixed  $signal  Signal to compare
-     *
-     * @return  mixed  False on failure. True if matches. String/Array
-     *          return results found via the match.
-     */
-    public function evaluate($var);
-
-    /**
      * Returns if this signal returns an indexable value.
      *
      * @return  boolean

@@ -40,14 +40,6 @@ class Event {
     protected $_trace = array();
 
     /**
-     * Constructs a new event object.
-     */
-    public function __construct()
-    {
-        $this->setState(static::STATE_DECLARED);
-    }
-
-    /**
      * Get a variable in the event.
      *
      * @param  mixed  $key  Variable name.

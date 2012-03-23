@@ -25,6 +25,38 @@ trait Storage {
     protected $_storage = [];
 
     /**
+     * Returns the current storage array.
+     * 
+     * @return  array
+     */
+    public function storage(/* ... */)
+    {
+        return $this->_storage;
+    }
+
+    /**
+     * Merge an array with the current storage.
+     * 
+     * @return  void
+     */
+    public function merge($array)
+    {
+        $this->_storage = array_merge($this->_storage, $array);
+    }
+
+    /**
+     * Apply the given function to every node in storage.
+     * 
+     * @param  callable  $func
+     * 
+     * @return  void
+     */
+    public function walk($func)
+    {
+        return array_walk($func, $this->_storage);
+    }
+
+    /**
      * Procedures.
      */
     public function count(/* ... */)

@@ -16,10 +16,16 @@ RESTRICTED_SIGNAL signal.
 Exception encountered during the execution of a signal handler.
 
 ## INVALID_HANDLE (0xE002)
-Invalid or unknown callable variable given to register as a signal handler.
+Invalid or unknown callable variable encountered.
 
 ## RESTRICTED_SIGNAL (0xE003)
 A handle has been registered for a built-in signal.
+
+## INVALID_SIGNAL (0xE004)
+Invalid or unknown signal encountered.
+
+## INVALID_EVENT (0xE005)
+Invalid or unknown event encountered.
 
 ## SHUTDOWN (0xE015)
 Engine shutdown has been initiated.

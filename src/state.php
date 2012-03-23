@@ -57,6 +57,16 @@ trait State
     protected $_state = null;
 
     /**
+     * Constructs a new state object.
+     * 
+     * @return  void
+     */
+    public function __construct() 
+    {
+        $this->_state = STATE_DECLARED;
+    }
+
+    /**
      * Returns the current event state.
      *
      * @return  integer  Current state of this event.
