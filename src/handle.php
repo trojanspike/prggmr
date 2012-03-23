@@ -170,7 +170,7 @@ class Handle {
                         $e->getMessage(),
                         $e->getFile(),
                         $e->getLine()
-                    ), $params[0], $this);
+                    ), $this->_bind, $this);
                 }
             }
         }
@@ -190,7 +190,7 @@ class Handle {
                     $e->getMessage(),
                     $e->getFile(),
                     $e->getLine()
-			), $params[0], $this);
+			), $this->_bind, $this);
         }
 
         # post execution
@@ -208,7 +208,7 @@ class Handle {
                         $e->getMessage(),
                         $e->getFile(),
                         $e->getLine()
-                    ), $params[0], $this);
+                    ), $this->_bind, $this);
                 }
             }
         }
@@ -321,6 +321,17 @@ class Handle {
     public function bind($object)
     {
         $this->_function =  $this->_function->bindTo($object);
+        $this->_bind = $object;
+    }
+
+    /**
+     * Returns the object the handle has been bound to.
+     * 
+     * @return  object
+     */
+    public function getBind()
+    {
+        return $this->_bind;
     }
 }
 

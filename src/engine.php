@@ -236,14 +236,14 @@ class Engine {
     public function handle($callable, $signal, $identifier = null, $priority = QUEUE_DEFAULT_PRIORITY, $exhaust = 1)
     {
         if (is_int($signal) && $signal >= 0xE001 && $signal <= 0xE02A) {
-            $this->signal(esig\Signal::RESTRICTED_SIGNAL, array(
+            $this->signal(esig::RESTRICTED_SIGNAL, array(
                 func_get_args()
             ));
         }
 
         if (!$callable instanceof Handle) {
             if (!is_callable($callable)) {
-                $this->signal(esig\Signal::INVALID_HANDLE, array(
+                $this->signal(esig::INVALID_HANDLE, array(
                     func_get_args()
                 ));
                 return false;
@@ -294,7 +294,7 @@ class Engine {
             try {
                 $signal = new Signal($signal);
             } catch (\InvalidArgumentException $e) {
-                $this->signal(esig\Signal::INVALID_SIGNAL, array($signal));
+                $this->signal(esig::INVALID_SIGNAL, array($signal));
                 return false;
             }
         }
@@ -455,7 +455,7 @@ class Engine {
             $locate = true;
             $found = array();
         } elseif (!$signal instanceof \prggmr\signal\Complex) {
-            $this->signal(esig\Signal::INVALID_SIGNAL, array($signal));
+            $this->signal(esig::INVALID_SIGNAL, array($signal));
             return [self::SEARCH_NOOP, null];
         }
         $this->_sort();
@@ -497,7 +497,7 @@ class Engine {
      *
      * @return  object  EventGG
      */
-    public function signal($signal, &$vars = null, &$event = null, $stacktrace = null)
+    public function signal($signal, $vars = null, &$event = null, $stacktrace = null)
     {
         if (null !== $vars) {
             if (!is_array($vars)) {
@@ -507,7 +507,7 @@ class Engine {
 
         if (!$event instanceof Event) {
             if (null !== $event) {
-                $this->signal(esig\Signals::INVALID_EVENT, array($event));
+                $this->signal(esigs::INVALID_EVENT, array($event));
             }
             $event = new Event();
             $event->setState(STATE_RUNNING);
@@ -585,10 +585,10 @@ class Engine {
         $handle->bind($event);
         try {
             $result = $handle->execute($vars);
-        } catch (\prggmr\HandleException $e) {
+        } catch (\prggmr\HandleException $exception) {
             $event->setState(STATE_CORRUPTED);
-            $this->signal(esig\Signals::HANDLE_EXCEPTION, array(
-                $handle, $event, $signal
+            $this->signal(esig::HANDLE_EXCEPTION, array(
+                $exception, $signal
             ));
         }
         if (null !== $result) {
