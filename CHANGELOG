@@ -1,5 +1,6 @@
 [ 0.3.0 00002012 ]
 ------------------
+- Removed handle identifier
 - Renamed \prggmr\signal\Regex to \prggmr\signal\Query
 - Added \prggmr\signal\Standard abstract class
 - Removed SignalInterface

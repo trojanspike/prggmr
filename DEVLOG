@@ -1,3 +1,35 @@
+[ 03232012 - 1815 ]
+
+- The Engine is now almost fully refactored with that the Queue, Event and 
+  Signal objects have been completely redesigned. At this point prggmr is
+  beginning to evolve and the evolution is incredible, it seems as though I 
+  have stumbled upon how to make prggmr a Complex Event Engine ... which I 
+  had no clue on how it would be done ... I guess it wasn't as difficult as
+  I had orginally thought it would be.
+
+  With that I still need to establish a method of keeping a history of all
+  signals and their associated events that have occured, I'm thinking this will
+  be done by simply inserting it into the Engine's memory with a timestamp and
+  simply provide a method for either fully flushing this history or not keeping
+  track at all ... but having a timeline of what happened and when during your
+  application and having that easily accesible would be extraordinary.
+
+- The states of all objects is still undetermined at this point, some of which
+  are a bit more complex than I orginally thought ... such as recycling a 
+  corrupted event, I have thought of possibly looping through the event's 
+  storage and detecting if there are any nodes in an error state but that could
+  be incredibly complicated since it would be almost impossible to determine 
+  what signifies an error state.
+
+- As mentioned in the previous note I believe I have found a method for doing
+  complex event processing, with that processing it seems as if it will be 
+  possible to actually never have the engine aware of any of the complex events
+  that are taking place but rather it would be robust enough to allow
+  for anything such as a non-blocking socket connection, real-time based signal
+  or complex event algorithms to instruct it on what to, this way it isn't the
+  engine that limits what can be done with prggmr but rather what the programmer
+  developing the complex signals can do providing limitless possibilites.
+
 [ 03082012 - 1300 ]
 
 - With the release of 5.4 this month I'm making PHP 5.4 a requirement, 
@@ -10,12 +42,7 @@
   but I needed somewhere to place misc functions that didn't fit anywhere else.
 
 - I believe I have finally come to a conclusion on the Queue implementation
-  although I am still not pleased with it. The Queue is now a FixedArray
-  object which, if PHP does as they say it does should be much faster than
-  the old Queue.
-
-  Along with that I need to ensure I convert any normal PHP array into a 
-  FixedArray, at least the arrays used within the Engine.
+  although I am still not pleased with it.
 
 [ 03062012 - 1350 ]
 
@@ -34,7 +61,7 @@
 - The coupling that existed in the Signal has been cleaned up ... not even sure
   why I did it this way.
 
-- I am attempting to trim down the all prggmr objects as much as possible, which 
+- I am attempting to trim down all prggmr objects as much as possible, which 
   should provide some performance gains and really simplify the objects. I'm 
   still wondering how I can trim down the Engine and find a way to move the Time
   based signals into their own little world without having to have the Engine

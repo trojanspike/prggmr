@@ -548,22 +548,10 @@ class Engine {
         while($queue->valid()) {
             if ($event->getState() === STATE_HALTED) break;
             $this->_execute($signal, $queue->current()[0], $event, $vars);
-            // if (!$event->isHalted() &&
-            //     null !== ($chain = $queue->info()->getChain())) {
-            //     foreach ($chain as $_chain) {
-            //         $link = $this->signal($_chain, $vars, $event, $stacktrace);
-            //         if (false !== $chain) {
-            //             $event->setChain($link);
-            //         }
-            //     }
-            // }
             $queue->next();
         }
-
         $event->setState(STATE_EXITED);
 
-        // release temporary queue
-        unset($queue);
         return $event;
     }
 
@@ -599,15 +587,6 @@ class Engine {
             }
         }
         // How to determine it can be recovered
-        // if ($event->getState() == STATE_CORRUPTED) {
-        //     if ($this->getState() === Engine::LOOP) {
-        //         if (false === $this->clearInterval($handle)) {
-        //             $this->dequeue($signal, $handle);
-        //         }
-        //     } else {
-        //         $this->dequeue($signal, $handle);
-        //     }
-        // }
         return $event;
     }
 
@@ -620,110 +599,4 @@ class Engine {
     {
         $this->setState(STATE_HALTED);
     }
-
-    /**
-     * Clears a set interval.
-     *
-     * @param  mixed  $handler  Handler instance of identifier.
-     *
-     * @return  boolean
-     */
-    public function clearInterval($handler)
-    {
-        $timers = count($this->_timers);
-        if (is_object($handler) && $handle instanceof Handler) {
-            $index = array_search($handler, $this->_timers);
-            if (false === $index) return false;
-        } else {
-            foreach($this->_timers as $_index => $_timer) {
-                if ($_timer[0]->getIdentifier() === $handler) {
-                    $index = $_index;
-                    break;
-                }
-            }
-            if (!isset($index)) return false;
-        }
-        unset($this->_timers[$index]);
-        return true;
-    }
-
-    /**
-     * Calls a function at the specified intervals of time in microseconds.
-     *
-     * @param  mixed  $callable  Callable php variable.
-     *
-     * @param  integer  $interval  Interval of time in microseconds to trigger.
-     *
-     * @param  mixed  $vars  Variables to pass the interval.
-     *
-     * @param  string  $identifier  Identifier of the function.
-     *
-     * @param  integer  $exhaust  Rate at which this handler will exhaust.
-     *
-     * @param  mixed  $start  Unix parse able date to start the function interval.
-     *
-     * @throws  InvalidArgumentException  Thrown when an invalid callback,
-     *          interval or un-parse able date is provided.
-     *
-     * @return  object  Handler
-     */
-    public function setInterval($callable, $interval, $vars = null, $identifier = null, $exhaust = 0, $start = null)
-    {
-        if (!$callable instanceof Handler) {
-            if (!is_callable($callable)) {
-                throw new \InvalidArgumentException(
-                    'function callback is not valid'
-                );
-            }
-            $handler = new Handler($callable, $identifier, $exhaust);
-        }
-
-        if (!is_int($interval)) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    'invalid time interval expected integer received %s',
-                    gettype($interval)
-                )
-            );
-        }
-        // Allow support for setting the interval in the future
-        // e.g. Set to begin at 12/1/1 at 12:00pm every 24 hours
-        if (null !== $start) {
-            if (is_int($start)) {
-                if (time() <= $start) {
-                    $timestamp = $start;
-                }
-            } else {
-                $timestamp = strtotime($start, time());
-                if (false !== $timestamp) {
-                    if (time() >= $timestamp) {
-                        $start = null;
-                    }
-                } else {
-                    throw new \InvalidArgumentException(sprintf(
-                        'Un-parse able date given as starting time (%s)',
-                        $start
-                    ));
-                }
-            }
-        }
-        if (null !== $start) {
-            // really this is getting old
-            $engine = $this;
-            $this->setTimeout(function() use ($engine, $handler, $interval, $vars, $exhaust){
-                $engine->setInterval($handler, $interval, $vars, $identifier, $exhaust, null);
-            }, ($timestamp - time()) * 1000, null);
-            // notice that this does seconds only not milli seconds
-        } else {
-            $this->_timers[] = array($subscription, $interval, $this->getMilliseconds() + $interval, $vars);
-        }
-        return $handler;
-    }
-
-    public function setTimeout($callable, $interval, $vars = null, $identifier = null, $start = null)
-    {
-        // This simply uses set interval and sets an exhaustion rate of 1 ...
-        return $this->setInterval($callable, $interval, $vars, $identifier, 1, $start);
-    }
-
 }

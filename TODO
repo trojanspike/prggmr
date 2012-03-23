@@ -1,9 +1,5 @@
 TODO [ 0.3.0 ]
 ---------------------------------------
+- Determine how a corrupted event can be recycled
 - Refactor Engine class to be faster!
-- Cleanup Signal class
-- Cleanup Event class
-- Setup Engine loop to run based on available handlers
-- Refactor Handle, Engine and Signal to handle time signals without an extra
-  storage.
-- Chains have not worked properly since v0.2.0 ... fix it!
+- Setup Engine loop to run based on routines
