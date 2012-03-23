@@ -19,7 +19,7 @@ require $dir.'/storage.php';
 require $dir.'/state.php';
 require $dir.'/engine/signals.php';
 require $dir.'/engine.php';
-require $dir.'/signal/interface.php';
+require $dir.'/signal/standard.php';
 require $dir.'/signal.php';
 require $dir.'/signal/complex.php';
 require $dir.'/event.php';

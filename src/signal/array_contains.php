@@ -25,10 +25,10 @@ class ArrayContains extends \prggmr\signal\Complex {
      * @param  mixed  $signal  Signal
      * @param  boolean  $strict  Use strict mode
      */
-    public function __construct($signal, $strict = false)
+    public function __construct($info, $strict = false)
     {
         $this->_strict = $strict;
-        $this->_signal = $signal;
+        $this->_info = $info;
     }
     
     /**
@@ -40,7 +40,7 @@ class ArrayContains extends \prggmr\signal\Complex {
      */
     public function evaluate($signal)
     {
-        if (array_search($signal, $this->_signal, $this->_strict) !== false) {
+        if (array_search($signal, $this->_info, $this->_strict) !== false) {
             return true;
         }
         return false;

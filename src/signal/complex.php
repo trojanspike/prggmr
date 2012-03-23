@@ -11,10 +11,9 @@ use \LogicException;
 /**
  * Added in v0.3.0
  * 
- * Complex signals are anything that is not a string or integer and requires
- * anything but a simple comparison (===) for evaluation.
+ * Complex signals are anything that is not a string or integer.
  */
-abstract class Complex extends \prggmr\Signal {
+abstract class Complex extends Standard {
     /**
      * Force implementation of a new constructor.
      */
@@ -36,13 +35,26 @@ abstract class Complex extends \prggmr\Signal {
     abstract public function evaluate($var);
 
     /**
-     * Runs the signal routine calculation.
+     * Runs the routine calculations which dictate when the engine will run or 
+     * idle.
      * 
-     * SUBJECT TO CHANGE
+     * Currently this accepts no parameters in future versions this will 
+     * possibly be given a list of events that have taken place, when and their
+     * results other signals that are currently registered, when they were 
+     * registered etc...
      * 
-     * @return  boolean|integer
+     * The goal of running routine calculations is to allow for complex event
+     * processing.
+     * 
+     * FALSE indicates the signal can do nothing.
+     * 
+     * INTEGER informs the engine to idle for that amount of time.
+     * 
+     * ARRAY informs the engine to signal those events.
+     * 
+     * @return  boolean|integer|array
      */
-    public function routine()
+    public function routine(/* ... */)
     {
         return false;
     }

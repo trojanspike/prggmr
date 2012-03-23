@@ -1,8 +1,12 @@
 [ 0.3.0 00002012 ]
 ------------------
+- Renamed \prggmr\signal\Regex to \prggmr\signal\Query
+- Added \prggmr\signal\Standard abstract class
+- Removed SignalInterface
+- Removed chains entirely
+- Event properties can now be set as read-only
 - \prggmr\signal\Complex::evaluate, routine abstract method added
 - \prggmr\signal\Complex is now abstract
-- Removed \prggmr\signal\SignalInterface::evalute
 - Added \prggmr\Engine::_searchComplex
 - \prggmr\Engine::queue renamed to \prggmr\Engine::sigHandler
 - \prggmr\Engine::queue now uses binary searching for finding queues

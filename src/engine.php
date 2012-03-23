@@ -233,7 +233,7 @@ class Engine {
      *
      * @return  object|boolean  Handle, boolean if error
      */
-    public function handle($callable, $signal, $identifier = null, $priority = QUEUE_DEFAULT_PRIORITY, $exhaust = 1)
+    public function handle($callable, $signal, $priority = QUEUE_DEFAULT_PRIORITY, $exhaust = 1)
     {
         if (is_int($signal) && $signal >= 0xE001 && $signal <= 0xE02A) {
             $this->signal(esig::RESTRICTED_SIGNAL, array(
@@ -248,7 +248,7 @@ class Engine {
                 ));
                 return false;
             }
-            $handle = new Handle($callable, $identifier, $exhaust);
+            $handle = new Handle($callable, $exhaust);
         }
 
         $slot = $this->sigHandler($signal);
@@ -314,7 +314,7 @@ class Engine {
         if (!$queue) {
             $queue = new Queue($type);
             if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE && !$complex) {
-                $this->_storage[(string) $signal->getSignal()] = [
+                $this->_storage[(string) $signal->info()] = [
                     $signal, $queue
                 ];
                 if ($this->_last_sig_added instanceof \prggmr\Signal\Complex) {
@@ -352,8 +352,8 @@ class Engine {
                 return -1;
             }
             if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE) return 0;
-            $_node1 = $_node1[0]->getSignal();
-            $_node2 = $_node2[0]->getSignal();
+            $_node1 = $_node1[0]->info();
+            $_node2 = $_node2[0]->info();
             if (is_int($_node1)){
                 if (is_string($_node2)) {
                     return -1;
@@ -392,7 +392,7 @@ class Engine {
             return [self::SEARCH_NOOP, null];
         }
         if ($signal instanceof \prggmr\Signal) {
-            $signal = $signal->getSignal();
+            $signal = $signal->info();
         }
         $this->_sort();
         if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE) {
@@ -403,12 +403,12 @@ class Engine {
         } else {
             if ($this->count() >= BINARY_ENGINE_SEARCH) {
                 if ($this->_unsorted) $this->_sort();
-                $signal = ($signal instanceof \prggmr\Signal) ? $signal->getSignal() : $signal;
+                $signal = ($signal instanceof \prggmr\Signal) ? $signal->info() : $signal;
                 return bin_search($signal, $this->_storage, function($_node1, $_node2){
                     if ($_node1[0] instanceof \prggmr\signal\Complex) {
                         return 1;
                     }
-                    $_node1 = $_node1[0]->getSignal();
+                    $_node1 = $_node1[0]->info();
                     if (is_int($_node1)){
                         if (is_string($_node2)) {
                             return -1;
@@ -427,10 +427,10 @@ class Engine {
             } else {
                 $this->reset();
                 if ($signal instanceof Signal) {
-                    $signal = $signal->getSignal();
+                    $signal = $signal->info();
                 }
                 while ($this->valid()) {
-                    if ($this->current()[0]->getSignal() === $signal) {
+                    if ($this->current()[0]->info() === $signal) {
                         return [self::SEARCH_FOUND, $this->current()[1]];
                     }
                     $this->next();
@@ -543,12 +543,13 @@ class Engine {
                 $event->addTrace($stacktrace);
             }
         }
+
         $queue->reset();
         while($queue->valid()) {
-            // if ($event->getState() === STATE_HALTED) break;
+            if ($event->getState() === STATE_HALTED) break;
             $this->_execute($signal, $queue->current()[0], $event, $vars);
             // if (!$event->isHalted() &&
-            //     null !== ($chain = $queue->getSignal()->getChain())) {
+            //     null !== ($chain = $queue->info()->getChain())) {
             //     foreach ($chain as $_chain) {
             //         $link = $this->signal($_chain, $vars, $event, $stacktrace);
             //         if (false !== $chain) {

@@ -9,35 +9,14 @@ namespace prggmr;
 /**
  * Event
  *
- * Represents an executed/executable prggmr event.
+ * Represents an executed/executable prggmr event signal.
  *
- * As of v0.3.0 the event now extends the State object.
+ * As of v0.3.0 the event now inherits the State and Storage traits.
  */
 
 class Event {
 
-    use State;
-
-    /**
-     * Data attached to this event
-     *
-     * @var  mixed
-     */
-    private $_data = null;
-
-    /**
-     * Event chained to this event.
-     *
-     * @var  object  Event
-     */
-    protected $_chain = null;
-    
-    /**
-     * Backtrace of this event.
-     *
-     * @var  array  $trace
-     */
-    protected $_trace = array();
+    use State, Storage;
 
     /**
      * Result of the event.
@@ -45,6 +24,25 @@ class Event {
      * @var  mixed
      */
     protected $_result = null;
+
+    /**
+     * Signal event represents.
+     * 
+     * @var  object
+     */
+    protected $_signal = null;
+
+    /**
+     * Constructs a new event.
+     * 
+     * @param  null|object  $signal  Signal object or null.
+     * 
+     * @return  void
+     */
+    public function __construct($signal = null)
+    {
+        $this->_signal = $signal;
+    }
 
     /**
      * Sets the result of the event.
@@ -67,6 +65,16 @@ class Event {
     }
 
     /**
+     * Halts the event execution.
+     * 
+     * @return  void
+     */
+    public function halt()
+    {
+        $this->_state = STATE_HALTED;
+    }
+
+    /**
      * Get a variable in the event.
      *
      * @param  mixed  $key  Variable name.
@@ -75,8 +83,8 @@ class Event {
      */
     public function __get($key)
     {
-        if (isset($this->_data[$key])) {
-            return $this->_data[$key];
+        if (isset($this->_storage[$key])) {
+            return $this->_storage[$key];
         } else {
             return null;
         }
@@ -91,7 +99,7 @@ class Event {
      */
     public function __isset($key)
     {
-        return isset($this->_data[$key]);
+        return isset($this->_storage[$key]);
     }
 
     /**
@@ -105,7 +113,13 @@ class Event {
      */
     public function __set($key, $value)
     {
-        $this->_data[$key] = $value;
+        if (isset($key) && strpos($this->__storage[$key], '_') === 1) {
+            throw new \LogicException(sprintf(
+                "%s is a read-only event property", 
+                $key
+            ));
+        }
+        $this->_storage[$key] = $value;
         return true;
     }
 
@@ -118,61 +132,6 @@ class Event {
      */
     public function __unset($key)
     {
-        unset($this->_data[$key]);
-    }
-
-    /**
-     * Halts the event execution.
-     * 
-     * @return  void
-     */
-    public function halt()
-    {
-        $this->_state = STATE_HALTED;
-    }
-
-    /**
-     * Add a new backtrace.
-     *
-     * @param  array  $trace  PHP trace array.
-     *
-     * @return  void
-     */
-    public function addTrace($trace)
-    {
-        $this->_trace[] = $trace;
-    }
-
-    /**
-     * Gets the event chain.
-     *
-     * @return  mixed  array, null if no chain exists.
-     */
-    public function getChain(/* ... */)
-    {
-        return $this->_chain;
-    }
-
-    /**
-     * Returns backtrace information.
-     *
-     * @return  array
-     */
-    public function getTrace(/* ... */)
-    {
-        return $this->_trace;
-    }
-
-    /**
-     * Sets an event chain.
-     *
-     * @param  object  $chain  Event
-     */
-    public function setChain(Event $chain)
-    {
-        if (null === $this->_chain) {
-            $this->_chain = array();
-        }
-        $this->_chain[] = $chain;
+        unset($this->_storage[$key]);
     }
 }

@@ -1,22 +1,22 @@
 <?php
 require '../src/prggmr.php';
-require '../src/signal/array_contains_signal.php';
+require '../src/signal/array_contains.php';
+
+handle(function(){
+    echo "RESTRICTED HANDLE REGISTERED";
+}, \prggmr\engine\Signals::RESTRICTED_SIGNAL);
 
 handle(function($exception, $signal){
-    var_dump($exception->getTraceAsString());
+    echo "Hello Exception";
 }, \prggmr\engine\Signals::HANDLE_EXCEPTION);
 
 handle(function(){
+    throw new \Exception(0);
     $this->test = "Sweet!";
-    signal('test-2', null, $this);
 }, 'test', "id", 0);
 
 handle(function(){
-    signal('test-3');
-}, 'test-2', "id", 1);
-
-handle(function(){
-    throw new \Exception('Something bad happened');
-}, 'test-3');
+    echo $this->test;
+}, 'test', "id", 1);
 
 signal('test');

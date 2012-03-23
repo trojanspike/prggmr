@@ -14,11 +14,7 @@
 *
 * @param  mixed  $subscription  Handle closure that will trigger.
 *
-* @param  string  $identifier  Identify of the handle.
-*
 * @param  integer $priority  Priority of the handle.
-*
-* @param  mixed  $chain  Chain thrown from this handle.
 *
 * @param  integer  $exhaust  Rate at which this handle will exhaust.
 *
@@ -28,9 +24,9 @@
 * @return  void
 */
 if (!function_exists('handle')){
-function handle($subscription, $signal, $identifier = null, $priority = null, $chain = null, $exhaust = 0)
+function handle($subscription, $signal, $priority = null, $exhaust = 1)
 {
-    return prggmr::instance()->handle($subscription, $signal, $identifier, $priority, $chain, $exhaust);
+    return prggmr::instance()->handle($subscription, $signal, $priority, $exhaust);
 }
 }
 
@@ -47,19 +43,12 @@ function handle($subscription, $signal, $identifier = null, $priority = null, $c
 *
 * @param  integer $priority  Priority of the handle.
 *
-* @param  mixed  $chain  Chain thrown from this handle.
-*
-* @param  integer  $exhaust  Rate at which this handle will exhaust.
-*
-* @throws  InvalidArgumentException  Thrown when an invalid callback is
-*          provided.
-*
 * @return  void
 */
 if (!function_exists('once')){
-function handle_once($subscription, $signal, $identifier = null, $priority = null, $chain = null)
+function handle_once($subscription, $signal, $priority = null)
 {
-    return prggmr::instance()->handle($signal, $subscription, $identifier, $priority, $chain, 1);
+    return prggmr::instance()->handle($signal, $subscription, $priority, 1);
 }
 }
 
@@ -124,15 +113,7 @@ function dechain($signal, $chain)
 if (!function_exists('fire')){
 function signal($signal, $vars = null, &$event = null)
 {
-    if (PRGGMR_DEBUG) {
-        if (version_compare(phpversion(), '5.3.6', '>=')) {
-            return prggmr::instance()->signal($signal, $vars, $event, debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT));
-        } else {
-            return prggmr::instance()->signal($signal, $vars, $event, debug_backtrace());
-        }
-    } else {
-        return prggmr::instance()->signal($signal, $vars, $event);
-    }
+    return prggmr::instance()->signal($signal, $vars, $event);
 }
 }
 

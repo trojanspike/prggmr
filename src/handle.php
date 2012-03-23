@@ -50,13 +50,6 @@ class Handle {
     protected $_exhausted = null;
 
     /**
-     * String identifier for this handle
-     *
-     * @var  string
-     */
-     protected $_identifier = null;
-
-    /**
      * Array of functions to execute pre dispatch
      *
      * @var  object
@@ -82,14 +75,12 @@ class Handle {
      * Constructs a new handle object.
      *
      * @param  mixed  $function  A callable php variable.
-     * @param  string  $identifier  Identifier of this handle.
      * @param  integer  $exhaust  Count to set handle exhaustion.
+     * 
+     * @return  void
      */
-    public function __construct($function, $identifier = null, $exhaust = 1)
+    public function __construct($function, $exhaust = 1)
     {
-        if (null === $identifier) {
-            $identifier = rand(0, 100000);
-        }
         if (!is_callable($function)) {
             throw new \InvalidArgumentException(sprintf(
                 "handle requires a callable (%s) given",
@@ -102,7 +93,6 @@ class Handle {
             $exhaust = 1;
         }
         $this->_function = $function;
-        $this->_identifier = $identifier;
         $this->_exhaustion = $exhaust;
     }
 
@@ -137,6 +127,8 @@ class Handle {
         # test for exhaustion
         if ($this->isExhausted()) return false;
         
+        $this->setState(STATE_RUNNING);
+
         # Increase execution count
         if (null !== $this->_exhaustion) {
             $this->_exhaustion;
@@ -204,7 +196,6 @@ class Handle {
                     throw new HandleException(sprintf(
                         'handle %s post-execution Exception 
                         ( %s ) at ( %s : %s )',
-                        $this->getIdentifier(),
                         $e->getMessage(),
                         $e->getFile(),
                         $e->getLine()
@@ -247,16 +238,6 @@ class Handle {
         }
 
         return false;
-    }
-
-    /**
-     * Returns the handle identifier.
-     *
-     * @return  string
-     */
-    public function getIdentifier(/* ... */)
-    {
-        return $this->_identifier;
     }
 
     /**

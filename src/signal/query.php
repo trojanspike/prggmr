@@ -7,43 +7,36 @@ namespace prggmr\signal;
  */
  
  /**
- * Regex signal
- *
- * Allows for signals using regular expresssions and :var param
- * query strings
+ * Handle signals using regular expresssions using :var param query strings
  */
-class Regex extends \prggmr\signal\Complex {
+class Query extends \prggmr\signal\Complex {
 
     /**
-     * Constructs a regular expression signal.
-     * Support for :name parameters are supported.
+     * Constructs a regex signal using :var style parameters.
      *
-     * @param  string  $signal  Regex event signal
-     * @param  mixed  $chain  An additional signal for a chain
+     * @param  string  $signal  Variable querystring for capturing signal.
      *
      * @return  void
      */
-    public function __construct($signal)
+    public function __construct($regex)
     {
-        $regex = preg_replace('#:([\w]+)#i', 'fix\(?P<$1>[\w_-]+fix\)', $signal);
+        $regex = preg_replace('#:([\w]+)#i', 'fix\(?P<$1>[\w_-]+fix\)', $regex);
         $regex = str_replace('fix\(', '(', $regex);
         $regex = str_replace('fix\)', ')', $regex);
         $regex = '#' . $regex . '$#i';
-        $this->_signal = $regex;
+        $this->_info = $regex;
     }
 
     /**
-     * Compares the event signal given with itself using
-     * regular expressions.
+     * Evalutes a signal with the object regex.
      *
-     * @param  mixed  $signal  Signal to compare
+     * @param  mixed  $signal  Signal to perform regex aganist.
      *
-     * @return  mixed  False on failure. True if matches. String/Array
-     *          return results found via the match.
+     * @return  boolean|array  Boolean|Array if matches found
      */
     public function evalute($signal)
     {
-        if (preg_match($this->_signal, $signal, $matches)) {
+        if (preg_match($this->_info, $signal, $matches)) {
             array_shift($matches);
             if (count($matches) != 0) {
                 foreach ($matches as $_k => $_v) {
