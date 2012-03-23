@@ -21,6 +21,11 @@ For low count signal systems this is recommended to leave at a higher value
 since the time required to sort the storage will outweigh the benefit of binary
 searching.
 
+### ENGINE_USE_BINARY
+__Default :__ false
+
+Use binary searching in the engine for locating signals.
+
 ## Queue
 
 ### QUEUE_MAX_SIZE

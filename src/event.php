@@ -40,6 +40,33 @@ class Event {
     protected $_trace = array();
 
     /**
+     * Result of the event.
+     * 
+     * @var  mixed
+     */
+    protected $_result = null;
+
+    /**
+     * Sets the result of the event.
+     * 
+     * @param  mixed  $result
+     */
+    public function setResult($result)
+    {
+        $this->_result = $result;
+    }
+
+    /**
+     * Returns the result of the event.
+     * 
+     * @return  mixed
+     */
+    public function getResult(/* ... */)
+    {
+        return $this->_result;
+    }
+
+    /**
      * Get a variable in the event.
      *
      * @param  mixed  $key  Variable name.
@@ -92,6 +119,16 @@ class Event {
     public function __unset($key)
     {
         unset($this->_data[$key]);
+    }
+
+    /**
+     * Halts the event execution.
+     * 
+     * @return  void
+     */
+    public function halt()
+    {
+        $this->_state = STATE_HALTED;
     }
 
     /**

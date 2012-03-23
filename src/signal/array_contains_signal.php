@@ -38,7 +38,7 @@ class ArrayContains extends \prggmr\signal\Complex {
      *
      * @return  mixed  False on failure. True if matches.
      */
-    public function evalute($signal)
+    public function evaluate($signal)
     {
         if (array_search($signal, $this->_signal, $this->_strict) !== false) {
             return true;

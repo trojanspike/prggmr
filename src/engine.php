@@ -111,6 +111,13 @@ class Engine {
      */
     protected $_unsorted = false;
 
+    /**
+     * Last sig handler added to the engine.
+     * 
+     * @var  object
+     */
+    protected $_last_sig_added = null;
+
 
     /**
     * Removes a signal handler.
@@ -293,7 +300,7 @@ class Engine {
         }
 
         if ($complex) {
-            $search = $this->_complexSearch($signal);
+            $search = $this->_searchComplex($signal);
             if ($search[0] === self::SEARCH_FOUND) {
                 $queue = $search[1];
             }
@@ -307,21 +314,26 @@ class Engine {
         if (!$queue) {
             $queue = new Queue($type);
             if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE && !$complex) {
-                $this->_storage[$signal->getSignal()] = [$signal, $queue];
-                $this->_unsorted = true;
+                $this->_storage[(string) $signal->getSignal()] = [
+                    $signal, $queue
+                ];
+                if ($this->_last_sig_added instanceof \prggmr\Signal\Complex) {
+                    $this->_unsorted = true;
+                }
             } else {
                 $this->_storage[] = [$signal, $queue];
-            }
-            if (!$signal instanceof \prggmr\signal\Complex) {
                 $this->_unsorted = true;
             }
-            return [self::QUEUE_NEW, $queue, $signal];
+            $return = [self::QUEUE_NEW, $queue, $signal];
         } else {
             if ($queue->count() === 0) {
-                return [self::QUEUE_EMPTY, $queue, $signal];
+                $return = [self::QUEUE_EMPTY, $queue, $signal];
             }
-            return [self::QUEUE_NONEMPTY, $queue, $signal];
+            $return = [self::QUEUE_NONEMPTY, $queue, $signal];
         }
+
+        $this->_last_sig_added = $signal;
+        return $return;
     }
 
     /**
@@ -329,11 +341,10 @@ class Engine {
      * 
      * @return  void
      */
-    protected function _sort(/* ... */) 
+    protected function _sort() 
     {
         if (!$this->_unsorted) return null;
-
-        $this->usort(function($_node1, $_node2){
+        $cmp = function($_node1, $_node2){
             if ($_node1[0] instanceof \prggmr\signal\Complex) {
                 return 1;
             }
@@ -357,7 +368,13 @@ class Engine {
                 }
                 return strcmp($_node1, $_node2);
             }
-        });
+        };
+
+        if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE) {
+            $this->uasort($cmp);
+        } else {
+            $this->usort($cmp);
+        }
 
         $this->_unsorted = false;
     }
@@ -371,11 +388,15 @@ class Engine {
      */
     protected function _search($signal) 
     {
-        if ($signal instanceof \prggmr\signal\Complex || !is_string($signal) && 
-            !is_int($signal)) {
+        if ($signal instanceof \prggmr\signal\Complex) {
             return [self::SEARCH_NOOP, null];
         }
+        if ($signal instanceof \prggmr\Signal) {
+            $signal = $signal->getSignal();
+        }
+        $this->_sort();
         if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE) {
+            $signal = (string) $signal;
             if (isset($this->_storage[$signal])) {
                 return [self::SEARCH_FOUND, $this->_storage[$signal][1]];
             }
@@ -435,11 +456,15 @@ class Engine {
             $found = array();
         } elseif (!$signal instanceof \prggmr\signal\Complex) {
             $this->signal(esig\Signal::INVALID_SIGNAL, array($signal));
-            return [self::SEARCH_NOOP, null]
+            return [self::SEARCH_NOOP, null];
         }
-
+        $this->_sort();
         $this->end();
         while ($this->valid()) {
+            if (!$this->current()[0] instanceof \prggmr\signal\Complex) {
+                // stop looking no longer in complex storage
+                break;
+            }
             if ($locate) {
                 $eval = $this->current()[0]->evaluate($signal);
                 if ($eval !== false) {
@@ -449,10 +474,6 @@ class Engine {
                 if ($this->current()[0] === $signal) {
                     return [self::SEARCH_FOUND, $signal];
                 }
-            }
-            if (!$this->current()[0] instanceof \prggmr\signal\Complex) {
-                // stop looking no longer in complex storage
-                break;
             }
             $this->prev();
         }
@@ -484,67 +505,61 @@ class Engine {
             }
         }
 
-        if (null === $event || !is_object($event)) {
+        if (!$event instanceof Event) {
+            if (null !== $event) {
+                $this->signal(esig\Signals::INVALID_EVENT, array($event));
+            }
             $event = new Event();
-        } elseif (!$event instanceof Event) {
-            $this->signal(esig\Signals::INVALID_EVENT, array($event));
-            $event = new Event();
+            $event->setState(STATE_RUNNING);
+        } else {
+            if ($event->getState() !== STATE_DECLARED) {
+                $event->setState(STATE_RECYCLED);
+            }
         }
         $queue = new Queue();
-        $event->setState(STATE_RUNNING);
         $stack = $this->_search($signal);
         if ($stack[0] === self::SEARCH_FOUND) {
             $queue->merge($stack[1]->storage());
         }
         $complex = $this->_searchComplex($signal);
         if ($complex[0] === self::SEARCH_FOUND) {
-            array_walk(function($node) use ($queue){
+            array_walk($complex[1], function($node) use ($queue){
                 if (is_bool($node[1]) === false) {
-                    $node[0]->walk(function($handle) use ($node[1]){
-                        $handle->params($node[1]);
+                    $data = $node[1];
+                    $node[0]->walk(function($handle) use ($data){
+                        $handle->params($data);
                     });
                 }
                 $queue->merge($node[0]->storage());
-            }, $nodes[1]);
+            });
         }
-
-        // keep the event in an active state until everything completes
-        $event->setState(Event::STATE_INACTIVE);
-
-        // the queue is dirty
-        $queue->dirty = true;
-
-        // the queue loop
-        $queue->rewind();
+        $queue->sort(true);
 
         // add stacktrace
         if (PRGGMR_DEBUG === true) {
             if (null === $stacktrace) {
-                if (version_compare(phpversion(), '5.3.6', '>=')) {
-                    $event->addTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));
-                } else {
-                    $event->addTrace(debug_backtrace(false));
-                }
+                $event->addTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));
             } else {
                 $event->addTrace($stacktrace);
             }
         }
-
+        $queue->reset();
         while($queue->valid()) {
-            $event->setSignal($queue->getSignal());
-            if ($event->isHalted()) break;
-            $this->_execute($queue->getSignal(), $queue->current(), $vars);
-            if (!$event->isHalted() &&
-                null !== ($chain = $queue->getSignal()->getChain())) {
-                foreach ($chain as $_chain) {
-                    $link = $this->signal($_chain, $vars, $event, $stacktrace);
-                    if (false !== $chain) {
-                        $event->setChain($link);
-                    }
-                }
-            }
+            // if ($event->getState() === STATE_HALTED) break;
+            $this->_execute($signal, $queue->current()[0], $event, $vars);
+            // if (!$event->isHalted() &&
+            //     null !== ($chain = $queue->getSignal()->getChain())) {
+            //     foreach ($chain as $_chain) {
+            //         $link = $this->signal($_chain, $vars, $event, $stacktrace);
+            //         if (false !== $chain) {
+            //             $event->setChain($link);
+            //         }
+            //     }
+            // }
             $queue->next();
         }
+
+        $event->setState(STATE_EXITED);
 
         // release temporary queue
         unset($queue);
@@ -564,41 +579,34 @@ class Engine {
      *
      * @return  object  Event
      */
-    protected function _execute($signal, $handle, &$event, &$vars)
+    protected function _execute($signal, &$handle, &$event, &$vars)
     {
-        $event->setHandle($handle);
+        // bind event to allow use of "this"
+        $handle->bind($event);
         try {
             $result = $handle->execute($vars);
         } catch (\prggmr\HandleException $e) {
-            $event->setState(\prggmr\Event::STATE_ERROR);
-            $this->signal(engine\Signals::HANDLE_EXCEPTION, array(
-                $e, $handle, $event
-            ));
-        }
-        if (!$event instanceof \prggmr\Event) {
-            throw new \RuntimeException(sprintf(
-                'Event object has been replaced in handle %s',
-                $subscription->getIdentifier()
+            $event->setState(STATE_CORRUPTED);
+            $this->signal(esig\Signals::HANDLE_EXCEPTION, array(
+                $handle, $event, $signal
             ));
         }
         if (null !== $result) {
-            $event->setReturn($result);
+            $event->setResult($result);
             if (false === $result) {
                 $event->halt();
             }
         }
-        if ($event->getState() == Event::STATE_ERROR) {
-            if ($this->getState() === Engine::LOOP) {
-                if (false === $this->clearInterval($handle)) {
-                    $this->dequeue($signal, $handle);
-                }
-            } else {
-                $this->dequeue($signal, $handle);
-            }
-        }
-        if ($handle->isExhausted()) {
-            $this->dequeue($signal, $subscription);
-        }
+        // How to determine it can be recovered
+        // if ($event->getState() == STATE_CORRUPTED) {
+        //     if ($this->getState() === Engine::LOOP) {
+        //         if (false === $this->clearInterval($handle)) {
+        //             $this->dequeue($signal, $handle);
+        //         }
+        //     } else {
+        //         $this->dequeue($signal, $handle);
+        //     }
+        // }
         return $event;
     }
 

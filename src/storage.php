@@ -39,7 +39,7 @@ trait Storage {
      * 
      * @return  void
      */
-    public function merge($array)
+    public function merge(&$array)
     {
         $this->_storage = array_merge($this->_storage, $array);
     }
@@ -98,5 +98,9 @@ trait Storage {
     public function usort($cmp)
     {
         return usort($this->_storage, $cmp);
+    }
+    public function uasort($cmp)
+    {
+        return uasort($this->_storage, $cmp);
     }
 }

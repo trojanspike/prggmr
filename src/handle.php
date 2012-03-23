@@ -243,9 +243,10 @@ class Handle {
 
         if (0 === $this->_exhaustion) {
             $this->_exhausted = true;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -308,6 +309,18 @@ class Handle {
         }
         
         $this->_params = $params;
+    }
+
+    /**
+     * Binds the handle to the given object.
+     * 
+     * @param  object  $object  Object to bind handle to
+     * 
+     * @return  void
+     */
+    public function bind($object)
+    {
+        $this->_function =  $this->_function->bindTo($object);
     }
 }
 
