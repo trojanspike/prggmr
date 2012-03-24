@@ -9,7 +9,7 @@ namespace prggmr\engine;
 /**
  * Engine Signals.
  * 
- * 0xE001 - 0xE015
+ * 0xE002 - 0xE014
  * Any signals which are directly related to the engine running, e.g. invalid 
  * signal registration, routine calculation failure, handle execution failure, 
  * handle exceptions, shutdown etc...
@@ -19,17 +19,17 @@ namespace prggmr\engine;
  */
 class Signals {
     /**
-     * Exception encountered during handle execution.
+     * Signal registered within the range of engine signals.
      */
-    const HANDLE_EXCEPTION = 0xE001;
+    const RESTRICTED_SIGNAL = 0xE001;
     /**
      * Invalid or unknown callable provided to sig handler.
      */
     const INVALID_HANDLE = 0xE002;
     /**
-     * Signal registered within the range of engine signals.
+     * Exception encountered during handle execution.
      */
-    const RESTRICTED_SIGNAL = 0xE003;
+    const HANDLE_EXCEPTION = 0xE003;
     /**
      * Invalid or unknown signal encountered.
      */
@@ -38,6 +38,10 @@ class Signals {
      * Invalid or unknown event encountered.
      */
     const INVALID_EVENT = 0xE005;
+    /**
+     * Invalid directory provided for handler loader.
+     */
+    const INVALID_HANDLE_DIRECTORY = 0xE006;
     /**
      * Engine shutdown initiated.
      */

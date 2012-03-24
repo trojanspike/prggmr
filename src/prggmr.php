@@ -33,13 +33,12 @@ if (!defined('PRGGMR_DEBUG')) {
 }
 
 // evented exceptions disabled by default
-if (!defined('PRGGMR_EVENTED_EXCEPTIONS')) {
-    define('PRGGMR_EVENTED_EXCEPTIONS', false);
+if (!defined('SIGNAL_ERRORS_EXCEPTIONS')) {
+    define('SIGNAL_ERRORS_EXCEPTIONS', false);
 }
-
 /**
  * The prggmr object works as the global instance used for managing the
- * global api and the prggmr signaled exceptions hook.
+ * global api.
  */
 final class prggmr extends \prggmr\Engine {
 
@@ -75,7 +74,7 @@ final class prggmr extends \prggmr\Engine {
  * Enables prggmr to transform any errors and exceptions into a 
  * catchable signal.
  */
-if (PRGGMR_EVENTED_EXCEPTIONS === true) {
+if (SIGNAL_ERRORS_EXCEPTIONS === true) {
     set_error_handler("signal_exceptions");
     set_exception_handler("signal_errors");
 }

@@ -53,7 +53,7 @@ trait Storage {
      */
     public function walk($func)
     {
-        return array_walk($func, $this->_storage);
+        return array_walk($this->_storage, $func);
     }
 
     /**

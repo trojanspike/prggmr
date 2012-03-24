@@ -12,14 +12,12 @@ the Signals class.
 Registering any signals within the range of 0xE001 - 0xE02A will result in a
 RESTRICTED_SIGNAL signal.
 
-## HANDLE_EXCEPTION (0xE001)
-Exception encountered during the execution of a signal handler.
+## RESTRICTED_SIGNAL (0xE001)
+A handle has been registered for a built-in signal.
 
-    handle(function($exception, $signal){
-        $handle = $exception->getHandle();
-        $event = $exception->getEvent();
-        $stacktrace = $exception->getTrace();
-    }, \prggmr\engine\Signals::HANDLE_EXCEPTION);
+    handle(function($callable, $signal, $identifier, $priority, $exhaust){
+        // A restricted signal This will actually call itself :)
+    }, \prggmr\engine\Signals::RESTRICTED_SIGNAL);
 
 ## INVALID_HANDLE (0xE002)
 Invalid or unknown callable variable encountered.
@@ -28,12 +26,14 @@ Invalid or unknown callable variable encountered.
         // $handle is the invalid handle
     }, \prggmr\engine\Signals::INVALID_HANDLE);
 
-## RESTRICTED_SIGNAL (0xE003)
-A handle has been registered for a built-in signal.
+## HANDLE_EXCEPTION (0xE003)
+Exception encountered during the execution of a signal handler.
 
-    handle(function($callable, $signal, $identifier, $priority, $exhaust){
-        // A restricted signal This will actually call itself :)
-    }, \prggmr\engine\Signals::RESTRICTED_SIGNAL);
+    handle(function($exception, $signal){
+        $handle = $exception->getHandle();
+        $event = $exception->getEvent();
+        $stacktrace = $exception->getTrace();
+    }, \prggmr\engine\Signals::HANDLE_EXCEPTION);
 
 ## INVALID_SIGNAL (0xE004)
 Invalid or unknown signal encountered.
@@ -48,6 +48,13 @@ Invalid or unknown event encountered.
     handle(function($event){
         // The $event is the invalid event
     }, \prggmr\engine\Signals::INVALID_EVENT);
+
+## INVALID_HANDLE_DIRECTORY (0xE005)
+Invalid directory provided for handler loader.
+
+    handle(function($event){
+        // The $event is the invalid event
+    }, \prggmr\engine\Signals::INVALID_HANDLE_DIRECTORY);
 
 ## SHUTDOWN (0xE015)
 Engine shutdown has been initiated.

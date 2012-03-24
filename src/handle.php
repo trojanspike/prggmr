@@ -67,9 +67,9 @@ class Handle {
      */
     public function __construct($function, $exhaust = 1)
     {
-        if (!is_callable($function)) {
+        if (!$function instanceof Closure) {
             throw new \InvalidArgumentException(sprintf(
-                "handle requires a callable (%s) given",
+                "handle requires a closure (%s) given",
                 (is_object($function)) ?
                 get_class($function) : gettype($function)
             ));
@@ -78,7 +78,8 @@ class Handle {
         if (!is_int($exhaust) || $exhaust <= -1) {
             $exhaust = 1;
         }
-        $this->_function = $function;
+        // unbind the closure
+        $this->_function = $function->bindTo(new \stdClass());
         $this->_exhaustion = $exhaust;
     }
 
@@ -131,19 +132,9 @@ class Handle {
             $params = array_merge($params, $this->_params);
         }
 
-        # handle fire
-        try {
-            $result = call_user_func_array($this->_function, $params);
-        } catch (\Exception $e) {
-            throw new HandleException(sprintf(
-				'handle Exception ( %s ) at ( %s : %s )',
-                    $e->getMessage(),
-                    $e->getFile(),
-                    $e->getLine()
-			), $this->_bind, $this);
-        }
+        call_user_func_array($this->_function, $params);
 
-        return $result;
+        return call_user_func_array($this->_function, $params);
     }
 
     /**

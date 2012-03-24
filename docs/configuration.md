@@ -8,7 +8,10 @@ know what you are doing.
 
 ## Engine
 
-### PRGGMR_EVENTED_EXCEPTIONS
+### SIGNAL_ERRORS_EXCEPTIONS
+__Default :__ false
+
+Enable prggmr's error and exception handler
 
 ### BINARY_ENGINE_SEARCH
 __Default :__ 75

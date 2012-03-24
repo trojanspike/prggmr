@@ -11,6 +11,13 @@ use \Closure,
     \prggmr\engine\Signals as esig;
 
 /**
+ * Transform all internal engine signals to exceptions.
+ */
+if (!defined('ENGINE_SIGNAL_EXCEPTIONS')) {
+    define('ENGINE_SIGNAL_EXCEPTIONS', true);
+}
+
+/**
  * When to begin binary searching.
  */
 if (!defined('BINARY_ENGINE_SEARCH')) {
@@ -140,6 +147,29 @@ class Engine {
     protected $_event_children = array();
 
     /**
+     * Starts the engine.
+     * 
+     * @return  void
+     */
+    public function __construct()
+    {
+        $this->setState(STATE_DECLARED);
+        if (ENGINE_SIGNAL_EXCEPTIONS) {
+            if (!class_exists('\prggmr\signal\Range', false)){
+                require_once 'signal/range.php';
+            }
+            $this->handle(function($type){
+                $args = func_get_args();
+                $message = null;
+                if ($args[0] instanceof \Exception) {
+                    $message = $args[0]->getMessage();
+                }
+                throw new EngineException($message, $type, $args);
+            }, new \prggmr\signal\Range(0xE002, 0xE014), 0, null);
+        }
+    }
+
+    /**
      * Removes a signal handler.
      *
      * @param  mixed  $signal  Signal instance or signal.
@@ -169,76 +199,6 @@ class Engine {
     }
 
     /**
-     * Starts the event loop.
-     *
-     * @param  boolean  $reset  Resets all timers to begin at loop start.
-     * @param  integer  $timeout  Number of milliseconds to run the loop.
-     *
-     * @return  void
-     */
-    public function loop($reset = false, $timeout = 100)
-    {
-        # Reset all timers
-        if ($reset) {
-            $this->handle(self::INTERVAL_RESET);
-            foreach($this->_timers as $_index => $_timer) {
-                $this->_timers[$_index][2] = $this->getMilliseconds() + $this->_timers[$_index][1];
-            }
-        }
-        // this can be cleared using clearTime(Engine::LOOP_SHUTDOWN_TIMEOUT)
-        // but after that the loop will run indefinitly
-        if (null !== $timeout && is_int($timeout)) {
-            // this is a required hack ... i know
-            // php 5.4 will hopefully provide a fix
-            $engine = $this;
-            $this->setTimeout(function() use ($engine) {
-                $engine->shutdown();
-            }, $timeout, null, Engine::LOOP_SHUTDOWN_TIMEOUT);
-        }
-        # Run routine calculations
-        while($this->_routines()) {
-            # Signal shutdown based on the state
-            $engine_state = $this->getState();
-            if (static::SHUTDOWN === $engine_state ||
-                static::ERROR === $engine_state) {
-            }
-            $this->_handleTimers();
-            foreach($this->_timers as $_index => $_timer) {
-                if (!isset($this->_timers[$_index])) {
-                    continue;
-                }
-                if ($this->getMilliseconds() >= $_timer[2]) {
-                    $vars = $_timer[3];
-                    if (null !== $vars) {
-                        if (!is_array($vars)) {
-                            $vars = array($vars);
-                        } else {
-                            if (isset($vars[0]) && !$vars[0] instanceof Event) {
-                                array_unshift($vars, new Event());
-                            }
-                        }
-                    } else {
-                        $vars = array(new Event());
-                    }
-                    if (!$vars[0] instanceof Event) {
-                        array_unshift($vars, new Event());
-                    }
-                    if (!$vars[0]->isHalted()){
-                        $this->_execute(null, $_timer[0], $vars);
-                    }
-                    if (isset($this->_timers[$_index])) {
-                        $this->_timers[$_index][3] = $vars;
-                        $this->_timers[$_index][2] = $this->getMilliseconds() + $_timer[1];
-                        if ($_timer[0]->isExhausted()) {
-                            unset($this->_timers[$_index]);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Attach a new handle to a signal.
      *
      * @param  mixed  $callable  Function to execute on handle.
@@ -262,7 +222,7 @@ class Engine {
         }
 
         if (!$callable instanceof Handle) {
-            if (!is_callable($callable)) {
+            if (!$callable instanceof \Closure) {
                 $this->signal(esig::INVALID_HANDLE, array(
                     func_get_args()
                 ));
@@ -305,8 +265,7 @@ class Engine {
     {
         $complex = false;
         $queue = false;
-
-        if ($signal instanceof Signal) {
+        if ($signal instanceof \prggmr\Signal\Standard) {
             if ($signal instanceof \prggmr\signal\Complex) {
                 $complex = true;
             }
@@ -314,7 +273,7 @@ class Engine {
             try {
                 $signal = new Signal($signal);
             } catch (\InvalidArgumentException $e) {
-                $this->signal(esig::INVALID_SIGNAL, array($signal));
+                $this->signal(esig::INVALID_SIGNAL, array($exception, $signal));
                 return false;
             }
         }
@@ -354,6 +313,43 @@ class Engine {
 
         $this->_last_sig_added = $signal;
         return $return;
+    }
+
+    /**
+     * Registers a new sig handle loader which recursively loads files in the
+     * given directory when a signal is triggered.
+     * 
+     * @param  integer|string|object  $signal  Signal to register with
+     * @param  string  $directory  Directory to load handles from
+     * 
+     * @return  object  \prggmr\Handle
+     */
+    public function loadHandler($signal, $directory, $heap = QUEUE_MIN_HEAP)
+    {
+        if (!is_dir($directory) || !is_readable($directory)) {
+            $this->signal(esig::INVALID_HANDLE_DIRECTORY, array(
+                $directory, $signal
+            ));
+        }
+
+        // ensure handle always has the highest priority
+        $priority = 0;
+        if ($heap === QUEUE_MAX_HEAP) {
+            $priority = PHP_INT_MAX;
+        }
+
+        $this->sigHandler(function() use ($directory){
+            $dir = new RegexIterator(
+                new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($directory)
+                ), '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH
+            );
+            foreach ($dir as $_file) {
+                array_map(function($i){
+                    include_once $i;
+                }, $_file);
+            }
+        }, $signal, 0);
     }
 
     /**
@@ -559,7 +555,7 @@ class Engine {
                 if (is_bool($node[1]) === false) {
                     $data = $node[1];
                     $node[0]->walk(function($handle) use ($data){
-                        $handle->params($data);
+                        $handle[0]->params($data);
                     });
                 }
                 $queue->merge($node[0]->storage());
@@ -606,14 +602,21 @@ class Engine {
         $handle->setState(STATE_RUNNING);
         // bind event to allow use of "this"
         $handle->bind($event);
-        try {
+        if (!ENGINE_SIGNAL_EXCEPTIONS) {
             $result = $handle->execute($vars);
-        } catch (\prggmr\HandleException $exception) {
-            $event->setState(STATE_ERROR);
-            $handle->setState(STATE_ERROR);
-            $this->signal(esig::HANDLE_EXCEPTION, array(
-                $exception, $signal
-            ));
+        } else {
+            try {
+                $result = $handle->execute($vars);
+            } catch (\Exception $exception) {
+                $event->setState(STATE_ERROR);
+                $handle->setState(STATE_ERROR);
+                if ($exception instanceof EngineException) {
+                    throw $exception;
+                }
+                $this->signal(esig::HANDLE_EXCEPTION, array(
+                    $exception, $signal
+                ));
+            }
         }
         if (null !== $result) {
             $event->setResult($result);
@@ -643,5 +646,46 @@ class Engine {
     public function shutdown()
     {
         $this->setState(STATE_HALTED);
+    }
+}
+
+class EngineException extends \Exception {
+
+    protected $_type = null;
+
+    protected $_args = null;
+
+    /**
+     * Constructs a new engine exception.
+     * 
+     * @param  string|null  $message  Exception message if given
+     * @param  integer  $type  Engine error type
+     * @param  array  $args  Arguments present for exception
+     */
+    public function __construct($message, $type, $args)
+    {
+        parent::__construct($message);
+        $this->_type = $type;
+        $this->_args = $args;
+    }
+
+    /**
+     * Returns exception arguments.
+     * 
+     * @return  array
+     */
+    public function getArgs(/* ... */)
+    {
+        return $this->_args;
+    }
+
+    /**
+     * Returns engine exception code.
+     * 
+     * @return  integer
+     */
+    public function getEngineCode(/* ... */)
+    {
+        return $this->_type;
     }
 }
