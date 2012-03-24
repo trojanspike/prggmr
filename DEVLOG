@@ -1,5 +1,7 @@
 [ 03242012 - 1120 ]
 
+- Performance testing shows that a handle costs about 2KB each.
+
 - The Engine now maintains an event history and events now store their own
   history which allows for event analyzes.
 

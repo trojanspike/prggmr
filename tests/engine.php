@@ -25,4 +25,4 @@ handle(function(){
 
 signal('test');
 
-var_dump(prggmr::instance());
+var_dump(memory_get_peak_usage());
