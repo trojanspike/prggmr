@@ -48,20 +48,6 @@ class Handle {
      * @var  boolean
      */
     protected $_exhausted = null;
-
-    /**
-     * Array of functions to execute pre dispatch
-     *
-     * @var  object
-     */
-    protected $_pre = null;
-
-    /**
-     * Array of functions to execute post dispatch
-     *
-     * @var  object
-     */
-    protected $_post = null;
     
     /**
      * Array of additional parameters to pass the executing function.
@@ -127,8 +113,6 @@ class Handle {
         # test for exhaustion
         if ($this->isExhausted()) return false;
         
-        $this->setState(STATE_RUNNING);
-
         # Increase execution count
         if (null !== $this->_exhaustion) {
             $this->_exhaustion;
@@ -147,61 +131,16 @@ class Handle {
             $params = array_merge($params, $this->_params);
         }
 
-        # pre fire
-        if (null !== $this->_pre) {
-            foreach ($this->_pre as $_index => $_func) {
-                try {
-                $result = call_user_func_array($_func, $params);
-                } catch (\Exception $e) {
-                    # unset incase we continue
-                    unset($this->_pre[$_index]);
-                    throw new HandleException(sprintf(
-                        'handle %s pre-execution function Exception 
-                         ( %s ) at ( %s : %s )',
-                        $this->getIdentifier(),
-                        $e->getMessage(),
-                        $e->getFile(),
-                        $e->getLine()
-                    ), $this->_bind, $this);
-                }
-            }
-        }
-
-        // allow for pre-execution to halt the handles execution
-        if (false === $result) {
-            return $result;
-        }
-
         # handle fire
         try {
             $result = call_user_func_array($this->_function, $params);
         } catch (\Exception $e) {
             throw new HandleException(sprintf(
-				'handle %s Exception ( %s ) at ( %s : %s )',
-                    $this->getIdentifier(),
+				'handle Exception ( %s ) at ( %s : %s )',
                     $e->getMessage(),
                     $e->getFile(),
                     $e->getLine()
 			), $this->_bind, $this);
-        }
-
-        # post execution
-        if (null !== $this->_post) {
-            foreach ($this->_post as $_index => $_func) {
-                try {
-                $result = call_user_func_array($_func, $params);
-                } catch (\Exception $e) {
-                    # unset incase we continue
-                    unset($this->_pre[$_index]);
-                    throw new HandleException(sprintf(
-                        'handle %s post-execution Exception 
-                        ( %s ) at ( %s : %s )',
-                        $e->getMessage(),
-                        $e->getFile(),
-                        $e->getLine()
-                    ), $this->_bind, $this);
-                }
-            }
         }
 
         return $result;
@@ -238,42 +177,6 @@ class Handle {
         }
 
         return false;
-    }
-
-    /**
-     * Registers a function to execute before executing the handle.
-     *
-     * @param  object  $closure  Closure
-     *
-     * @return  void
-     */
-    public function preExecution($closure)
-    {
-        if (!is_callable($closure)) {
-            throw new \InvalidArgumentException(
-                'argument $closure is not a valid php callback'
-            );
-        }
-        if (null === $this->_pre) $this->_pre = array();
-        $this->_pre[] = $closure;
-    }
-
-    /**
-     * Registers a function to execute after executing the handle.
-     *
-     * @param  object  $closure  Closure
-     *
-     * @return  void
-     */
-    public function postExecution($closure)
-    {
-        if (!is_callable($closure)) {
-            throw new \InvalidArgumentException(
-                'argument $closure is not a valid php callback'
-            );
-        }
-        if (null === $this->_post) $this->_post = array();
-        $this->_post[] = $closure;
     }
     
     /**

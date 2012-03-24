@@ -30,19 +30,14 @@ class Event {
      * 
      * @var  object
      */
-    protected $_signal = null;
+    protected $_signals = null;
 
     /**
-     * Constructs a new event.
+     * Parent event.
      * 
-     * @param  null|object  $signal  Signal object or null.
-     * 
-     * @return  void
+     * @var  object
      */
-    public function __construct($signal = null)
-    {
-        $this->_signal = $signal;
-    }
+    protected $_parent = null;
 
     /**
      * Sets the result of the event.
@@ -69,9 +64,68 @@ class Event {
      * 
      * @return  void
      */
-    public function halt()
+    public function halt(/* ... */)
     {
         $this->_state = STATE_HALTED;
+    }
+
+    /**
+     * Returns the signal representions this event has been assigned to.
+     * Each node is an array containing the signal and time.
+     * 
+     * [signal, timestamp]
+     * 
+     * @return  array
+     */
+    public function signals(/* ... */)
+    {
+        return $this->_signals;
+    }
+
+    /**
+     * Adds a signal the event respresents.
+     * 
+     * @return  null [description]
+     */
+    public function addSignal($signal)
+    {
+        if (!is_array($this->_signals)) {
+            $this->_signals = [];
+        }
+
+        $this->_signals[] = [$signal, milliseconds()];
+    }
+
+    /**
+     * Determines if the event is a child of another event.
+     * 
+     * @return  boolean
+     */
+    public function isChild(/* ... */)
+    {
+        return null !== $this->_parent;
+    }
+
+    /**
+     * Sets the parent event.
+     * 
+     * @param  object  $event  \prggmr\Event
+     * 
+     * @return  void
+     */
+    public function setParent(Event $event)
+    {
+        $this->_parent = $event;
+    }
+
+    /**
+     * Retrieves this event's parent.
+     * 
+     * @return  null|object 
+     */
+    public function parent(/* ... */)
+    {
+        return $this->_parent;
     }
 
     /**

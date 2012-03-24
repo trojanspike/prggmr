@@ -118,18 +118,38 @@ class Engine {
      */
     protected $_last_sig_added = null;
 
+    /**
+     * History of events
+     * 
+     * @var  array
+     */
+    protected $_event_history = array();
 
     /**
-    * Removes a signal handler.
-    *
-    * @param  mixed  $signal  Signal instance or signal.
-    *
-    * @param  mixed  $handle  Handle instance or identifier.
-    *
-    * @throws  InvalidArgumentException
-    * 
-    * @return  void
-    */
+     * Current event in execution
+     * 
+     * @var  object  \prggmr\Event
+     */
+    protected $_current_event = null;
+
+    /**
+     * Event children
+     * 
+     * @var  array
+     */
+    protected $_event_children = array();
+
+    /**
+     * Removes a signal handler.
+     *
+     * @param  mixed  $signal  Signal instance or signal.
+     *
+     * @param  mixed  $handle  Handle instance or identifier.
+     *
+     * @throws  InvalidArgumentException
+     * 
+     * @return  void
+     */
     public function dehandle($signal, $handle)
     {
         $slot = $this->queue($signal);
@@ -138,7 +158,7 @@ class Engine {
     }
 
     /**
-     * Empties the storage and clears the current state.
+     * Empties the storage, history and clears the current state.
      *
      * @return void
      */
@@ -495,7 +515,7 @@ class Engine {
      *
      * @param  array  $stacktrace  Stacktrace array
      *
-     * @return  object  EventGG
+     * @return  object|null  Event|Null if no handlers
      */
     public function signal($signal, $vars = null, &$event = null, $stacktrace = null)
     {
@@ -505,6 +525,7 @@ class Engine {
             }
         }
 
+        // event creation
         if (!$event instanceof Event) {
             if (null !== $event) {
                 $this->signal(esigs::INVALID_EVENT, array($event));
@@ -516,6 +537,17 @@ class Engine {
                 $event->setState(STATE_RECYCLED);
             }
         }
+
+        // event history management
+        $event->addSignal($signal);
+        if (null !== $this->_current_event) {
+            $this->_event_children[] = $this->_current_event;
+            $event->setParent($this->_current_event);
+        }
+        $this->_current_event = $event;
+        $this->_event_history[] = $event;
+
+        // locate sig handlers
         $queue = new Queue();
         $stack = $this->_search($signal);
         if ($stack[0] === self::SEARCH_FOUND) {
@@ -533,25 +565,26 @@ class Engine {
                 $queue->merge($node[0]->storage());
             });
         }
+
+        // no sig handlers found
+        if ($queue->count() === 0) return null;
+
+        // execute sig handlers
         $queue->sort(true);
-
-        // add stacktrace
-        if (PRGGMR_DEBUG === true) {
-            if (null === $stacktrace) {
-                $event->addTrace(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));
-            } else {
-                $event->addTrace($stacktrace);
-            }
-        }
-
         $queue->reset();
         while($queue->valid()) {
             if ($event->getState() === STATE_HALTED) break;
             $this->_execute($signal, $queue->current()[0], $event, $vars);
             $queue->next();
         }
-        $event->setState(STATE_EXITED);
 
+        // event execution finished cleanup and reset current
+        $event->setState(STATE_EXITED);
+        if (count($this->_event_children) !== 0) {
+            $this->_current_event = array_pop($this->_event_children);
+        } else {
+            $this->_current_event = null;
+        }
         return $event;
     }
 
@@ -570,12 +603,14 @@ class Engine {
      */
     protected function _execute($signal, &$handle, &$event, &$vars)
     {
+        $handle->setState(STATE_RUNNING);
         // bind event to allow use of "this"
         $handle->bind($event);
         try {
             $result = $handle->execute($vars);
         } catch (\prggmr\HandleException $exception) {
-            $event->setState(STATE_CORRUPTED);
+            $event->setState(STATE_ERROR);
+            $handle->setState(STATE_ERROR);
             $this->signal(esig::HANDLE_EXCEPTION, array(
                 $exception, $signal
             ));
@@ -586,8 +621,18 @@ class Engine {
                 $event->halt();
             }
         }
-        // How to determine it can be recovered
+        $handle->setState(STATE_EXITED);
         return $event;
+    }
+
+    /**
+     * Retrieves the event history.
+     * 
+     * @return  array
+     */
+    public function history(/* ... */)
+    {
+        return $this->_event_history;
     }
 
     /**

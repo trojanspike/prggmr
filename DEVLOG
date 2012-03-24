@@ -1,3 +1,8 @@
+[ 03242012 - 1120 ]
+
+- The Engine now maintains an event history and events now store their own
+  history which allows for event analyzes.
+
 [ 03232012 - 1815 ]
 
 - The Engine is now almost fully refactored with that the Queue, Event and 

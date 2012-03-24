@@ -42,7 +42,7 @@ namespace prggmr;
 define('STATE_DECLARED' , 0x00001);
 define('STATE_RUNNING'  , 0x00002);
 define('STATE_EXITED'   , 0x00003);
-define('STATE_CORRUPTED', 0x00004);
+define('STATE_ERROR'    , 0x00004);
 define('STATE_RECYCLED' , 0x00005);
 define('STATE_RECOVERED', 0x00006);
 define('STATE_HALTED'   , 0x00007);

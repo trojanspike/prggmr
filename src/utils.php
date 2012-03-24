@@ -16,8 +16,8 @@
  * 
  * @return  integer
  */
-function get_milliseconds(/* ... */) {
-    return int(round(microtime(true) * 1000));
+function milliseconds(/* ... */) {
+    return round(microtime(true) * 1000);
 }
 
 /**
