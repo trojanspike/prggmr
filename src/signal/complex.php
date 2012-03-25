@@ -14,15 +14,8 @@ use \LogicException;
  * Complex signals are anything that is not a string or integer.
  */
 abstract class Complex extends Standard {
-    /**
-     * Force implementation of a new constructor.
-     */
-    public function __construct($signal)
-    {
-        throw new \LogicException(
-            'Signal not implemented properly'
-        );
-    }
+
+    protected $_vars = null;
 
     /**
      * Compares the event signal given aganist itself.
@@ -32,7 +25,9 @@ abstract class Complex extends Standard {
      * @return  boolean|string|array  False on failure. True if matches. String
      *                                or array indicate results to pass handlers
      */
-    abstract public function evaluate($var);
+    public function evaluate($var = null) {
+        return false;
+    }
 
     /**
      * Runs the routine calculations which dictate when the engine will run or 
@@ -52,10 +47,22 @@ abstract class Complex extends Standard {
      * 
      * ARRAY informs the engine to signal those events.
      * 
+     * @param  array  $history  Event history
+     * 
      * @return  boolean|integer|array
      */
-    public function routine(/* ... */)
+    public function routine($history = null)
     {
         return false;
+    }
+
+    /**
+     * Returns any variables to provide the signal handler.
+     * 
+     * @return  array|null
+     */
+    public function vars(/* ... */)
+    {
+
     }
 }

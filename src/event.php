@@ -26,18 +26,38 @@ class Event {
     protected $_result = null;
 
     /**
-     * Signal event represents.
-     * 
-     * @var  object
-     */
-    protected $_signals = null;
-
-    /**
      * Parent event.
      * 
      * @var  object
      */
     protected $_parent = null;
+
+    /**
+     * Signal event represents.
+     */
+    protected $_signal = null;
+
+    /**
+     * Sets the signal for the event.
+     * 
+     * @param  string|int|object
+     * 
+     * @return  void
+     */
+    public function setSignal($signal)
+    {
+        $this->_signal = $signal;
+    }
+
+    /**
+     * Returns the event signal.
+     * 
+     * @return  int|string|object
+     */
+    public function getSignal(/* ... */)
+    {
+        return $this->_signal;
+    }
 
     /**
      * Sets the result of the event.
@@ -67,33 +87,6 @@ class Event {
     public function halt(/* ... */)
     {
         $this->_state = STATE_HALTED;
-    }
-
-    /**
-     * Returns the signal representions this event has been assigned to.
-     * Each node is an array containing the signal and time.
-     * 
-     * [signal, timestamp]
-     * 
-     * @return  array
-     */
-    public function signals(/* ... */)
-    {
-        return $this->_signals;
-    }
-
-    /**
-     * Adds a signal the event respresents.
-     * 
-     * @return  null [description]
-     */
-    public function addSignal($signal)
-    {
-        if (!is_array($this->_signals)) {
-            $this->_signals = [];
-        }
-
-        $this->_signals[] = [$signal, milliseconds()];
     }
 
     /**

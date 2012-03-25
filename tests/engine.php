@@ -1,23 +1,11 @@
 <?php
 require '../src/prggmr.php';
 
-handle(function(){
-    throw new \Exception('test');
-}, 'test-child');
+setTimeout(function(){
+    echo "10 seconds just passed";
+}, 10000);
 
-handle(function(){
-    echo "HELLo";
-}, 'test-child', 0);
-
-signal('test-child');
-// handle(function(){
-//     $this->test = "ROOT EVENT";
-// }, 'test', 0);
-
-// handle(function(){
-//     echo $this->test.PHP_EOL;
-//     signal('test-child');
-// }, 'test', 1);
+prggmr_loop();
 
 // handle(function(){
 //     echo "I'm a root child event".PHP_EOL;

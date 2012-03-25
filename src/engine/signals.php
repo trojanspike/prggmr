@@ -9,12 +9,14 @@ namespace prggmr\engine;
 /**
  * Engine Signals.
  * 
- * 0xE002 - 0xE014
+ * Represented as hex 0xE001 - 0xE02A
+ * 
+ * Errors are 0xE002 - 0xE014
+ * 
  * Any signals which are directly related to the engine running, e.g. invalid 
  * signal registration, routine calculation failure, handle execution failure, 
- * handle exceptions, shutdown etc...
+ * handle exceptions, loop start and shutdown etc ...
  * 
- * 0xE016 - 0xE02A
  * Unrelated signals handled directly by or represented by the engine.
  */
 class Signals {
@@ -43,15 +45,23 @@ class Signals {
      */
     const INVALID_HANDLE_DIRECTORY = 0xE006;
     /**
-     * Engine shutdown initiated.
+     * Infinitly looping recursive event detected.
      */
-    const SHUTDOWN = 0xE015;
+    const INFINITE_RECURSION_LOOP = 0xE007;
+    /**
+     * Engine loop startup
+     */
+    const LOOP_START = 0xE015;
+    /**
+     * Engine loop shutdown.
+     */
+    const LOOP_SHUTDOWN = 0xE016;
     /**
      * Global exception signal.
      */
-    const GLOBAL_EXCEPTION = 0xE016;
+    const GLOBAL_EXCEPTION = 0xE017;
     /**
      * Global error signal.
      */
-    const GLOBAL_ERROR = 0xE017;
+    const GLOBAL_ERROR = 0xE018;
 }

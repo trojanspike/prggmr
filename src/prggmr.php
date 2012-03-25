@@ -22,6 +22,7 @@ require $dir.'/engine.php';
 require $dir.'/signal/standard.php';
 require $dir.'/signal.php';
 require $dir.'/signal/complex.php';
+require $dir.'/signal/timeout.php';
 require $dir.'/event.php';
 require $dir.'/queue.php';
 require $dir.'/handle.php';

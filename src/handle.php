@@ -132,8 +132,6 @@ class Handle {
             $params = array_merge($params, $this->_params);
         }
 
-        call_user_func_array($this->_function, $params);
-
         return call_user_func_array($this->_function, $params);
     }
 

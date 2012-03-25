@@ -18,6 +18,13 @@ if (!defined('ENGINE_SIGNAL_EXCEPTIONS')) {
 }
 
 /**
+ * Allow the engine to detect inifinite looping.
+ */
+if (!defined('ENGINE_RECURSIVE_DETECTION')) {
+    define('ENGINE_RECURSIVE_DETECTION', false);
+}
+
+/**
  * When to begin binary searching.
  */
 if (!defined('BINARY_ENGINE_SEARCH')) {
@@ -38,6 +45,11 @@ if (defined('ENGINE_USE_BINARY')) {
 } else {
     define('ENGINE_STORAGE_TYPE', ENGINE_HASH_STORAGE);
 }
+
+/**
+ * Complex signal return to trigger the signal during routine calculation.
+ */
+define('ENGINE_ROUTINE_SIGNAL', -0xF14E);
 
 /**
  * As of v0.3.0 the loop is now run in respect to the currently available handles,
@@ -140,11 +152,25 @@ class Engine {
     protected $_current_event = null;
 
     /**
+     * Number of recursive event calls
+     * 
+     * @var  integer
+     */
+    protected $_event_recursive = 0;
+
+    /**
      * Event children
      * 
      * @var  array
      */
     protected $_event_children = array();
+
+    /**
+     * Routine data.
+     * 
+     * @var  array
+     */
+    private $_routines = array();
 
     /**
      * Starts the engine.
@@ -167,6 +193,77 @@ class Engine {
                 throw new EngineException($message, $type, $args);
             }, new \prggmr\signal\Range(0xE002, 0xE014), 0, null);
         }
+    }
+
+    /**
+     * Start the event loop.
+     * 
+     * @return  void
+     */
+    public function loop()
+    {
+        $this->signal(esig::LOOP_START);
+        while($this->_routines()) {
+            // check for signals that need to trigger
+            if (count($this->_routines[2]) != 0) {
+                foreach ($this->_routines[2] as $_node) {
+                    $this->_execute(
+                        $_node[0], $_node[1], $this->_event($_node[0]), $_node[0]->vars()
+                    );
+                }
+            }
+            // trigger signals provided to trigger
+            if (count($this->_routines[1]) != 0) {
+                var_dump($this->_routines[1]);
+                foreach ($this->_routines[1] as $_signals) {
+                    foreach ($_signals as $_node) {
+                        $this->signal($_node[0], $_node[1]);
+                    }
+                }
+            }
+            // check for sleep time
+            if ($this->_routines[0] > 0) {
+                // idle for the given time in milliseconds
+                usleep($this->_routines[0] * 1000);
+            }
+        }
+        $this->signal(esig::LOOP_SHUTDOWN);
+    }
+
+    /**
+     * Runs complex signal routines for engine loop.
+     * 
+     * @return  boolean|array
+     */
+    private function _routines()
+    {
+        $return = false;
+        $this->_sort();
+        $this->end();
+        $this->_routines = [0, [], []];
+        while ($this->valid()) {
+            if (!$this->current()[0] instanceof \prggmr\signal\Complex) {
+                break;
+            }
+            $routine = $this->current()[0]->routine($this->_event_history);
+            if (false !== $routine) {
+                $return = true;
+                if (is_array($routine)) {
+                    $this->_routines[1][] = [$routine, $this->current()[0]->vars()];
+                }
+                if (is_int($routine) || is_float($routine)) {
+                    if ($this->_routines[0] === 0 || $this->_routines[0] > $routine) {
+                        $this->_routines[0] = $routine;
+                    }
+                }
+                if ($routine === ENGINE_ROUTINE_SIGNAL) {
+                    $this->_routines[2][] = $this->current();
+                }
+            }
+            $this->prev();
+        }
+
+        return $return;
     }
 
     /**
@@ -232,10 +329,8 @@ class Engine {
         }
 
         $slot = $this->sigHandler($signal);
-        $slot[1]->enqueue($handle, $priority);
-
-        if (null !== $chain) {
-            $slot[2]->setChain($chain);
+        if (false !== $slot && $slot[1] instanceof \prggmr\Queue) {
+            $slot[1]->enqueue($handle, $priority);
         }
 
         return $handle;
@@ -501,26 +596,15 @@ class Engine {
     }
 
     /**
-     * Signals an event.
-     *
-     * @param  mixed  $signal  Signal instance or signal.
-     *
-     * @param  array  $vars  Array of variables to pass handles.
-     *
+     * Loads an event for the current signal.
+     * 
+     * @param  int|string|object  $signal
      * @param  object  $event  \prggmr\Event
-     *
-     * @param  array  $stacktrace  Stacktrace array
-     *
-     * @return  object|null  Event|Null if no handlers
+     * 
+     * @return  object  \prggmr\Event
      */
-    public function signal($signal, $vars = null, &$event = null, $stacktrace = null)
+    private function _event($signal, &$event = null)
     {
-        if (null !== $vars) {
-            if (!is_array($vars)) {
-                $vars = array($vars);
-            }
-        }
-
         // event creation
         if (!$event instanceof Event) {
             if (null !== $event) {
@@ -533,15 +617,57 @@ class Engine {
                 $event->setState(STATE_RECYCLED);
             }
         }
-
+        // TODO : infinite loop detection algorithm
+        // if possible ... or needed
         // event history management
-        $event->addSignal($signal);
         if (null !== $this->_current_event) {
             $this->_event_children[] = $this->_current_event;
             $event->setParent($this->_current_event);
         }
         $this->_current_event = $event;
-        $this->_event_history[] = $event;
+        $this->_event_history[] = [$event, $signal, milliseconds()];
+        $event->setSignal($signal);
+        return $event;
+    }
+
+    /**
+     * Exits the event from the engine.
+     * 
+     * @param  object  $event  \prggmr\Event
+     */
+    private function _eventExit($event)
+    {
+        // event execution finished cleanup and reset current
+        $event->setState(STATE_EXITED);
+        if (count($this->_event_children) !== 0) {
+            $this->_current_event = array_pop($this->_event_children);
+        } else {
+            $this->_current_event = null;
+        }
+    }
+
+    /**
+     * Signals an event.
+     *
+     * @param  mixed  $signal  Signal instance or signal.
+     *
+     * @param  array  $vars  Array of variables to pass handles.
+     *
+     * @param  object  $event  \prggmr\Event
+     *
+     * @return  object  Event
+     */
+    public function signal($signal, $vars = null, &$event = null)
+    {
+        // check variables
+        if (null !== $vars) {
+            if (!is_array($vars)) {
+                $vars = array($vars);
+            }
+        }
+
+        // load engine event
+        $event = $this->_event($signal, $event);
 
         // locate sig handlers
         $queue = new Queue();
@@ -563,25 +689,12 @@ class Engine {
         }
 
         // no sig handlers found
-        if ($queue->count() === 0) return null;
-
-        // execute sig handlers
-        $queue->sort(true);
-        $queue->reset();
-        while($queue->valid()) {
-            if ($event->getState() === STATE_HALTED) break;
-            $this->_execute($signal, $queue->current()[0], $event, $vars);
-            $queue->next();
+        if ($queue->count() === 0) {
+            $this->_eventExit($event);
+            return $event;
         }
 
-        // event execution finished cleanup and reset current
-        $event->setState(STATE_EXITED);
-        if (count($this->_event_children) !== 0) {
-            $this->_current_event = array_pop($this->_event_children);
-        } else {
-            $this->_current_event = null;
-        }
-        return $event;
+        return $this->_execute($signal, $queue, $event, $vars);
     }
 
     /**
@@ -597,34 +710,43 @@ class Engine {
      *
      * @return  object  Event
      */
-    protected function _execute($signal, &$handle, &$event, &$vars)
+    protected function _execute($signal, &$queue, &$event, &$vars)
     {
-        $handle->setState(STATE_RUNNING);
-        // bind event to allow use of "this"
-        $handle->bind($event);
-        if (!ENGINE_SIGNAL_EXCEPTIONS) {
-            $result = $handle->execute($vars);
-        } else {
-            try {
+        // execute sig handlers
+        $queue->sort(true);
+        $queue->reset();
+        while($queue->valid()) {
+            if ($event->getState() === STATE_HALTED) break;
+            $handle = $queue->current()[0];
+            $handle->setState(STATE_RUNNING);
+            // bind event to allow use of "this"
+            $handle->bind($event);
+            if (ENGINE_SIGNAL_EXCEPTIONS) {
                 $result = $handle->execute($vars);
-            } catch (\Exception $exception) {
-                $event->setState(STATE_ERROR);
-                $handle->setState(STATE_ERROR);
-                if ($exception instanceof EngineException) {
-                    throw $exception;
+            } else {
+                try {
+                    $result = $handle->execute($vars);
+                } catch (\Exception $exception) {
+                    $event->setState(STATE_ERROR);
+                    $handle->setState(STATE_ERROR);
+                    if ($exception instanceof EngineException) {
+                        throw $exception;
+                    }
+                    $this->signal(esig::HANDLE_EXCEPTION, array(
+                        $exception, $signal
+                    ));
                 }
-                $this->signal(esig::HANDLE_EXCEPTION, array(
-                    $exception, $signal
-                ));
             }
-        }
-        if (null !== $result) {
-            $event->setResult($result);
-            if (false === $result) {
-                $event->halt();
+            if (null !== $result) {
+                $event->setResult($result);
+                if (false === $result) {
+                    $event->halt();
+                }
             }
+            $handle->setState(STATE_EXITED);
+            $queue->next();
         }
-        $handle->setState(STATE_EXITED);
+        $this->_eventExit($event);
         return $event;
     }
 

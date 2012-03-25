@@ -70,36 +70,6 @@ function handle_remove($signal, $handle)
 }
 
 /**
- * Establishes a chain between two signals.
- *
- * @param  mixed  $singal  Signal which triggers the chain.
- * @param  mixed  $chain  Signal to be chained.
- *
- * @return  void
- */
-if (!function_exists('chain')){
-function chain($signal, $chain)
-{
-    return prggmr::instance()->queue($signal)->getSignal()->setChain($chain);
-}
-}
-
-/**
- * Removes a signal chain.
- *
- * @param  mixed  $singal  Signal which contains the chain
- * @param  mixed  $chain  Signal to be removed
- *
- * @return  void
- */
-if (!function_exists('dechain')){
-function dechain($signal, $chain)
-{
-    return prggmr::instance()->queue($signal)->getSignal()->removeChain($chain);
-}
-}
-
-/**
 * Signals an event.
 *
 * @param  mixed  $signal  Signal instance or signal.
@@ -163,10 +133,11 @@ function setInterval($function, $interval, $vars = null, $identifier = null, $ex
  * @return  object  \prggmr\handle\Time
  */
 if (!function_exists('setTimeout')){
-function setTimeout($function, $timeout, $vars = null, $identifier = null, $start = null)
+function setTimeout($function, $timeout, $vars = null)
 {
-    // This simply uses set interval and sets an exhaustion rate of 1 ...
-    return prggmr::instance()->setTimeout($function, $timeout, $vars, $identifier, $start);
+    return prggmr::instance()->handle($function, new \prggmr\signal\Timeout(
+        $timeout, $vars
+    ));
 }
 }
 
@@ -207,9 +178,9 @@ function clearTimeout($handle)
  * @return  void
  */
 if (!function_exists('prggmr_loop')){
-function prggmr_loop($reset = false, $timeout = null)
+function prggmr_loop()
 {
-    return prggmr::instance()->loop($reset, $timeout);
+    return prggmr::instance()->loop();
 }
 }
 

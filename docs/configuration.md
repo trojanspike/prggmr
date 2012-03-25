@@ -8,6 +8,11 @@ know what you are doing.
 
 ## Engine
 
+### ENGINE_SIGNAL_EXCEPTIONS
+__Default :__ true
+
+Enables throwing exceptions for internal engine signals.
+
 ### SIGNAL_ERRORS_EXCEPTIONS
 __Default :__ false
 
