@@ -45,7 +45,8 @@ class Signals {
      */
     const INVALID_HANDLE_DIRECTORY = 0xE006;
     /**
-     * Infinitly looping recursive event detected.
+     * Infinitly looping recursive event detected.  
+     * !! NOT IMPLEMENTED !!
      */
     const INFINITE_RECURSION_LOOP = 0xE007;
     /**

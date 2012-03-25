@@ -56,14 +56,28 @@ Invalid directory provided for handler loader.
         // The $event is the invalid event
     }, \prggmr\engine\Signals::INVALID_HANDLE_DIRECTORY);
 
-## SHUTDOWN (0xE015)
+## LOOP_START (0xE015)
+Engine loop has started.
+
+    handle(function(){
+        // initialize some variables
+    }, \prggmr\engine\Signals::LOOP_START);
+
+## LOOP_SHUTDOWN (0xE016)
 Engine shutdown has been initiated.
 
-    handle(function($shutdown){
-        // do some cleanup before shutdown
-    }, \prggmr\engine\Signals::SHUTDOWN);
+    handle(function(){
+        // do some cleanup
+    }, \prggmr\engine\Signals::LOOP_SHUTDOWN);
 
-## GLOBAL_EXCEPTION (0xE016)
+## EXHAUSTED_QUEUE_SIGNALED (0xE017)
+A queue that has been exhausted has been signaled. 
+
+    handle(function(){
+        // do some cleanup
+    }, \prggmr\engine\Signals::EXHAUSTED_QUEUE_SIGNALED);
+
+## GLOBAL_EXCEPTION (0xE029)
 Global exception signal used for any non-prggmr exceptions when using the prggmr
 exception handler.
 
@@ -71,10 +85,10 @@ exception handler.
         // the thrown exception is in $exception
     }, \prggmr\engine\Signals::GLOBAL_EXCEPTION);
 
-## GLOBAL_ERROR (0xE017)
+## GLOBAL_ERROR (0xE02A)
 Global error signal used for any non-prggmr errors when using the prggmr
 error handler.
 
     handle(function($errno, $errst, $errfile, $errline, $errcontext){
-        // This is a standard PHP error handler only evented!
+        // This is a standard PHP error handler only signal driven!
     }, \prggmr\engine\Signals::GLOBAL_EXCEPTION);

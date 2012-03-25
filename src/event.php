@@ -44,7 +44,7 @@ class Event {
      * 
      * @return  void
      */
-    public function setSignal($signal)
+    public function set_signal($signal)
     {
         $this->_signal = $signal;
     }
@@ -54,7 +54,7 @@ class Event {
      * 
      * @return  int|string|object
      */
-    public function getSignal(/* ... */)
+    public function get_signal(/* ... */)
     {
         return $this->_signal;
     }
@@ -64,7 +64,7 @@ class Event {
      * 
      * @param  mixed  $result
      */
-    public function setResult($result)
+    public function set_result($result)
     {
         $this->_result = $result;
     }
@@ -74,7 +74,7 @@ class Event {
      * 
      * @return  mixed
      */
-    public function getResult(/* ... */)
+    public function get_result(/* ... */)
     {
         return $this->_result;
     }
@@ -94,7 +94,7 @@ class Event {
      * 
      * @return  boolean
      */
-    public function isChild(/* ... */)
+    public function is_child(/* ... */)
     {
         return null !== $this->_parent;
     }
@@ -106,7 +106,7 @@ class Event {
      * 
      * @return  void
      */
-    public function setParent(Event $event)
+    public function set_parent(Event $event)
     {
         $this->_parent = $event;
     }
@@ -116,7 +116,7 @@ class Event {
      * 
      * @return  null|object 
      */
-    public function parent(/* ... */)
+    public function get_parent(/* ... */)
     {
         return $this->_parent;
     }

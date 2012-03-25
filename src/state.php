@@ -71,7 +71,7 @@ trait State
      *
      * @return  integer  Current state of this event.
      */
-    public function getState(/* ... */)
+    public function get_state(/* ... */)
     {
         return $this->_state;
     }
@@ -85,7 +85,7 @@ trait State
      *
      * @return  void
      */
-    public function setState($state) 
+    public function set_state($state) 
     {
         if (!in_array($state, range(1, 7))) {
             throw new \InvalidArgumentException(

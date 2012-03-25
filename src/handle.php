@@ -112,7 +112,7 @@ class Handle {
     public function execute(&$params = null)
     {
         # test for exhaustion
-        if ($this->isExhausted()) return false;
+        if ($this->is_exhausted()) return false;
         
         # Increase execution count
         if (null !== $this->_exhaustion) {
@@ -154,7 +154,7 @@ class Handle {
      *
      * @return  boolean
      */
-    public function isExhausted()
+    public function is_exhausted()
     {
         if (null === $this->_exhaustion) {
             return false;
@@ -206,7 +206,7 @@ class Handle {
      * 
      * @return  object
      */
-    public function getBind()
+    public function get_bind()
     {
         return $this->_bind;
     }
@@ -246,7 +246,7 @@ class HandleException extends \Exception {
      *
      * @return  object  \prggmr\Event
      */
-    public function getEvent(/* ... */)
+    public function get_event(/* ... */)
     {
         return $this->_event;
     }
@@ -256,7 +256,7 @@ class HandleException extends \Exception {
      *
      * @return  object  \prggmr\Handle
      */
-    public function getHandle(/* ... */)
+    public function get_handle(/* ... */)
     {
         return $this->_handle;
     }

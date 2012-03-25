@@ -1,5 +1,6 @@
 [ 0.3.0 00002012 ]
 ------------------
+- All methods use the underscore seperator for words
 - Events now contain a history of all signals they have represented
 - Events now contain a reference to a parent if signal within another event
 - Engine now stores a running history of events that have taken place

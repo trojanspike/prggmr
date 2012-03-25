@@ -6,89 +6,91 @@
  */
 
 /**
-* Create a new sig handler.
-*
-* @param  mixed  $signal  Signal to handle, this
-*         can be a Signal object, the signal representation or an array
-*         for a chained signal.
-*
-* @param  mixed  $subscription  Handle closure that will trigger.
-*
-* @param  integer $priority  Priority of the handle.
-*
-* @param  integer  $exhaust  Rate at which this handle will exhaust.
-*
-* @throws  InvalidArgumentException  Thrown when an invalid callback is
-*          provided.
-*
-* @return  void
-*/
-if (!function_exists('handle')){
+ * Creates a new signal handler.
+ *
+ * @param  object  $callable  Closure
+ * @param  string|integer|object  $signal  Signal to attach the handle.
+ * @param  integer $priority  Handle priority.
+ * @param  integer  $exhaust  Handle exhaustion.
+ *
+ * @return  object|boolean  Handle, boolean if error
+ *
+ * @return  void
+ */
 function handle($subscription, $signal, $priority = null, $exhaust = 1)
 {
     return prggmr::instance()->handle($subscription, $signal, $priority, $exhaust);
 }
-}
 
 /**
-* Attaches a new handle to a signal for one execution loop.
-*
-* @param  mixed  $signal  Signal the handle will attach to, this
-*         can be a Signal object, the signal representation or an array
-*         for a chained signal.
-*
-* @param  mixed  $subscription  Handle closure that will trigger.
-*
-* @param  string  $identifier  Identify of the handle.
-*
-* @param  integer $priority  Priority of the handle.
-*
-* @return  void
-*/
-if (!function_exists('once')){
-function handle_once($subscription, $signal, $priority = null)
-{
-    return prggmr::instance()->handle($signal, $subscription, $priority, 1);
-}
-}
-
-/**
-* Removes a handle from a signal.
-*
-* @param  mixed  $signal  Signal handle is attached to.
-*
-* @param  mixed  $handle  handle instance or id.
-*
-* @throws  InvalidArgumentException
-* @return  void
-*/
-if (!function_exists('dequeue')){
+ * Remove a signal handler.
+ *
+ * @param  string|integer|object  $signal  Signal handle is attached to.
+ * @param  object  $handle  Handle instance.
+ *
+ * @return  void
+ */
 function handle_remove($signal, $handle)
 {
-    return prggmr::instance()->dequeue($signal, $handle);   
-}
+    return prggmr::instance()->handle_remove($signal, $handle);   
 }
 
 /**
-* Signals an event.
-*
-* @param  mixed  $signal  Signal instance or signal.
-*
-* @param  array  $vars  Array of variables to pass the handles.
-*
-* @param  object  $event  Event
-*
-* @return  object  Event
-*/
-if (!function_exists('fire')){
+ * Registers a new signal handle loader which recursively loads files in the
+ * given directory when a signal is triggered.
+ * 
+ * @param  integer|string|object  $signal  Signal to register with
+ * @param  string  $directory  Directory to load handles from
+ * @param  integer  $heap  Queue heap type
+ * 
+ * @return  object  \prggmr\Handle
+ */
+function handle_loader($signal, $directory, $heap = QUEUE_MIN_HEAP)
+{
+    return prggmr::instance()->handle_loader($signal, $directory, $heap);
+}
+
+/**
+ * Signal an event.
+ *
+ * @param  string|integer|object  $signal  Signal or a signal instance.
+ * @param  array  $vars  Array of variables to pass the handles.
+ * @param  object  $event  Event
+ *
+ * @return  object  \prggmr\Event
+ */
 function signal($signal, $vars = null, &$event = null)
 {
     return prggmr::instance()->signal($signal, $vars, $event);
 }
+
+/**
+ * Locates or creates a signal Queue in storage.
+ * 
+ * The storage is designed to place any sortable types [int, strings and
+ * sortable objects] at top of the stack and place any unstortable types 
+ * [complex objects] at the bottom.
+ * 
+ * A visual representation:
+ * 
+ * [
+ *     1,2,object(3),4
+ *     'a','b',object('c'),'d'
+ *     object(c2), object(c2)
+ * ]
+ * 
+ * @param  string|integer|object  $signal  Signal
+ * @param  integer  $type  [QUEUE_MIN_HEAP,QUEUE_MAX_HEAP]
+ *
+ * @return  boolean|array  [QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, queue, signal]
+ */
+function signal_queue($signal)
+{
+    return prggmr::instance()->signal_queue($signal);
 }
 
 /**
- * Calls a function at the specified intervals of time in microseconds.
+ * Calls a function at the specified intervals of time in milliseconds.
  *
  * @param  object  $function  Closure
  * @param  integer  $timeout  Milliseconds before calling timeout.
@@ -97,13 +99,11 @@ function signal($signal, $vars = null, &$event = null)
  *
  * @return  array  [signal, handle]
  */
-if (!function_exists('interval')){
 function interval($function, $interval, $vars = null, $priority = QUEUE_DEFAULT_PRIORITY)
 {
     $signal = new \prggmr\signal\Interval($interval, $vars);
     $handle = prggmr::instance()->handle($function, $signal, $priority, null);
     return [$signal, $handle];
-}
 }
 
 /**
@@ -116,13 +116,11 @@ function interval($function, $interval, $vars = null, $priority = QUEUE_DEFAULT_
  *
  * @return  array  [signal, handle]
  */
-if (!function_exists('timeout')){
 function timeout($function, $timeout, $vars = null, $priority = QUEUE_DEFAULT_PRIORITY)
 {
     $signal = new \prggmr\signal\Time($timeout, $vars);
     $handle = prggmr::instance()->handle($function, $signal, $priority, 1);
     return [$signal, $handle];
-}
 }
 
 /**
@@ -133,11 +131,9 @@ function timeout($function, $timeout, $vars = null, $priority = QUEUE_DEFAULT_PR
  *
  * @return  void
  */
-if (!function_exists('prggmr_loop')){
 function prggmr_loop()
 {
     return prggmr::instance()->loop();
-}
 }
 
 /**
@@ -145,9 +141,7 @@ function prggmr_loop()
  *
  * @return  void
  */
-if (!function_exists('shutdown')){
 function prggmr_shutdown()
 {
     return prggmr::instance()->shutdown();
-}
 }

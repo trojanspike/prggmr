@@ -114,14 +114,6 @@ class Engine {
      */
 
     /**
-     * Current engine stacktrace, this is keep for when a handle errors out
-     * and php does not maintain the actual trace to the call.
-     *
-     * @var  array
-     */
-    protected $_stacktrace = array();
-
-    /**
      * Determins if queue storage needs to be sorted.
      * 
      * @var  boolean
@@ -177,7 +169,7 @@ class Engine {
      */
     public function __construct()
     {
-        $this->setState(STATE_DECLARED);
+        $this->set_state(STATE_DECLARED);
         if (ENGINE_EXCEPTIONS) {
             if (!class_exists('\prggmr\signal\Range', false)){
                 require_once 'signal/range.php';
@@ -203,7 +195,7 @@ class Engine {
         $this->signal(esig::LOOP_START);
         while($this->_routines()) {
             // allow for external shutdown signal
-            if ($this->getState() === STATE_HALTED) break;
+            if ($this->get_state() === STATE_HALTED) break;
             // check for signals that need to trigger
             if (count($this->_routines[2]) != 0) {
                 foreach ($this->_routines[2] as $_node) {
@@ -252,7 +244,7 @@ class Engine {
                 if (null !== $routine[0]) {
                     if (is_array($routine[0])) {
                         foreach ($routine as $_sig) {
-                            if (false === $this->_routineExhausted($_sig)) {
+                            if (false === $this->_routine_exhausted($_sig)) {
                                 $return = true;
                                 $this->_routines[1][] = [$_sig, $this->current()[0]->vars()];
                             }
@@ -260,13 +252,13 @@ class Engine {
                     } else {
                         // Trigger the signal itself
                         if ($routine[0] === ENGINE_ROUTINE_SIGNAL) {
-                            if (false === $this->_routineExhausted($this->current()[1])) {
+                            if (false === $this->_routine_exhausted($this->current()[1])) {
                                 $return = true;
                                 $this->_routines[2][] = $this->current();
                             }
                         // Trigger one signal
                         } else {
-                            if (false === $this->_routineExhausted($_routine[0])) {
+                            if (false === $this->_routine_exhausted($_routine[0])) {
                                 $return = true;
                                 $this->_routines[1][] = [$_routine[0], $this->current()[0]->vars()];
                             }
@@ -293,13 +285,13 @@ class Engine {
      * 
      * @return  boolean
      */
-    private function _routineExhausted($queue)
+    private function _routine_exhausted($queue)
     {
         if (!$queue instanceof Queue) {
-            $queue = $this->sigHandler($queue, false);
+            $queue = $this->signal_queue($queue, false);
             if (false === $queue) return false;
         }
-        if (true === $this->queueExhausted($queue)) {
+        if (true === $this->queue_exhausted($queue)) {
             $this->signal(esig::EXHAUSTED_QUEUE_SIGNALED, array(
                 $this->current()[1], $this->current()[0]
             ));
@@ -315,11 +307,11 @@ class Engine {
      * 
      * @return  boolean
      */
-    public function queueExhausted($queue)
+    public function queue_exhausted($queue)
     {
         $queue->reset();
         while($queue->valid()) {
-            if (!$queue->current()[0]->isExhausted()) {
+            if (!$queue->current()[0]->is_exhausted()) {
                 return false;
             }
             $queue->next();
@@ -338,9 +330,9 @@ class Engine {
      * 
      * @return  void
      */
-    public function dehandle($signal, $handle)
+    public function handle_remove($signal, $handle)
     {
-        $slot = $this->queue($signal);
+        $slot = $this->signal_queue($signal);
         if ($slot[0] <= self::QUEUE_EMPTY) return false;
         return $slot[1]->dequeue($handle);
     }
@@ -353,21 +345,16 @@ class Engine {
     public function flush(/* ... */)
     {
         $this->_storage = [];
-        $this->setState(STATE_DECLARED);
+        $this->set_state(STATE_DECLARED);
     }
 
     /**
-     * Attach a new handle to a signal.
+     * Creates a new signal handler.
      *
-     * @param  mixed  $callable  Function to execute on handle.
-     *
-     * @param  mixed  $signal  Signal which triggers the handle.
-     *
-     * @param  string  $identifier  Identifier of handle.
-     *
+     * @param  object  $callable  Closure
+     * @param  string|int|object  $signal  Signal to attach the handle.
      * @param  integer $priority  Handle priority.
-     *
-     * @param  integer  $exhaust  Rate at which handle exhausts. DEFAULT = 1
+     * @param  integer  $exhaust  Handle exhaustion.
      *
      * @return  object|boolean  Handle, boolean if error
      */
@@ -389,7 +376,7 @@ class Engine {
             $handle = new Handle($callable, $exhaust);
         }
 
-        $slot = $this->sigHandler($signal);
+        $slot = $this->signal_queue($signal);
         if (false !== $slot && $slot[1] instanceof \prggmr\Queue) {
             $slot[1]->enqueue($handle, $priority);
         }
@@ -417,7 +404,7 @@ class Engine {
      *
      * @return  boolean|array  [QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, queue, signal]
      */
-    public function sigHandler($signal, $create = true, $type = QUEUE_MIN_HEAP)
+    public function signal_queue($signal, $create = true, $type = QUEUE_MIN_HEAP)
     {
         $complex = false;
         $queue = false;
@@ -435,7 +422,7 @@ class Engine {
         }
 
         if ($complex) {
-            $search = $this->_searchComplex($signal);
+            $search = $this->_search_complex($signal);
             if ($search[0] === self::SEARCH_FOUND) {
                 $queue = $search[1];
             }
@@ -483,7 +470,7 @@ class Engine {
      * 
      * @return  object  \prggmr\Handle
      */
-    public function loadHandler($signal, $directory, $heap = QUEUE_MIN_HEAP)
+    public function handle_loader($signal, $directory, $heap = QUEUE_MIN_HEAP)
     {
         if (!is_dir($directory) || !is_readable($directory)) {
             $this->signal(esig::INVALID_HANDLE_DIRECTORY, array(
@@ -497,7 +484,7 @@ class Engine {
             $priority = PHP_INT_MAX;
         }
 
-        $this->sigHandler(function() use ($directory){
+        $this->handle(function() use ($directory){
             $dir = new RegexIterator(
                 new RecursiveIteratorIterator(
                     new RecursiveDirectoryIterator($directory)
@@ -624,7 +611,7 @@ class Engine {
      * 
      * @return  array  [SEARCH_NULL|SEARCH_FOUND|SEARCH_NOOP, object|array|null]
      */
-    public function _searchComplex($signal)
+    public function _search_complex($signal)
     {
         if (is_string($signal) || is_int($signal)) {
             $locate = true;
@@ -675,10 +662,10 @@ class Engine {
                 $this->signal(esigs::INVALID_EVENT, array($event));
             }
             $event = new Event();
-            $event->setState(STATE_RUNNING);
+            $event->set_state(STATE_RUNNING);
         } else {
-            if ($event->getState() !== STATE_DECLARED) {
-                $event->setState(STATE_RECYCLED);
+            if ($event->get_state() !== STATE_DECLARED) {
+                $event->set_state(STATE_RECYCLED);
             }
         }
         // TODO : infinite loop detection algorithm
@@ -686,11 +673,11 @@ class Engine {
         // event history management
         if (null !== $this->_current_event) {
             $this->_event_children[] = $this->_current_event;
-            $event->setParent($this->_current_event);
+            $event->set_parent($this->_current_event);
         }
         $this->_current_event = $event;
         $this->_event_history[] = [$event, $signal, milliseconds()];
-        $event->setSignal($signal);
+        $event->set_signal($signal);
         return $event;
     }
 
@@ -699,10 +686,10 @@ class Engine {
      * 
      * @param  object  $event  \prggmr\Event
      */
-    private function _eventExit($event)
+    private function _event_exit($event)
     {
         // event execution finished cleanup and reset current
-        $event->setState(STATE_EXITED);
+        $event->set_state(STATE_EXITED);
         if (count($this->_event_children) !== 0) {
             $this->_current_event = array_pop($this->_event_children);
         } else {
@@ -739,7 +726,7 @@ class Engine {
         if ($stack[0] === self::SEARCH_FOUND) {
             $queue->merge($stack[1]->storage());
         }
-        $complex = $this->_searchComplex($signal);
+        $complex = $this->_search_complex($signal);
         if ($complex[0] === self::SEARCH_FOUND) {
             array_walk($complex[1], function($node) use ($queue){
                 if (is_bool($node[1]) === false) {
@@ -754,7 +741,7 @@ class Engine {
 
         // no sig handlers found
         if ($queue->count() === 0) {
-            $this->_eventExit($event);
+            $this->_event_exit($event);
             return $event;
         }
 
@@ -780,9 +767,9 @@ class Engine {
         $queue->sort(true);
         $queue->reset();
         while($queue->valid()) {
-            if ($event->getState() === STATE_HALTED) break;
+            if ($event->get_state() === STATE_HALTED) break;
             $handle = $queue->current()[0];
-            $handle->setState(STATE_RUNNING);
+            $handle->set_state(STATE_RUNNING);
             // bind event to allow use of "this"
             $handle->bind($event);
             if (ENGINE_EXCEPTIONS) {
@@ -791,8 +778,8 @@ class Engine {
                 try {
                     $result = $handle->execute($vars);
                 } catch (\Exception $exception) {
-                    $event->setState(STATE_ERROR);
-                    $handle->setState(STATE_ERROR);
+                    $event->set_state(STATE_ERROR);
+                    $handle->set_state(STATE_ERROR);
                     if ($exception instanceof EngineException) {
                         throw $exception;
                     }
@@ -802,15 +789,15 @@ class Engine {
                 }
             }
             if (null !== $result) {
-                $event->setResult($result);
+                $event->set_result($result);
                 if (false === $result) {
                     $event->halt();
                 }
             }
-            $handle->setState(STATE_EXITED);
+            $handle->set_state(STATE_EXITED);
             $queue->next();
         }
-        $this->_eventExit($event);
+        $this->_event_exit($event);
         return $event;
     }
 
@@ -831,7 +818,7 @@ class Engine {
      */
     public function shutdown()
     {
-        $this->setState(STATE_HALTED);
+        $this->set_state(STATE_HALTED);
     }
 }
 
@@ -860,7 +847,7 @@ class EngineException extends \Exception {
      * 
      * @return  array
      */
-    public function getArgs(/* ... */)
+    public function get_args(/* ... */)
     {
         return $this->_args;
     }
@@ -870,7 +857,7 @@ class EngineException extends \Exception {
      * 
      * @return  integer
      */
-    public function getEngineCode(/* ... */)
+    public function get_engine_code(/* ... */)
     {
         return $this->_type;
     }
