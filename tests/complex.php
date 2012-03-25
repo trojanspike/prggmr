@@ -44,12 +44,18 @@ class Wedding extends \prggmr\signal\Complex {
 
 }
 
+// signal handlers
 handle(function(){
     echo "The man has arrived".PHP_EOL;
+    echo "Waiting for the woman".PHP_EOL;
 }, 'man');
 
 handle(function(){
     echo "The woman has arrived".PHP_EOL;
+    echo "The wedding will start in 3 seconds".PHP_EOL;
+    timeout(function(){
+        signal('bells');
+    }, 3000);
 }, 'woman');
 
 handle(function(){
@@ -57,12 +63,20 @@ handle(function(){
 }, "bells");
 
 handle(function(){
-    echo "A wedding is taking place!";
-    exit();
+    echo "A wedding is taking place!".PHP_EOL;
+    timeout(function(){
+        signal('wedding_over');
+    }, 10000);
 }, new Wedding());
 
+handle(function(){
+    echo "The wedding is over".PHP_EOL;
+}, 'wedding_over');
+
+timeout(function(){
+    signal('woman');
+}, 5000);
+
 signal('man');
-signal('woman');
-signal('bells');
 
 prggmr_loop();
