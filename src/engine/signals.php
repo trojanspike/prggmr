@@ -57,11 +57,15 @@ class Signals {
      */
     const LOOP_SHUTDOWN = 0xE016;
     /**
+     * Exhausted queue signaled to trigger.
+     */
+    const EXHAUSTED_QUEUE_SIGNALED = 0xE017;
+    /**
      * Global exception signal.
      */
-    const GLOBAL_EXCEPTION = 0xE017;
+    const GLOBAL_EXCEPTION = 0xE029;
     /**
      * Global error signal.
      */
-    const GLOBAL_ERROR = 0xE018;
+    const GLOBAL_ERROR = 0xE02A;
 }

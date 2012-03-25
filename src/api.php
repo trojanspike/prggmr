@@ -90,82 +90,38 @@ function signal($signal, $vars = null, &$event = null)
 /**
  * Calls a function at the specified intervals of time in microseconds.
  *
- * @param  mixed  $callable  Callable php variable.
+ * @param  object  $function  Closure
+ * @param  integer  $timeout  Milliseconds before calling timeout.
+ * @param  array  $vars  Variables to pass the timeout function
+ * @param  integer  $priority  Timeout priority
  *
- * @param  integer  $interval  Interval of time in microseconds between execution.
- *
- * @param  mixed  $vars  Variables to pass the interval.
- *
- * @param  string  $identifier  Identifier of the function.
- *
- * @param  integer  $exhaust  Rate at which this handle will exhaust.
- *
- * @param  mixed  $start  Unix parse able date to start the function interval.
- *
- * @throws  InvalidArgumentException  Thrown when an invalid callback,
- *          interval or un-parse able date is provided.
- *
- * @return  object  \prggmr\handle\Time
+ * @return  array  [signal, handle]
  */
-if (!function_exists('setInterval')){
-function setInterval($function, $interval, $vars = null, $identifier = null, $exhaust = 0, $start = null)
+if (!function_exists('interval')){
+function interval($function, $interval, $vars = null, $priority = QUEUE_DEFAULT_PRIORITY)
 {
-    return prggmr::instance()->setInterval($function, $interval, $vars, $identifier, $exhaust, $start);
+    $signal = new \prggmr\signal\Interval($interval, $vars);
+    $handle = prggmr::instance()->handle($function, $signal, $priority, null);
+    return [$signal, $handle];
 }
 }
 
 /**
- * Calls a function after the specified time in microseconds.
+ * Calls a timeout function after the specified time in microseconds.
+ * 
+ * @param  object  $function  Closure
+ * @param  integer  $timeout  Milliseconds before calling timeout.
+ * @param  array  $vars  Variables to pass the timeout function
+ * @param  integer  $priority  Timeout priority
  *
- * @param  mixed  $callable  Callable php variable.
- *
- * @param  integer  $interval  Number of microseconds to pass before execution.
- *
- * @param  mixed  $vars  Variables to pass.
- *
- * @param  string  $identifier  Identifier of the function.
- *
- * @param  mixed  $start  Unix parse able date to start the function.
- *
- * @throws  InvalidArgumentException  Thrown when an invalid callback,
- *          interval or un-parse able date is provided.
- *
- * @return  object  \prggmr\handle\Time
+ * @return  array  [signal, handle]
  */
-if (!function_exists('setTimeout')){
-function setTimeout($function, $timeout, $vars = null)
+if (!function_exists('timeout')){
+function timeout($function, $timeout, $vars = null, $priority = QUEUE_DEFAULT_PRIORITY)
 {
-    return prggmr::instance()->handle($function, new \prggmr\signal\Timeout(
-        $timeout, $vars
-    ));
-}
-}
-
-/**
- * Clears an interval.
- *
- * @param  mixed  $subscription  Time handle instance of identifier.
- *
- * @return  void
- */
-if (!function_exists('clearInterval')){
-function clearInterval($handle)
-{
-    return prggmr::instance()->clearInterval($handle);
-}
-}
-
-/**
- * Clears a timeout.
- *
- * @param  mixed  $subscription  Time handle instance of identifier.
- *
- * @return  void
- */
-if (!function_exists('clearTimeout')){
-function clearTimeout($handle)
-{
-    return prggmr::instance()->clearTimeout($handle);
+    $signal = new \prggmr\signal\Time($timeout, $vars);
+    $handle = prggmr::instance()->handle($function, $signal, $priority, 1);
+    return [$signal, $handle];
 }
 }
 

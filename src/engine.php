@@ -11,10 +11,10 @@ use \Closure,
     \prggmr\engine\Signals as esig;
 
 /**
- * Transform all internal engine signals to exceptions.
+ * Engine will throw exceptions rather than signals on errors.
  */
-if (!defined('ENGINE_SIGNAL_EXCEPTIONS')) {
-    define('ENGINE_SIGNAL_EXCEPTIONS', true);
+if (!defined('ENGINE_EXCEPTIONS')) {
+    define('ENGINE_EXCEPTIONS', true);
 }
 
 /**
@@ -56,19 +56,17 @@ define('ENGINE_ROUTINE_SIGNAL', -0xF14E);
  * this prevents the engine from running contionusly forever when there isn't anything
  * that it needs to do.
  *
- * To achieve this the engine uses routines for calculating when to run,
- * the default routines are based on time which calculates the time a handle is
- * to run and sleeps until then, the other processes the available handles
- * and shutdowns the engine when no more are available.
+ * To achieve this the engine uses routines for calculating when to run and 
+ * shutdowns when no more are available.
  *
  * The Engine uses the State and Storage traits, and will also attempt to
- * gracefully handle exceptions.
+ * gracefully handle exceptions when ENGINE_EXCEPTIONS is turned off.
  * 
  * The queue storage has also been improved in 0.3.0, previously the storage used
  * a non-index and index based storage, the storage now uses only a single array.
  * 
  * The major improvement is the storage uses a binary search algorithm or a 
- * direct index lookup for locating the queues, the algorithm works with 
+ * hash table for locating the queues, the algorithm works with 
  * strings, integers and \prggmr\signal\Complex objects providing a major 
  * performance increase over the previous implementation.
  */
@@ -180,7 +178,7 @@ class Engine {
     public function __construct()
     {
         $this->setState(STATE_DECLARED);
-        if (ENGINE_SIGNAL_EXCEPTIONS) {
+        if (ENGINE_EXCEPTIONS) {
             if (!class_exists('\prggmr\signal\Range', false)){
                 require_once 'signal/range.php';
             }
@@ -204,6 +202,8 @@ class Engine {
     {
         $this->signal(esig::LOOP_START);
         while($this->_routines()) {
+            // allow for external shutdown signal
+            if ($this->getState() === STATE_HALTED) break;
             // check for signals that need to trigger
             if (count($this->_routines[2]) != 0) {
                 foreach ($this->_routines[2] as $_node) {
@@ -212,16 +212,17 @@ class Engine {
                     );
                 }
             }
+
             // trigger signals provided to trigger
             if (count($this->_routines[1]) != 0) {
-                var_dump($this->_routines[1]);
                 foreach ($this->_routines[1] as $_signals) {
                     foreach ($_signals as $_node) {
                         $this->signal($_node[0], $_node[1]);
                     }
                 }
             }
-            // check for sleep time
+
+            // check for idle time
             if ($this->_routines[0] > 0) {
                 // idle for the given time in milliseconds
                 usleep($this->_routines[0] * 1000);
@@ -238,32 +239,92 @@ class Engine {
     private function _routines()
     {
         $return = false;
+        $this->_routines = [0, [], []];
         $this->_sort();
         $this->end();
-        $this->_routines = [0, [], []];
         while ($this->valid()) {
             if (!$this->current()[0] instanceof \prggmr\signal\Complex) {
                 break;
             }
             $routine = $this->current()[0]->routine($this->_event_history);
-            if (false !== $routine) {
-                $return = true;
-                if (is_array($routine)) {
-                    $this->_routines[1][] = [$routine, $this->current()[0]->vars()];
-                }
-                if (is_int($routine) || is_float($routine)) {
-                    if ($this->_routines[0] === 0 || $this->_routines[0] > $routine) {
-                        $this->_routines[0] = $routine;
+            if (is_array($routine) && count($routine) == 2) {
+                // Check for signals
+                if (null !== $routine[0]) {
+                    if (is_array($routine[0])) {
+                        foreach ($routine as $_sig) {
+                            if (false === $this->_routineExhausted($_sig)) {
+                                $return = true;
+                                $this->_routines[1][] = [$_sig, $this->current()[0]->vars()];
+                            }
+                        }
+                    } else {
+                        // Trigger the signal itself
+                        if ($routine[0] === ENGINE_ROUTINE_SIGNAL) {
+                            if (false === $this->_routineExhausted($this->current()[1])) {
+                                $return = true;
+                                $this->_routines[2][] = $this->current();
+                            }
+                        // Trigger one signal
+                        } else {
+                            if (false === $this->_routineExhausted($_routine[0])) {
+                                $return = true;
+                                $this->_routines[1][] = [$_routine[0], $this->current()[0]->vars()];
+                            }
+                        }
                     }
                 }
-                if ($routine === ENGINE_ROUTINE_SIGNAL) {
-                    $this->_routines[2][] = $this->current();
+                // check for idle
+                if ($routine[1] !== null) {
+                    if ($this->_routines[0] === 0 || $this->_routines[0] > $routine[1]) {
+                        $return = true;
+                        $this->_routines[0] = $routine[1];
+                    }
                 }
             }
             $this->prev();
         }
-
         return $return;
+    }
+
+    /**
+     * Determines if the given signal queue in the routine has exhausted.
+     * 
+     * @param  string|integer|object  $queue
+     * 
+     * @return  boolean
+     */
+    private function _routineExhausted($queue)
+    {
+        if (!$queue instanceof Queue) {
+            $queue = $this->sigHandler($queue, false);
+            if (false === $queue) return false;
+        }
+        if (true === $this->queueExhausted($queue)) {
+            $this->signal(esig::EXHAUSTED_QUEUE_SIGNALED, array(
+                $this->current()[1], $this->current()[0]
+            ));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Analysis a queue to determine if all handles are exhausted.
+     * 
+     * @param  object  $queue  \prggmr\Queue
+     * 
+     * @return  boolean
+     */
+    public function queueExhausted($queue)
+    {
+        $queue->reset();
+        while($queue->valid()) {
+            if (!$queue->current()[0]->isExhausted()) {
+                return false;
+            }
+            $queue->next();
+        }
+        return true;
     }
 
     /**
@@ -354,9 +415,9 @@ class Engine {
      * @param  string|integer|object  $signal  Signal
      * @param  integer  $type  [QUEUE_MIN_HEAP,QUEUE_MAX_HEAP]
      *
-     * @return  array  [QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, queue, signal]
+     * @return  boolean|array  [QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, queue, signal]
      */
-    public function sigHandler($signal, $type = QUEUE_MIN_HEAP)
+    public function sigHandler($signal, $create = true, $type = QUEUE_MIN_HEAP)
     {
         $complex = false;
         $queue = false;
@@ -386,6 +447,9 @@ class Engine {
         }
 
         if (!$queue) {
+            if (!$create) {
+                return false;
+            }
             $queue = new Queue($type);
             if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE && !$complex) {
                 $this->_storage[(string) $signal->info()] = [
@@ -721,7 +785,7 @@ class Engine {
             $handle->setState(STATE_RUNNING);
             // bind event to allow use of "this"
             $handle->bind($event);
-            if (ENGINE_SIGNAL_EXCEPTIONS) {
+            if (ENGINE_EXCEPTIONS) {
                 $result = $handle->execute($vars);
             } else {
                 try {

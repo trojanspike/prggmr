@@ -75,7 +75,7 @@ class Handle {
             ));
         }
         # Invalid or negative exhausting sets the rate to 1.
-        if (!is_int($exhaust) || $exhaust <= -1) {
+        if (null !== $exhaust && (!is_int($exhaust) || $exhaust <= -1)) {
             $exhaust = 1;
         }
         // unbind the closure
@@ -132,6 +132,10 @@ class Handle {
             $params = array_merge($params, $this->_params);
         }
 
+        if (null !== $this->_exhaustion) {
+            $this->_exhaustion--;
+        }
+
         return call_user_func_array($this->_function, $params);
     }
 
@@ -160,7 +164,7 @@ class Handle {
             return true;
         }
 
-        if (0 === $this->_exhaustion) {
+        if (0 >= $this->_exhaustion) {
             $this->_exhausted = true;
             return true;
         }

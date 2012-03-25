@@ -7,11 +7,18 @@ namespace prggmr\signal;
  */
  
  /**
- * Timeout signal
+ * Time signal
  *
- * Signal event based on a timeout.
+ * Signal event based on timed intervals.
  */
-class Timeout extends \prggmr\signal\Complex {
+class Interval extends \prggmr\signal\Time {
+
+    /**
+     * Milliseconds elasped before signaling.
+     * 
+     * @var  integer
+     */
+    protected $_time = null;
 
     /**
      * Constructs a time signal.
@@ -24,38 +31,24 @@ class Timeout extends \prggmr\signal\Complex {
      */
     public function __construct($time)
     {
-        if (!is_int($time) || $time >= 0) {
-            throw new InvalidArgumentException(
-                "Invalid or negative timeout given."
-            );
-        }
-        $this->_info = $time + milliseconds();
+        parent::__construct($time);
+        $this->_time = $time;
     }
-
     
-    /**
-     * Time signals never evalute.
-     * 
-     * @return  boolean  False
-     */
-    public function evaluate(/* ... */)
-    {
-        return false;
-    }
-
     /**
      * Determines when the time signal should fire, otherwise returning
      * the engine to idle until it will.
      * 
      * @return  integer
      */
-    public function routine()
+    public function routine($history = null)
     {
         $current = milliseconds();
+        $return = null;
         if ($current >= $this->_info) {
-            $this->_info = null;
-            return ENGINE_ROUTINE_SIGNAL;
+            $this->_info = $this->_time + milliseconds();
+            $return = ENGINE_ROUTINE_SIGNAL;
         }
-        return $this->_info - $current;
+        return [$return, $this->_info - $current];
     }
 }

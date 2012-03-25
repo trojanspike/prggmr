@@ -7,11 +7,11 @@ namespace prggmr\signal;
  */
  
  /**
- * Timeout signal
+ * Time signal
  *
- * Signal event based on a timeout.
+ * Signal event based on time.
  */
-class Timeout extends \prggmr\signal\Complex {
+class Time extends \prggmr\signal\Complex {
 
     /**
      * Constructs a time signal.
@@ -55,8 +55,8 @@ class Timeout extends \prggmr\signal\Complex {
         if (null === $this->_info) return false;
         if ($current >= $this->_info) {
             $this->_info = null;
-            return ENGINE_ROUTINE_SIGNAL;
+            return [ENGINE_ROUTINE_SIGNAL, null];
         }
-        return $this->_info - $current;
+        return [null, $this->_info - $current];
     }
 }
