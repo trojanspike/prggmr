@@ -138,8 +138,6 @@ function engine_code($code)
         case \prggmr\engine\Signals::INVALID_HANDLE_DIRECTORY:
             return "Invalid handle loading directory";
             break;
-        case \prggmr\engine\Signals::EXHAUSTED_QUEUE_SIGNALED:
-            return "Exhausted queue signaled to trigger";
         default:
             return null;
         break;

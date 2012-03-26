@@ -36,7 +36,7 @@ class Wedding extends \prggmr\signal\Complex {
             }
         }
         if ($man && $woman && $bells) {
-            return ENGINE_ROUTINE_SIGNAL;
+            return [ENGINE_ROUTINE_SIGNAL, null];
         }
 
         return false;
@@ -45,23 +45,8 @@ class Wedding extends \prggmr\signal\Complex {
 }
 
 // signal handlers
-handle(function(){
-    echo "The man has arrived".PHP_EOL;
-    echo "Waiting for the woman".PHP_EOL;
-}, 'man');
 
-handle(function(){
-    echo "The woman has arrived".PHP_EOL;
-    echo "The wedding will start in 3 seconds".PHP_EOL;
-    timeout(function(){
-        signal('bells');
-    }, 3000);
-}, 'woman');
-
-handle(function(){
-    echo "Wedding bells Ringing".PHP_EOL;
-}, "bells");
-
+// wedding
 handle(function(){
     echo "A wedding is taking place!".PHP_EOL;
     timeout(function(){
@@ -69,14 +54,36 @@ handle(function(){
     }, 10000);
 }, new Wedding());
 
+// man
+handle(function(){
+    echo "The man has arrived".PHP_EOL;
+}, 'man');
+
+// woman
+handle(function(){
+    echo "The woman has arrived".PHP_EOL;
+}, 'woman');
+
+// wedding bells
+handle(function(){
+    echo "Wedding bells Ringing".PHP_EOL;
+}, "bells");
+
+// wedding over
 handle(function(){
     echo "The wedding is over".PHP_EOL;
 }, 'wedding_over');
 
+// man arrives late because of second thoughts
 timeout(function(){
-    signal('woman');
+    signal('man');
 }, 5000);
 
-signal('man');
+timeout(function(){
+    signal('bells');
+}, 10000);
+
+// man is ready first
+signal('woman');
 
 prggmr_loop();
