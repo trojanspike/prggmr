@@ -17,9 +17,9 @@
  *
  * @return  void
  */
-function handle($subscription, $signal, $priority = null, $exhaust = 1)
+function handle($closure, $signal, $priority = null, $exhaust = 1)
 {
-    return prggmr::instance()->handle($subscription, $signal, $priority, $exhaust);
+    return prggmr::instance()->handle($closure, $signal, $priority, $exhaust);
 }
 
 /**
@@ -62,6 +62,16 @@ function handle_loader($signal, $directory, $heap = QUEUE_MIN_HEAP)
 function signal($signal, $vars = null, &$event = null)
 {
     return prggmr::instance()->signal($signal, $vars, $event);
+}
+
+/**
+ * Returns the event history.
+ * 
+ * @return  array
+ */
+function event_history(/* ... */)
+{
+    return prggmr::instance()->event_history();
 }
 
 /**

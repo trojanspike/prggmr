@@ -806,7 +806,7 @@ class Engine {
      * 
      * @return  array
      */
-    public function history(/* ... */)
+    public function event_history(/* ... */)
     {
         return $this->_event_history;
     }
