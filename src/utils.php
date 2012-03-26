@@ -113,3 +113,35 @@ function bin_search($needle, $haystack, $compare = null) {
 
     return null;
 }
+
+/**
+ * Converts an engine exception code into a readable message.
+ * 
+ * @param  integer  $code  Exception code
+ * 
+ * @return  string
+ */
+function engine_code($code)
+{
+    switch($code) {
+        case \prggmr\engine\Signals::INVALID_HANDLE:
+            return "Invalid function provided for signal handler";
+            break;
+        case \prggmr\engine\Signals::HANDLE_EXCEPTION:
+            return "Exception occured during handle execution";
+        case \prggmr\engine\Signals::INVALID_SIGNAL:
+            return "Invalid or unknown signal";
+            break;
+        case \prggmr\engine\Signals::INVALID_EVENT:
+            return "Invalid or unknown event";
+            break;
+        case \prggmr\engine\Signals::INVALID_HANDLE_DIRECTORY:
+            return "Invalid handle loading directory";
+            break;
+        case \prggmr\engine\Signals::EXHAUSTED_QUEUE_SIGNALED:
+            return "Exhausted queue signaled to trigger";
+        default:
+            return null;
+        break;
+    }
+}

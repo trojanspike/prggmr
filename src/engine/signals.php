@@ -50,6 +50,10 @@ class Signals {
      */
     const INFINITE_RECURSION_LOOP = 0xE007;
     /**
+     * Exhausted queue signaled to trigger.
+     */
+    const EXHAUSTED_QUEUE_SIGNALED = 0xE008;
+    /**
      * Engine loop startup
      */
     const LOOP_START = 0xE015;
@@ -57,10 +61,6 @@ class Signals {
      * Engine loop shutdown.
      */
     const LOOP_SHUTDOWN = 0xE016;
-    /**
-     * Exhausted queue signaled to trigger.
-     */
-    const EXHAUSTED_QUEUE_SIGNALED = 0xE017;
     /**
      * Global exception signal.
      */

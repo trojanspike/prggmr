@@ -49,12 +49,19 @@ Invalid or unknown event encountered.
         // The $event is the invalid event
     }, \prggmr\engine\Signals::INVALID_EVENT);
 
-## INVALID_HANDLE_DIRECTORY (0xE005)
+## INVALID_HANDLE_DIRECTORY (0xE006)
 Invalid directory provided for handler loader.
 
     handle(function($event){
         // The $event is the invalid event
     }, \prggmr\engine\Signals::INVALID_HANDLE_DIRECTORY);
+
+## EXHAUSTED_QUEUE_SIGNALED (0xE008)
+A queue that has been exhausted has been signaled. 
+
+    handle(function(){
+        // do some cleanup
+    }, \prggmr\engine\Signals::EXHAUSTED_QUEUE_SIGNALED);
 
 ## LOOP_START (0xE015)
 Engine loop has started.
@@ -70,12 +77,6 @@ Engine shutdown has been initiated.
         // do some cleanup
     }, \prggmr\engine\Signals::LOOP_SHUTDOWN);
 
-## EXHAUSTED_QUEUE_SIGNALED (0xE017)
-A queue that has been exhausted has been signaled. 
-
-    handle(function(){
-        // do some cleanup
-    }, \prggmr\engine\Signals::EXHAUSTED_QUEUE_SIGNALED);
 
 ## GLOBAL_EXCEPTION (0xE029)
 Global exception signal used for any non-prggmr exceptions when using the prggmr

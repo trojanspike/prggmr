@@ -174,11 +174,14 @@ class Engine {
             if (!class_exists('\prggmr\signal\Range', false)){
                 require_once 'signal/range.php';
             }
-            $this->handle(function($type){
+            $this->handle(function(){
                 $args = func_get_args();
+                $type = end($args);
                 $message = null;
                 if ($args[0] instanceof \Exception) {
                     $message = $args[0]->getMessage();
+                } else {
+                    $message = engine_code($type);
                 }
                 throw new EngineException($message, $type, $args);
             }, new \prggmr\signal\Range(0xE002, 0xE014), 0, null);
@@ -495,7 +498,7 @@ class Engine {
                     include_once $i;
                 }, $_file);
             }
-        }, $signal, 0);
+        }, $signal, 0, 1);
     }
 
     /**
@@ -659,7 +662,7 @@ class Engine {
         // event creation
         if (!$event instanceof Event) {
             if (null !== $event) {
-                $this->signal(esigs::INVALID_EVENT, array($event));
+                $this->signal(esig::INVALID_EVENT, array($event));
             }
             $event = new Event();
             $event->set_state(STATE_RUNNING);
