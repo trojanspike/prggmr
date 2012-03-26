@@ -25,14 +25,14 @@ function handle($closure, $signal, $priority = null, $exhaust = 1)
 /**
  * Remove a signal handler.
  *
- * @param  string|integer|object  $signal  Signal handle is attached to.
  * @param  object  $handle  Handle instance.
+ * @param  string|integer|object  $signal  Signal handle is attached to.
  *
  * @return  void
  */
-function handle_remove($signal, $handle)
+function handle_remove($handle, $signal)
 {
-    return prggmr::instance()->handle_remove($signal, $handle);   
+    return prggmr::instance()->handle_remove($handle, $signal);   
 }
 
 /**

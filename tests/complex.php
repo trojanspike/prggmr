@@ -87,3 +87,5 @@ timeout(function(){
 signal('woman');
 
 prggmr_loop();
+
+var_dump(event_history());

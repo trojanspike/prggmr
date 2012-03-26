@@ -119,13 +119,11 @@ class Handle {
             $this->_exhaustion;
         }
 
-        if (count(func_get_args()) >= 2) {
-            $params = func_get_args();
-        } else {
-            # force array
-            if (!is_array($params)) {
-                $params = array($params);
-            }
+        # force array
+        if (null === $params) {
+            $params = [];
+        } elseif (!is_array($params)) {
+             $params = [$params];
         }
         
         if (null !== $this->_params) {

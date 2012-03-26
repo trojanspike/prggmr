@@ -20,7 +20,7 @@ class Query extends \prggmr\signal\Complex {
      */
     public function __construct($regex)
     {
-        $regex = preg_replace('#:([\w]+)#i', 'fix\(?P<$1>[\w_-]+fix\)', $regex);
+        $regex = preg_replace('#:([\w]+)#i', 'fix\(?P<$1>[\w]+fix\)', $regex);
         $regex = str_replace('fix\(', '(', $regex);
         $regex = str_replace('fix\)', ')', $regex);
         $regex = '#' . $regex . '$#i';
@@ -34,7 +34,7 @@ class Query extends \prggmr\signal\Complex {
      *
      * @return  boolean|array  Boolean|Array if matches found
      */
-    public function evalute($signal)
+    public function evaluate($signal)
     {
         if (preg_match($this->_info, $signal, $matches)) {
             array_shift($matches);

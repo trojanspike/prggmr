@@ -1,7 +1,7 @@
 <?php
 
 require '../src/prggmr.php';
-
+require '../src/signal/query.php';
 // INVALID_HANDLE
 //handle('a', 'b');
 
@@ -19,3 +19,15 @@ require '../src/prggmr.php';
 
 // INVALID_HANDLE_DIRECTORY
 //handle_loader('a', '/asjhfasf');
+
+handle(function(){
+        echo "HelloWorld_1";
+    }, "helloworld");
+
+    handle(function(){
+        echo "HelloWorld_2";
+    }, "helloworld", null, null);
+
+    while(true) {
+        signal('helloworld');
+    }

@@ -18,6 +18,13 @@ if (!defined('ENGINE_EXCEPTIONS')) {
 }
 
 /**
+ * Maintain the event history
+ */
+if (!defined('ENGINE_EVENT_HISTORY')) {
+    define('ENGINE_EVENT_HISTORY', false);
+}
+
+/**
  * Allow the engine to detect inifinite looping.
  */
 if (!defined('ENGINE_RECURSIVE_DETECTION')) {
@@ -326,14 +333,11 @@ class Engine {
      * Removes a signal handler.
      *
      * @param  mixed  $signal  Signal instance or signal.
-     *
      * @param  mixed  $handle  Handle instance or identifier.
-     *
-     * @throws  InvalidArgumentException
      * 
      * @return  void
      */
-    public function handle_remove($signal, $handle)
+    public function handle_remove($handle, $signal)
     {
         $slot = $this->signal_queue($signal);
         if ($slot[0] <= self::QUEUE_EMPTY) return false;
@@ -671,6 +675,11 @@ class Engine {
                 $event->set_state(STATE_RECYCLED);
             }
         }
+        $event->set_signal($signal);
+        // are we keeping the history
+        if (!ENGINE_EVENT_HISTORY) {
+            return $event;
+        }
         // TODO : infinite loop detection algorithm
         // if possible ... or needed
         // event history management
@@ -680,7 +689,6 @@ class Engine {
         }
         $this->_current_event = $event;
         $this->_event_history[] = [$event, $signal, milliseconds()];
-        $event->set_signal($signal);
         return $event;
     }
 
@@ -693,6 +701,10 @@ class Engine {
     {
         // event execution finished cleanup and reset current
         $event->set_state(STATE_EXITED);
+        // are we keeping the history
+        if (!ENGINE_EVENT_HISTORY) {
+            return null;
+        }
         if (count($this->_event_children) !== 0) {
             $this->_current_event = array_pop($this->_event_children);
         } else {
@@ -822,6 +834,18 @@ class Engine {
     public function shutdown()
     {
         $this->set_state(STATE_HALTED);
+    }
+
+    /**
+     * Provides a tree structure for analyzing the system event architecture.
+     * 
+     * TODO
+     * 
+     * @return  string
+     */
+    public function event_analysis()
+    {
+        if (!ENGINE_EVENT_HISTORY) return false;
     }
 }
 

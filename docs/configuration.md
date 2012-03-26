@@ -18,6 +18,12 @@ __Default :__ false
 
 Enable prggmr's error and exception handler
 
+### ENGINE_EVENT_HISTORY
+__Default :__ false
+
+Configures the engine event history, if you will be writing complex events or 
+performing event analyzsis this setting must be enabled. 
+
 ### BINARY_ENGINE_SEARCH
 __Default :__ 75
 
