@@ -19,4 +19,4 @@ The ```\prggmr\Handle``` instance returned by ```handle```
 
 ### $signal
 
-The signal the handle is attached to.
+The signal the handle is assigned to.

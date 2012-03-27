@@ -42,7 +42,7 @@ By default the priority works as a min-heap where 0 has the greatest rank.
 ### $exhaust
 __Default :__ 1
 
-The exhaustion is the number of times a handle will execute when it's signal is called.
+The number of times a signal call will execute the handle.
 
 Setting to null allows for infinite execution.
 

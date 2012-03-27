@@ -41,7 +41,7 @@ If needed you can directly provide a ```\prggmr\Event``` instance to signal hand
 ### Invalid signals
 
 When an invalid signal is provided a ```\prggmr\EngineException``` exception or ```\prggmr\engine\Signals::INVALID_SIGNAL``` signal
-will be triggered. By default an exception will be thrown.
+will be triggered dependent on the ```ENGINE_EXCEPTIONS``` configuration value, by default an exceptions are enabled.
 
     signal([]);
 
