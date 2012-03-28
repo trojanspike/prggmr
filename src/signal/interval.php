@@ -29,9 +29,9 @@ class Interval extends \prggmr\signal\Time {
      *
      * @return  void
      */
-    public function __construct($time)
+    public function __construct($time, $vars = null)
     {
-        parent::__construct($time);
+        parent::__construct($time, $vars);
         $this->_time = $time;
     }
     

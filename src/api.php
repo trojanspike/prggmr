@@ -126,9 +126,9 @@ function interval($function, $interval, $vars = null, $priority = QUEUE_DEFAULT_
  *
  * @return  array  [signal, handle]
  */
-function timeout($function, $timeout, $vars = null, $priority = QUEUE_DEFAULT_PRIORITY)
+function timeout($function, $timeout, $priority = QUEUE_DEFAULT_PRIORITY)
 {
-    $signal = new \prggmr\signal\Time($timeout, $vars);
+    $signal = new \prggmr\signal\Time($timeout);
     $handle = prggmr::instance()->handle($function, $signal, $priority, 1);
     return [$signal, $handle];
 }

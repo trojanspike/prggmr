@@ -14,6 +14,13 @@ namespace prggmr\signal;
 class Time extends \prggmr\signal\Complex {
 
     /**
+     * Variables to pass the timeout handle.
+     * 
+     * @var null|array
+     */
+    protected $_vars = null;
+
+    /**
      * Constructs a time signal.
      *
      * @param  int  $time  Microseconds before signaling.
@@ -22,13 +29,14 @@ class Time extends \prggmr\signal\Complex {
      *
      * @return  void
      */
-    public function __construct($time)
+    public function __construct($time, $vars = null)
     {
         if (!is_int($time) || $time <= 0) {
             throw new \InvalidArgumentException(
                 "Invalid or negative timeout given."
             );
         }
+        $this->_vars = $vars;
         $this->_info = $time + milliseconds();
     }
 

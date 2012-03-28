@@ -20,7 +20,7 @@ A handle is how prggmr responds to signals, for each signal any number of handle
 
 ### $closure
 
-All handles use Closures for their execution functions, any other type of callable is not allowed.
+A ```Closure``` any other type of callable is not allowed.
 
 Note that a handle will automatically bind the current ```\prggmr\Event``` instance to the closure, allowing for the use of ```$this```. 
 
@@ -50,7 +50,8 @@ Setting to null allows for infinite execution.
 
 ### Complex Signals
 
-Using complex signals handles can be registered based on complex algorithms, comparisons, time, socket connections etc...
+Using complex signals handles can be registered based on complex algorithms, comparisons, time, socket connections or 
+any other computation you can think of.
 
 Here is an example using the ```\prggmr\signal\Query``` signal.
 
