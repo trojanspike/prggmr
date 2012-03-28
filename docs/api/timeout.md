@@ -1,4 +1,4 @@
-# timeout ($function, $timeout, [[$vars = null, $priority = QUEUE_DEFAULT_PRIORITY]])
+# timeout($function, $timeout, [[$vars = null, $priority = QUEUE_DEFAULT_PRIORITY]])
 
 Registers a function to execute as a timeout after a number of milliseconds.
 

@@ -90,11 +90,12 @@ function event_history(/* ... */)
  * ]
  * 
  * @param  string|integer|object  $signal  Signal
+ * @param  boolean  $create  Create the queue if not found.
  * @param  integer  $type  [QUEUE_MIN_HEAP,QUEUE_MAX_HEAP]
  *
  * @return  boolean|array  [QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, queue, signal]
  */
-function signal_queue($signal)
+function signal_queue($signal, $create = true, $type = QUEUE_MIN_HEAP)
 {
     return prggmr::instance()->signal_queue($signal);
 }

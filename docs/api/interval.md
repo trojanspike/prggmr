@@ -1,4 +1,4 @@
-# interval ($function, $interval, [[$vars = null, $priority = QUEUE_DEFAULT_PRIORITY]])
+# interval($function, $interval, [[$vars = null, $priority = QUEUE_DEFAULT_PRIORITY]])
 
 Registers a function to execute each time the number of milliseconds passed.
 

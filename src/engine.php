@@ -407,9 +407,10 @@ class Engine {
      * ]
      * 
      * @param  string|integer|object  $signal  Signal
+     * @param  boolean  $create  Create the queue if not found.
      * @param  integer  $type  [QUEUE_MIN_HEAP,QUEUE_MAX_HEAP]
      *
-     * @return  boolean|array  [QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, queue, signal]
+     * @return  boolean|array  False|[QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, queue, signal]
      */
     public function signal_queue($signal, $create = true, $type = QUEUE_MIN_HEAP)
     {
@@ -460,8 +461,9 @@ class Engine {
         } else {
             if ($queue->count() === 0) {
                 $return = [self::QUEUE_EMPTY, $queue, $signal];
+            } else {
+                $return = [self::QUEUE_NONEMPTY, $queue, $signal];
             }
-            $return = [self::QUEUE_NONEMPTY, $queue, $signal];
         }
 
         $this->_last_sig_added = $signal;

@@ -1,4 +1,4 @@
-# signal ($signal, [$vars = null, [$event = null]])
+# signal($signal, [$vars = null, [$event = null]])
 
 Signals an event.
 

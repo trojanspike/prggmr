@@ -1,10 +1,10 @@
-# event_history ()
+# event_history()
 
 Returns the current event history.
 
 ## Return
 
-Array of the current event history
+Array of the current event history.
 
 ## Example
 

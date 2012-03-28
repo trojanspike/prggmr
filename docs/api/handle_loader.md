@@ -1,4 +1,4 @@
-# handle_loader ($signal, $directory, [$heap = QUEUE_MIN_HEAP])
+# handle_loader($signal, $directory, [$heap = QUEUE_MIN_HEAP])
 
 Registers a new handle auto-loader for the given signal.
 

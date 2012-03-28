@@ -1,4 +1,4 @@
-# handle ($closure, $signal, [$priority = null, [$exhaust = 1]])
+# handle($closure, $signal, [$priority = null, [$exhaust = 1]])
 
 Creates a new signal handler.
 

@@ -1,4 +1,4 @@
-# handle_remove ($handle, $signal)
+# handle_remove($handle, $signal)
 
 Removes a registered signal handle.
 
