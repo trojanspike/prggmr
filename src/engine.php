@@ -198,14 +198,19 @@ class Engine {
     /**
      * Start the event loop.
      * 
+     * @param  null|integer  $ttr  Number of milliseconds to run the loop.
+     * 
      * @return  void
      */
-    public function loop()
+    public function loop($ttr = null)
     {
+        if (null !== $ttr) {
+            $this->handle(function($engine){
+                $engine->shutdown();
+            }, new \prggmr\signal\Time($ttr, $this));
+        }
         $this->signal(esig::LOOP_START);
         while($this->_routines()) {
-            // allow for external shutdown signal
-            if ($this->get_state() === STATE_HALTED) break;
             // check for signals that need to trigger
             if (count($this->_routines[2]) != 0) {
                 foreach ($this->_routines[2] as $_node) {
@@ -223,6 +228,9 @@ class Engine {
                     }
                 }
             }
+
+            // allow for external shutdown signal
+            if ($this->get_state() === STATE_HALTED) break;
 
             // check for idle time
             if ($this->_routines[0] > 0) {
@@ -244,6 +252,8 @@ class Engine {
         $this->_routines = [0, [], []];
         $this->_sort();
         $this->end();
+        // allow for external shutdown signal before running anything
+        if ($this->get_state() === STATE_HALTED) return false;
         while ($this->valid()) {
             if (!$this->current()[0] instanceof \prggmr\signal\Complex) {
                 break;

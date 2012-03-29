@@ -1,6 +1,5 @@
 <?php
 
-require '../src/prggmr.php';
 require '../src/signal/query.php';
 // INVALID_HANDLE
 //handle('a', 'b');

@@ -137,14 +137,13 @@ function timeout($function, $timeout, $priority = QUEUE_DEFAULT_PRIORITY)
 /**
  * Starts the prggmr event loop.
  *
- * @param  boolean  $reset  Resets all timers to begin at loop start.
- * @param  integer  $timeout  Number of milliseconds to run the loop. 
+ * @param  null|integer  $ttr  Number of milliseconds to run the loop. 
  *
  * @return  void
  */
-function prggmr_loop()
+function prggmr_loop($ttr = null)
 {
-    return prggmr::instance()->loop();
+    return prggmr::instance()->loop($ttr);
 }
 
 /**

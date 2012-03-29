@@ -1,5 +1,4 @@
 <?php
-require '../src/prggmr.php';
 
 class Wedding extends \prggmr\signal\Complex {
 

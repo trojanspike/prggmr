@@ -52,6 +52,16 @@ class Time extends \prggmr\signal\Complex {
     }
 
     /**
+     * Returns any variables to provide the signal handler.
+     * 
+     * @return  array|null
+     */
+    public function vars(/* ... */)
+    {
+        return $this->_vars;
+    }
+
+    /**
      * Determines when the time signal should fire, otherwise returning
      * the engine to idle until it will.
      * 

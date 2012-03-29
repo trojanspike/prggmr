@@ -1,6 +1,5 @@
 <?php
 
-require '../src/prggmr.php';
 
 handle(function(){
     signal('b');

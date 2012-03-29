@@ -1,5 +1,4 @@
 <?php
-require '../src/prggmr.php';
 ini_set('memory_limit', -1);
 $handle_count = 0;
 $signal_count = 0;

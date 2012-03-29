@@ -1,7 +1,5 @@
 <?php
 
-require '../src/prggmr.php';
-
 // $interval = interval(function(){
 //     echo "1 second passed";
 // }, 1000);
