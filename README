@@ -1,18 +1,48 @@
-prggmr is currently undergoing a major rewrite.
+prggmr is currently in transition to 0.3.0, the majority of the rewrite is now
+complete and needs only to be fully tested before it will be baked for production.
 
-The master is highly experimental and subject to change without notice,
+## Signals Roadmap
 
-Use for production is very dangerous.
+The following signals are on the development roadmap.
 
-0.3.0 Roadmap
--------------
-- Event Driven I/O
-- Major Performance overhaul
-- Possible integration with epoll, kqueue and select
+### Non-Blocking Asynchronous Signal I/O
 
-Production use
---------------
-prggmr 0.2.2 is fully baked and ready to go for any production system.
+This will allow for non-blocking event driven I/O using file descriptors or 
+networking socktes.
+
+#### Example
+    
+    $socket = new \prggmr\signal\io\Socket('127.0.0.1', 8888);
+
+    handle(function($bytes){
+        echo "Read bytes";
+        echo $bytes;
+    }, $socket->read(1024));
+
+    handle(function($bytes){
+        echo "Writing bytes";
+        echo $bytes;
+    }, $socket->write());
+
+    handle(function($client){
+        echo "Client connected";
+        echo $client->ip_address;
+    }, $socket->connect());
+
+    handle(function($client){
+        echo "Client disconnected";
+        echo $client->ip_address;
+    }, $socket->disconnect());
+
+Or something like that ...
+
+## Production use
+
+0.2.2 is fully baked and ready to go for any production system.
+
+0.3.0 will be ready for production very soon so it might be wise to wait if 
+possible.
+
 
 Installation
 ------------
