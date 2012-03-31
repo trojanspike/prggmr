@@ -6,11 +6,10 @@ Locates or creates a signal queue in the engine.
 
 __Boolean :__ False
 
-False is returned when ```$create``` is false and the queue could not be located.
+False is returned when ```$create``` is false and the queue could not be located
+otherwise an array is returned.
 
 __Array__
-
-An array is returned when ```$create``` is true.
 
 Node ```0``` contains the flag for the queue creation, this allows to determine if
 the queue is new, empty or contains handles.
@@ -58,5 +57,3 @@ Node ```1``` contains the ```\prggmr\Queue``` instance representing the signal.
     Signaling helloworld
     Helloworld
     ...
-
-Read more about <a href="../event_history.html">the event history</a>.
