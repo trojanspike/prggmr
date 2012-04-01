@@ -15,7 +15,7 @@ Additional variables to pass the signal handler.
 
 ## Namespace
 
-```\prggmr\signal```
+\prggmr\signal
 
 ## Description
 
@@ -31,9 +31,9 @@ This signal is in the API for the [timeout](../api/timeout.html) and [interval](
 
 ## Example
 
-handle(function(){
-    echo "1 second just passed";
-}, new \prggmr\signal\Time(1000));
+    handle(function(){
+        echo "1 second just passed";
+    }, new \prggmr\signal\Time(1000));
 
 ## Parent
 
