@@ -39,18 +39,7 @@ class Time extends \prggmr\signal\Complex {
         $this->_vars = $vars;
         $this->_info = $time + milliseconds();
     }
-
     
-    /**
-     * Time signals never evalute.
-     * 
-     * @return  boolean  False
-     */
-    public function evaluate($var = null)
-    {
-        return false;
-    }
-
     /**
      * Determines when the time signal should fire, otherwise returning
      * the engine to idle until it will.

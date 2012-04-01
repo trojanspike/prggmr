@@ -2,17 +2,6 @@
 
 Signal an event based on an array contain lookup.
 
-## Parameters
-
-### $time
-
-Hackstack to search.
-
-### $strict
-__Default :__ ```false```
-
-Use strict comparison checks.
-
 ## Namespace
 
 \prggmr\signal
@@ -32,6 +21,39 @@ If you need greater performance and can sort and compare the array try the [Arra
     }, new \prggmr\signal\ArrayContains(array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
 
     signal(4);
+
+## Methods
+
+### __construct($array, [$cmp = null])
+
+Constructs a new ArraySearch signal.
+
+#### $array
+
+Hackstack to search.
+
+#### $strict
+__Default :__ ```false```
+
+Use strict comparison checks.
+
+### evaluate($signal)
+
+Evalutes the given signal to determine if it should trigger the signal.
+
+#### $signal
+
+Signal to evaluate
+
+#### Returns
+
+##### Boolean
+
+Returns boolean ```false``` when evaluation fails.
+
+##### Mixed
+
+Returns the signal under evaluation when successful.
 
 ## Parent
 

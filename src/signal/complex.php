@@ -25,7 +25,8 @@ abstract class Complex extends Standard {
      * @return  boolean|string|array  False on failure. True if matches. String
      *                                or array indicate results to pass handlers
      */
-    public function evaluate($var = null) {
+    public function evaluate($var = null) 
+    {
         return false;
     }
 
@@ -42,8 +43,6 @@ abstract class Complex extends Standard {
      * processing.
      * 
      * FALSE indicates the signal can do nothing.
-     * 
-     * INTEGER informs the engine to idle for that amount of time.
      * 
      * ARRAY informs the engine to signal those events.
      * 

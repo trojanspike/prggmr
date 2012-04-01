@@ -2,17 +2,6 @@
 
 Signal events based on time passed in milliseconds.
 
-## Parameters
-
-### $time
-
-The amount of time in milliseconds before triggering the signal.
-
-### $vars
-__Default :__ ```null```
-
-Additional variables to pass the signal handler.
-
 ## Namespace
 
 \prggmr\signal
@@ -34,6 +23,43 @@ This signal is in the API for the [timeout](../api/timeout.html) and [interval](
     handle(function(){
         echo "1 second just passed";
     }, new \prggmr\signal\Time(1000));
+
+## Methods
+
+### __construct($time, [$vars = null]))
+
+#### $time
+
+The amount of time in milliseconds before triggering the signal.
+
+#### $vars
+__Default :__ ```null```
+
+Additional variables to pass the signal handler.
+
+### routine([$history = null])
+
+Determines when to trigger the signal. Once the signal has been triggered.
+
+Once the time has passed it will always return false.
+
+#### $history
+__Default :__ ```null```
+
+The current event history.
+
+#### Returns
+
+Array
+
+    [
+        null|ENGINE_ROUTING_SIGNAL,
+        null,(engine idle time)
+    ]
+
+Boolean
+
+False will be returned once the timeout has been signaled.
 
 ## Parent
 

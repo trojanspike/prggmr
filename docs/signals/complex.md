@@ -5,37 +5,40 @@ Base class for ***all*** complex signals.
 If you are writing a complex signal you ***must*** inherit this class, otherwise
 the engine will not know it is complex.
 
-## Parameters
-
-### $time
-
-Hackstack to search.
-
-### $strict
-__Default :__ ```false```
-
-Use strict comparison checks.
-
 ## Namespace
 
 \prggmr\signal
 
+## Abstract
+
+Complex is an abstract class
+
 ## Description
 
-The array contains signal uses the [array_search](http://php.net/array_search) function for 
-performing the search.
+The Complex signal is the base for all prggmr Complex signals, it provides a skeleton of both the routine and evaluate methods both of which return false by default. It also provides the ```var``` method that returns any variables assigned to the ```_vars``` property.
 
-If you need greater performance and can sort and compare the array try the [ArrayBinary](array_binary.html) signal.
+## Methods
 
-## Example
+### evaluate([$var = null])
 
-    handle(function($value){
-        echo "This used a array_search lookup";
-        echo "Found $value";
-    }, new \prggmr\signal\ArrayContains(array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+Evaluates the complex signal during signal lookup when the [signal](../api/signal.html) function is called.
 
-    signal(4);
+By default this always returns ```false``` and should be overwritten in a child signal that must evaluate in a signal lookup.
+
+### routine([$history = null])
+
+Runs the routing calculation during the event loop.
+
+The return of this method will dictate how the event loop runs.
+
+The return must always be either false or an array.
+
+When array is returned the engine will use the array as:
+
+node ```0``` for either another array of events to signal, a string of a single event or the  ```ENGINE_ROUTING_SIGNAL``` constant to indicate this signal should trigger.
+
+node ```1``` for the engine idle in milliseconds. Note that the idle time returned from the routine may not be used if another signal provides a shorter time, it also is not guaranteed that the time provided will be the exact time the engine idles.
 
 ## Parent
 
-ArrayContains is a child of [Complex](complex.html).
+Complex is a child of [Standard](standard.html).

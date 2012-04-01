@@ -25,13 +25,11 @@ The binary search signal is designed to allow for large scale array lookups.
 
 Constructs a new ArrayBinary signal.
 
-#### Parameters
-
-##### $array
+#### $array
 
 Hackstack to search, note this must be sorted.
 
-##### $cmp
+#### $cmp
 __Default :__ ```null```
 
 Comparison function to use when performing the binary search.
@@ -40,9 +38,7 @@ Comparison function to use when performing the binary search.
 
 Evalutes the given signal to determine if it should trigger the signal.
 
-#### Parameters
-
-##### $signal
+#### $signal
 
 Signal to evaluate
 
