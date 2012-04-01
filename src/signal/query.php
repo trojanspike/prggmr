@@ -14,13 +14,13 @@ class Query extends \prggmr\signal\Complex {
     /**
      * Constructs a regex signal using :var style parameters.
      *
-     * @param  string  $signal  Variable querystring for capturing signal.
+     * @param  string  $query  Variable querystring for capturing signal.
      *
      * @return  void
      */
-    public function __construct($regex)
+    public function __construct($query)
     {
-        $regex = preg_replace('#:([\w]+)#i', 'fix\(?P<$1>[\w]+fix\)', $regex);
+        $regex = preg_replace('#:([\w]+)#i', 'fix\(?P<$1>[\w]+fix\)', $query);
         $regex = str_replace('fix\(', '(', $regex);
         $regex = str_replace('fix\)', ')', $regex);
         $regex = '#' . $regex . '$#i';
