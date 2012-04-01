@@ -10,4 +10,4 @@ Array of the current event history.
 
     $history = event_history();
 
-Read more about <a href="../event_history.html">the event history</a>.
+Read more about the [event history](../event_history.html).

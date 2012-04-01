@@ -29,7 +29,7 @@ The timeout API function is a shorthand convience function:
     }, new \prggmr\signal\Time(1000));
 
 The timeout handle is a standard prggmr ```handle``` assigned to a ```\prggmr\signal\Time``` signal,
-which is a complex signal read more about the <a href="../signals/time.html">time signal</a>.
+which is a complex signal read more about the [time signal](../signals/time.html).
 
 ## Parameters
 

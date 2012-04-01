@@ -30,7 +30,7 @@ Any other binding automatically created by PHP will be voided.
 
 A handle will be attached to this signal, the signal can be any string, integer or complex signal object.
 
-Signals are the real magic behind prggmr which allow for CEP, read more about <a href="signals.html">signals</a>.
+Signals are the real magic behind prggmr which allow for CEP, read more about [signals](../complex_signals.html).
 
 ### $priority
 __Default :__ 100

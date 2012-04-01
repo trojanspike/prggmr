@@ -15,7 +15,7 @@ Signals an event.
 
 A signal is what triggers an event and executes any assigned handles.
 
-See <a href="../signals.html">engine signals</a> for signals which are restricted for use and should
+See [signals](../signals.html) for signals which are restricted for use and should
 never be fired directly.
 
 ## Parameters

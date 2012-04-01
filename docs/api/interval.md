@@ -29,7 +29,7 @@ The interval API function is a shorthand convience function:
     }, new \prggmr\signal\Interval(1000));
 
 The interval handle is a standard prggmr ```handle``` assigned to a ```\prggmr\signal\Interval``` signal,
-which is a complex signal read more about the <a href="../signals/interval.html">interval signal</a>.
+which is a complex signal read more about the [interval signal](../signals/interval.html).
 
 ## Parameters
 

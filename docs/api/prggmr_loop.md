@@ -31,4 +31,4 @@ Amount of time in milliseconds to run the engine.
 
 ## Description
 
-Read more about prggmr's <a href="../event_loop.html">event loop</a>.
+Read more about prggmr's [event loop](../event_loop.html).
