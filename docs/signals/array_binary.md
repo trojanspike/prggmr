@@ -1,22 +1,6 @@
-# ArrayBinary($array, [$vars = null, [$cmp = null]])
+# ArrayBinary
 
 Signal an event based on a binary array search.
-
-## Parameters
-
-### $time
-
-Hackstack to search, note this must be sorted.
-
-### $vars
-__Default :__ ```null```
-
-Additional variables to pass the signal handlers.
-
-### $cmp
-__Default :__ ```null```
-
-Comparison function to use when performing the binary search.
 
 ## Namespace
 
@@ -34,6 +18,43 @@ The binary search signal is designed to allow for large scale array lookups.
     }, new \prggmr\signal\ArrayBinary(array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
 
     signal(4);
+
+## Methods
+
+### __construct($array, [$cmp = null])
+
+Constructs a new ArrayBinary signal.
+
+#### Parameters
+
+##### $array
+
+Hackstack to search, note this must be sorted.
+
+##### $cmp
+__Default :__ ```null```
+
+Comparison function to use when performing the binary search.
+
+### evaluate($signal)
+
+Evalutes the given signal to determine if it should trigger the signal.
+
+#### Parameters
+
+##### $signal
+
+Signal to evaluate
+
+#### Returns
+
+##### Boolean
+
+Returns boolean ```false``` when evaluation fails.
+
+##### Mixed
+
+Returns the signal under evaluation when successful.
 
 ## Parent
 

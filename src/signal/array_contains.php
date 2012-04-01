@@ -22,12 +22,13 @@ class ArrayContains extends \prggmr\signal\Complex {
     /**
      * Constructs a new array contains signal object.
      *
-     * @param  mixed  $signal  Signal
+     * @param  array  $info  Array haystack
      * @param  boolean  $strict  Use strict mode
      */
     public function __construct($info, $strict = false)
     {
         $this->_strict = $strict;
+        $this->_vars = $vars;
         $this->_info = $info;
     }
     
@@ -41,7 +42,7 @@ class ArrayContains extends \prggmr\signal\Complex {
     public function evaluate($signal)
     {
         if (array_search($signal, $this->_info, $this->_strict) !== false) {
-            return true;
+            return $signal;
         }
         return false;
     }
