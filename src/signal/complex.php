@@ -63,6 +63,6 @@ abstract class Complex extends Standard {
      */
     public function vars(/* ... */)
     {
-        return null;
+        return $this->_vars;
     }
 }

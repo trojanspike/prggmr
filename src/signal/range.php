@@ -30,11 +30,11 @@ class Range extends \prggmr\signal\Complex {
     }
     
     /**
-     * Compares the event signal using array_search
+     * Compares the event signal using min max comparison.
      *
      * @param  mixed  $signal  Signal to compare
      *
-     * @return  boolean|mixed  False|Contents of key
+     * @return  boolean|mixed  False|Signal
      */
     public function evaluate($signal)
     {

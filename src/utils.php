@@ -85,7 +85,6 @@ function bin_search($needle, $haystack, $compare = null) {
 
     $low = 0;
     $high = count($haystack) - 1;
-    
     while ($low <= $high) {
         $mid = ($low + $high) >> 1;
         $node = $haystack[$mid];
@@ -96,11 +95,11 @@ function bin_search($needle, $haystack, $compare = null) {
                 return $mid;
                 break;
             # backwards
-            case $cmp > 0:
+            case $cmp < 0:
                 $low = $mid + 1;
                 break;
             # forwards
-            case $cmp < 0:
+            case $cmp > 0:
                 $high = $mid - 1;
                 break;
             # null

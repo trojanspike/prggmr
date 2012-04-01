@@ -578,7 +578,8 @@ class Engine {
         $this->_sort();
         if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE) {
             $signal = (string) $signal;
-            if (isset($this->_storage[$signal])) {
+            if (isset($this->_storage[$signal]) && 
+                !$this->_storage[$signal][0] instanceof \prggmr\signal\Complex) {
                 return [self::SEARCH_FOUND, $this->_storage[$signal][1]];
             }
         } else {

@@ -15,19 +15,21 @@ class ArrayBinary extends \prggmr\signal\Complex {
      * Constructs a new array binary signal object.
      *
      * @param  array  $info  Array tree
+     * @param  array  $vars  Additional variables to pass sig handlers.
      * @param  callable  $cmp  Function to use for binary search
      * 
      * @return  void
      */
-    public function __construct($info, $cmp = null)
+    public function __construct($array, $vars = null, $cmp = null)
     {
-        if (!is_array($info) || !is_callable($cmp)) {
+        if (!is_array($array) || null !== $cmp && !is_callable($cmp)) {
             throw new \InvalidArgumentException(
                 'invalid parameters given array binary'
             );
         }
-        $this->_info = $info;
-        $this->_cmp = $cmp
+        $this->_info = $array;
+        $this->_vars = $vars;
+        $this->_cmp = $cmp;
     }
     
     /**

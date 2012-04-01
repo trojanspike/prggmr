@@ -6,9 +6,10 @@
 $usage = "usage: prggmr [options...] file
 
 Current options:
-  -v/--version  Displays current prggmr version.
-  -t/--time     Length of time to run in milliseconds.
+  -c/--config   Configuration file
   -h/--help     Show this help message.
+  -t/--time     Length of time to run in milliseconds.
+  -v/--version  Displays current prggmr version.
 ";
 
 if (count($argv) == 1) {
@@ -20,9 +21,9 @@ $ttr = null;
 // last param is file
 $runfile = $argv[$argc - 1];
 $options = getopt(
-    'qwert:yuiopasdfghjklzxcvbnm',
+    'qwert:yuiopasdfghjklzxc:vbnm',
     array(
-        'help', 'debug', 'version', 'sync', 'time:'
+        'help', 'config:', 'version', 'time:'
     )
 );
 
@@ -44,6 +45,10 @@ foreach ($options as $_i => $_arg) {
         case 'v':
         case 'version':
             $showversion = true;
+            break;
+        case 'c':
+        case 'config':
+            include($_arg);
             break;
         default:
             exit(sprintf(
