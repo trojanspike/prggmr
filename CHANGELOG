@@ -1,4 +1,4 @@
-[ 0.3.0 00002012 ]
+[ 0.3.0 04032012 ]
 ------------------
 - Added the engine_code utility function
 - All methods use the underscore seperator for words
