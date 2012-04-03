@@ -1,10 +1,13 @@
 <?php
 // Creates a matrix style rain!
 // First define our character set
-$range = str_split(',./;[]\1234568790-=`!~@#$%&^*()_+{}|:"<>?"');
+#$range = str_split(',./;[]\1234568790-=`!~@#$%&^*()_+{}|:"<>?"');
+#$range = str_split('qwertyuiopasdfghkjklzxcvbnm1234567890!@#$%^*&()_+-=[]\{}|;\':",./<>?');
+$range = [0, 1, '[', ']', '$', '%'];
+#$range = ['ア','チ','ナ','フ'];
 $event = new \prggmr\Event();
 // Width of all chars
-$event->line_width = 80;
+$event->line_width = 236;
 // Number of rain elements at a given time
 $event->rain = round($event->line_width * .75);
 // Interval reference for rain
@@ -30,14 +33,19 @@ interval(function() use ($range){
                 echo " ";
             } else {
                 echo "\033[1;37m".$element."\033[0m";
+                //echo $element;
             }
             if ($this->rain_elements->{$i}[1] <= 0) {
                 $this->rain_count--;
                 unset($this->rain_elements->$i);
             }
         } else {
-            echo $element;
+            if (rand(0, 10) >= 9) {
+                echo "\033[1;32m".$element."\033[0m";
+            } else {
+                echo $element;
+            }
         }
     }
     echo PHP_EOL;
-}, 15)[0]->event($event);
+}, 40)[0]->event($event);

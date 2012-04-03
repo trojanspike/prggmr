@@ -66,8 +66,7 @@ if (false === $runfile) {
 
 // load prggmr
 if (!class_exists('prggmr')) {
-    // attempt to include prggmr lib on include path
-    require '../src/prggmr.php';
+    require_once dirname(realpath(__FILE__)).'/../src/prggmr.php';
 }
 
 if (isset($showversion)) exit('prggmr version '.PRGGMR_VERSION."
