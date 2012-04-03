@@ -15,7 +15,19 @@ use \LogicException;
  */
 abstract class Complex extends Standard {
 
+    /**
+     * Vars assigned to the signal to pass the handler.
+     * 
+     * @var  array
+     */
     protected $_vars = null;
+
+    /**
+     * Custom event object for a signal.
+     * 
+     * @var  object
+     */
+    protected $_event = null;
 
     /**
      * Compares the event signal given aganist itself.
@@ -60,8 +72,20 @@ abstract class Complex extends Standard {
      * 
      * @return  array|null
      */
-    public function vars(/* ... */)
+    final public function vars(/* ... */)
     {
         return $this->_vars;
+    }
+
+    /**
+     * Sets or returns the event assigned to this signal.
+     * 
+     * @return  object|null
+     */
+    final public function event($event = null)
+    {
+        if (null === $event) return $this->_event;
+        $this->_event = $event;
+        return $this->_event;
     }
 }

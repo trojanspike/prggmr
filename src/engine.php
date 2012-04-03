@@ -215,7 +215,7 @@ class Engine {
             if (count($this->_routines[2]) != 0) {
                 foreach ($this->_routines[2] as $_node) {
                     $this->_execute(
-                        $_node[0], $_node[1], $this->_event($_node[0]), $_node[0]->vars()
+                        $_node[0], $_node[1], $this->_event($_node[0], $_node[0]->event()), $_node[0]->vars()
                     );
                 }
             }
@@ -224,7 +224,7 @@ class Engine {
             if (count($this->_routines[1]) != 0) {
                 foreach ($this->_routines[1] as $_signals) {
                     foreach ($_signals as $_node) {
-                        $this->signal($_node[0], $_node[1]);
+                        $this->signal($_node[0], $_node[1], $_node[2]);
                     }
                 }
             }
@@ -260,27 +260,28 @@ class Engine {
             }
             $routine = $this->current()[0]->routine($this->_event_history);
             if (is_array($routine) && count($routine) == 2) {
+                $current = $this->current();
                 // Check for signals
                 if (null !== $routine[0]) {
                     if (is_array($routine[0])) {
                         foreach ($routine as $_sig) {
                             if (false === $this->_routine_exhausted($_sig)) {
                                 $return = true;
-                                $this->_routines[1][] = [$_sig, $this->current()[0]->vars()];
+                                $this->_routines[1][] = [$_sig, $current[0]->vars(), $current[0]->event()];
                             }
                         }
                     } else {
                         // Trigger the signal itself
                         if ($routine[0] === ENGINE_ROUTINE_SIGNAL) {
-                            if (false === $this->_routine_exhausted($this->current()[1])) {
+                            if (false === $this->_routine_exhausted($current[1])) {
                                 $return = true;
-                                $this->_routines[2][] = $this->current();
+                                $this->_routines[2][] = $current;
                             }
                         // Trigger one signal
                         } else {
                             if (false === $this->_routine_exhausted($_routine[0])) {
                                 $return = true;
-                                $this->_routines[1][] = [$_routine[0], $this->current()[0]->vars()];
+                                $this->_routines[1][] = [$_routine[0], $current[0]->vars()];
                             }
                         }
                     }
