@@ -7,7 +7,7 @@ $range = [0, 1, '[', ']', '$', '%'];
 #$range = ['ア','チ','ナ','フ'];
 $event = new \prggmr\Event();
 // Width of all chars
-$event->line_width = 236;
+$event->line_width = 130;
 // Number of rain elements at a given time
 $event->rain = round($event->line_width * .75);
 // Interval reference for rain

@@ -1,3 +1,7 @@
+[ 0.3.1 TBD ]
+------------------
+- Read-Only event properties now throw a LogicException if written to.
+
 [ 0.3.0 04032012 ]
 ------------------
 - Added the engine_code utility function
