@@ -1,5 +1,8 @@
 [ 0.3.1 TBD ]
 ------------------
+- The engine now generates and stores an event concurrently for recurring 
+  complex signals.
+- Event properties reference themselves correctly.
 - Read-Only event properties now throw a LogicException if written to.
 
 [ 0.3.0 04032012 ]

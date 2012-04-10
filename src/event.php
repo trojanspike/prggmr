@@ -16,7 +16,7 @@ namespace prggmr;
 
 class Event {
 
-    use State, Storage;
+    use State;
 
     /**
      * Result of the event.
@@ -130,11 +130,10 @@ class Event {
      */
     public function __get($key)
     {
-        if (isset($this->_storage[$key])) {
-            return $this->_storage[$key];
-        } else {
-            return null;
-        }
+        throw new \LogicException(sprintf(
+            "Call to undefined event property %s",
+            $key
+        ));
     }
 
     /**
@@ -146,7 +145,7 @@ class Event {
      */
     public function __isset($key)
     {
-        return isset($this->_storage[$key]);
+        return isset($this->$key);
     }
 
     /**
@@ -160,13 +159,13 @@ class Event {
      */
     public function __set($key, $value)
     {
-        if (isset($this->_storage[$key]) && stripos($key, '_') === 0) {
+        if (stripos($key, '_') === 0 && isset($this->$key)) {
             throw new \LogicException(sprintf(
                 "%s is a read-only event property", 
                 $key
             ));
         }
-        $this->_storage[$key] = $value;
+        $this->$key = $value;
         return true;
     }
 
@@ -179,6 +178,13 @@ class Event {
      */
     public function __unset($key)
     {
-        unset($this->_storage[$key]);
+        if (!isset($this->$key)) return false;
+        if (stripos($key, '_') === 0) {
+            throw new \LogicException(sprintf(
+                "%s is a read-only event property", 
+                $key
+            ));
+        }
+        unset($this->$key);
     }
 }

@@ -21,7 +21,7 @@ if (!defined('ENGINE_EXCEPTIONS')) {
  * Maintain the event history
  */
 if (!defined('ENGINE_EVENT_HISTORY')) {
-    define('ENGINE_EVENT_HISTORY', false);
+    define('ENGINE_EVENT_HISTORY', true);
 }
 
 /**
@@ -275,13 +275,17 @@ class Engine {
                         if ($routine[0] === ENGINE_ROUTINE_SIGNAL) {
                             if (false === $this->_routine_exhausted($current[1])) {
                                 $return = true;
+                                // Recurring signals will always get the same event
+                                if (null === $current[0]->event()) {
+                                    $current[0]->event(new \prggmr\Event());
+                                }
                                 $this->_routines[2][] = $current;
                             }
                         // Trigger one signal
                         } else {
                             if (false === $this->_routine_exhausted($_routine[0])) {
                                 $return = true;
-                                $this->_routines[1][] = [$_routine[0], $current[0]->vars()];
+                                $this->_routines[1][] = [$_routine[0], $current[0]->vars(), $current[0]->event()];
                             }
                         }
                     }

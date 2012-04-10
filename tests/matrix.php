@@ -2,12 +2,10 @@
 // Creates a matrix style rain!
 // First define our character set
 #$range = str_split(',./;[]\1234568790-=`!~@#$%&^*()_+{}|:"<>?"');
-#$range = str_split('qwertyuiopasdfghkjklzxcvbnm1234567890!@#$%^*&()_+-=[]\{}|;\':",./<>?');
 $range = [0, 1, '[', ']', '$', '%'];
-#$range = ['ア','チ','ナ','フ'];
 $event = new \prggmr\Event();
 // Width of all chars
-$event->line_width = 130;
+$event->line_width = 168;
 // Number of rain elements at a given time
 $event->rain = round($event->line_width * .75);
 // Interval reference for rain
