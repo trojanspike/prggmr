@@ -1,9 +1,96 @@
 prggmr is an event processing engine for PHP 5.4. designed to be lightweight, 
 fast and very simple to use.
 
+## Usage
+
+    <?php
+
+    handle(function(){
+        echo "The light is green go!";
+    }, 'light.green');
+
+    handle(function(){
+        echo "The light is red stop!";
+    }, 'light.red');
+
+    handle(function(){
+        echo "The light is yellow go faster!";
+    } 'light.yellow');
+
+    signal('light.green');
+    signal('light.yellow');
+    signal('light.red');
+
+## Installation
+
+Depending on your needs prggmr can be installed using two different methods.
+
+### Composer
+
+Include the following in your ```composer.json``` file.
+
+    {
+        "require": {
+            "prggmr/prggmr": "0.3.*"
+        }
+    }
+
+Run the installer.
+
+    php composer.phar install
+
+And include the library
+
+    require_once 'vendor/prggmr/prggmr/src/prggmr.php';
+
+### Global system installation
+
+This method will install prggmr to your php include path.
+
+Download the latest release and navigate a terminal to the extract directory.
+
+    # cd into the prggmr library so you see the README, LICENSE etc..
+    cd path/to/prggmr/extraction
+    # Get include path
+    php -r "echo get_include_path();"
+    # My output .:/usr/local/lib/php
+    # Copy prggmr to lib
+    sudo cp -Rf * /usr/local/lib/php/prggmr/*
+    # Copy bin
+    sudo ln -ls /usr/local/lib/php/prggmr/bin/prggmr /usr/bin/
+    # Test
+    prggmr -v
+    # Result
+    prggmr version 0.3.1.1
+
+## Documentation
+
+Documentation is available at [prggmr.org](http://www.prggmr.org)
+
+## Mailing List
+
+The prggmr mailing list is located here [mailing list](https://groups.google.com/forum/?fromgroups#!forum/prggmr).
+
+
 ## Signals Roadmap
 
 The following signals are on the development roadmap.
+
+### Event Stream Server
+
+W3C Event-Stream (Specs)[http://dev.w3.org/html5/eventsource/].
+
+#### Example
+
+    $socket = new \prggmr\signal\http\EventStream();
+
+    handle(function($bytes){
+        // do something
+    }, $socket->read());
+
+    handle(function($bytes){
+        // do something
+    }, $socket->write());
 
 ### Non-Blocking Asynchronous Signal I/O
 
@@ -12,6 +99,8 @@ networking socktes.
 
 #### Example
     
+    <?php
+
     $socket = new \prggmr\signal\io\Socket('127.0.0.1', 8888);
 
     handle(function($bytes){
@@ -35,37 +124,3 @@ networking socktes.
     }, $socket->disconnect());
 
 Or something like that ...
-
-## Production use
-
-0.2.2 is fully baked and ready to go for any production system.
-
-0.3.0 will be ready for production very soon so it might be wise to wait if 
-possible.
-
-
-Installation
-------------
-You can install prggmr using the prggmr distribution network with the following
-commands.
-
-    wget http://distr.prggmr.org/prggmr/v0.2.2/prggmr.tar.gz
-    tar -xzvf prggmr.tar.gz
-    cd v0.2.2
-    sudo php pinstall
-
-If your prefer to manually install prggmr you can download it using either the
-Github tag for 0.2.2 or download it directly using this link.
-
-Tar Archive
------------
-1.1MB - http://distr.prggmr.org/prggmr/v0.2.2/prggmr.tar.gz
-
-Zip Archive
------------
-1.3MB - http://distr.prggmr.org/prggmr/v0.2.2/prggmr.zip
-
-
-Documentation
--------------
-Documentation is available @ http://prggmr.org

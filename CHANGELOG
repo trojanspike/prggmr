@@ -1,5 +1,9 @@
+[ 0.3.2 04142012 ]
+------------------
+- Added the http\Request signal.
+
 [ 0.3.1.1 041012 ]
------------
+------------------
 - Added the composer.json file
 - prggmr bin now supports the -p, --passthru option
 
