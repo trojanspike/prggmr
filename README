@@ -1,5 +1,5 @@
-prggmr is currently in transition to 0.3.0, the majority of the rewrite is now
-complete and needs only to be fully tested before it will be baked for production.
+prggmr is an event processing engine for PHP 5.4. designed to be lightweight, 
+fast and very simple to use.
 
 ## Signals Roadmap
 

@@ -8,6 +8,7 @@ $usage = "usage: prggmr [options...] file
 Current options:
   -c/--config   Configuration file
   -h/--help     Show this help message.
+  -p/--passthru Pass the given arguments to the script
   -t/--time     Length of time to run in milliseconds.
   -v/--version  Displays current prggmr version.
 ";
@@ -30,7 +31,13 @@ $options = getopt(
 $tmp = $argv;
 // parse args and check for options
 foreach ($options as $_i => $_arg) {
+    // Hack
+    $break = false;
     switch ($_i) {
+        case 'p':
+        case 'passthru':
+            $break = true;
+            break;
         case 't':
         case 'time':
             if (false === $_arg || !is_int($_arg + 0)) {
@@ -58,6 +65,7 @@ foreach ($options as $_i => $_arg) {
             ));
             break;
     }
+    if ($break) break;
 }
 
 if (false === $runfile) {

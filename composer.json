@@ -1,0 +1,16 @@
+{
+    "name": "prggmr/prggmr",
+    "description": "The event library that will change the way you write PHP forever...",
+    "keywords": ["event-dispatcher", "event-engine", "complex-event-engine", "signal-library", "signals", "events"],
+    "license": "Apache 2.0",
+    "authors": [
+        {
+            "name": "Nickolas Whiting",
+            "email": "prggmr@gmail.com",
+            "homepage": "http://prggmr.org"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    }
+}
