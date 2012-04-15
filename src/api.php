@@ -1,5 +1,5 @@
 <?php
-use prggmr;
+namespace prggmr;
 /**
  * Copyright 2010-12 Nickolas Whiting. All rights reserved.
  * Use of this source code is governed by the Apache 2 license
@@ -18,7 +18,7 @@ use prggmr;
  */
 function handle($closure, $signal, $priority = null, $exhaust = 1)
 {
-    return prggmr::instance()->handle($closure, $signal, $priority, $exhaust);
+    return \prggmr::instance()->handle($closure, $signal, $priority, $exhaust);
 }
 
 /**
@@ -31,7 +31,7 @@ function handle($closure, $signal, $priority = null, $exhaust = 1)
  */
 function handle_remove($handle, $signal)
 {
-    return prggmr::instance()->handle_remove($handle, $signal);   
+    return \prggmr::instance()->handle_remove($handle, $signal);   
 }
 
 /**
@@ -46,7 +46,7 @@ function handle_remove($handle, $signal)
  */
 function handle_loader($signal, $directory, $heap = QUEUE_MIN_HEAP)
 {
-    return prggmr::instance()->handle_loader($signal, $directory, $heap);
+    return \prggmr::instance()->handle_loader($signal, $directory, $heap);
 }
 
 /**
@@ -60,7 +60,7 @@ function handle_loader($signal, $directory, $heap = QUEUE_MIN_HEAP)
  */
 function signal($signal, $vars = null, &$event = null)
 {
-    return prggmr::instance()->signal($signal, $vars, $event);
+    return \prggmr::instance()->signal($signal, $vars, $event);
 }
 
 /**
@@ -70,7 +70,7 @@ function signal($signal, $vars = null, &$event = null)
  */
 function event_history(/* ... */)
 {
-    return prggmr::instance()->event_history();
+    return \prggmr::instance()->event_history();
 }
 
 /**
@@ -96,7 +96,7 @@ function event_history(/* ... */)
  */
 function signal_queue($signal, $create = true, $type = QUEUE_MIN_HEAP)
 {
-    return prggmr::instance()->signal_queue($signal);
+    return \prggmr::instance()->signal_queue($signal);
 }
 
 /**
@@ -129,7 +129,7 @@ function interval($function, $interval, $vars = null, $priority = QUEUE_DEFAULT_
 function timeout($function, $timeout, $priority = QUEUE_DEFAULT_PRIORITY)
 {
     $signal = new \prggmr\signal\time\Time($timeout);
-    $handle = prggmr::instance()->handle($function, $signal, $priority, 1);
+    $handle = \prggmr::instance()->handle($function, $signal, $priority, 1);
     return [$signal, $handle];
 }
 
@@ -142,7 +142,7 @@ function timeout($function, $timeout, $priority = QUEUE_DEFAULT_PRIORITY)
  */
 function prggmr_loop($ttr = null)
 {
-    return prggmr::instance()->loop($ttr);
+    return \prggmr::instance()->loop($ttr);
 }
 
 /**
@@ -152,5 +152,5 @@ function prggmr_loop($ttr = null)
  */
 function prggmr_shutdown()
 {
-    return prggmr::instance()->shutdown();
+    return \prggmr::instance()->shutdown();
 }

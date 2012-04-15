@@ -5,6 +5,8 @@ fast and very simple to use.
 
     <?php
 
+    use prggmr;
+
     handle(function(){
         echo "The light is green go!";
     }, 'light.green');
@@ -31,7 +33,7 @@ Include the following in your ```composer.json``` file.
 
     {
         "require": {
-            "prggmr/prggmr": "0.3.*"
+            "prggmr/prggmr": "1.0.*"
         }
     }
 
@@ -71,6 +73,9 @@ Documentation is available at [prggmr.org](http://www.prggmr.org)
 
 The prggmr mailing list is located here [mailing list](https://groups.google.com/forum/?fromgroups#!forum/prggmr).
 
+## Versions
+
+prggmr uses [semver](http://semver.org) you should to.
 
 ## Signals Roadmap
 

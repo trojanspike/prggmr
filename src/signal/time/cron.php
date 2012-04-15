@@ -21,7 +21,7 @@ class Cron extends \prggmr\signal\Interval {
     protected $_time = null;
 
     /**
-     * Constructs a time signal.
+     * Constructs a cron signal.
      *
      * @param  int  $time  Microseconds before signaling.
      *

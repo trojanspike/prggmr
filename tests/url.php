@@ -3,10 +3,10 @@
 define('BASE_URI', '/request.php');
 
 require '../src/prggmr.php';
-require '../src/signal/http/request.php';
+require '../src/signal/http/url.php';
 
-prggmr\signal\http\handle_request(function($id, $post){
+prggmr\signal\http\handle_url(function($id, $post){
     echo "This is a post $id $post";
 }, "/user/:id/:post_number") ;
 
-prggmr_loop();
+prggmr\prggmr_loop();

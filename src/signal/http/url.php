@@ -22,10 +22,10 @@ namespace prggmr\signal\http;
   * The $_SERVER['REQUEST_URI'] and $_SERVER['REQUEST_METHOD'] are used
   * for checking the signal.
   */
-class Request extends \prggmr\signal\Complex {
+class Url extends \prggmr\signal\Complex {
 
     /**
-     * Configures a new Request signal.
+     * Configures a new URL signal.
      * 
      * @param  string  $url  URL of request to handle.
      * @param  string|array  $method  Type of request to handle.
@@ -82,7 +82,7 @@ class Request extends \prggmr\signal\Complex {
  *
  * @return  object|boolean  Handle, boolean if error
  */
-function handle_request($closure, $url, $method = null, $priority = null, $exhaust = 1)
+function handle_url($closure, $url, $method = null, $priority = null, $exhaust = 1)
 {
-    return \prggmr::instance()->handle($closure, new Request($url, $method), $priority, $exhaust);
+    return \prggmr::instance()->handle($closure, new Url($url, $method), $priority, $exhaust);
 }
