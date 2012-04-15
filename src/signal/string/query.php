@@ -20,9 +20,7 @@ class Query extends \prggmr\signal\Complex {
      */
     public function __construct($query)
     {
-        $regex = preg_replace('#:([\w]+)#i', 'fix\(?P<$1>[\w]+fix\)', $query);
-        $regex = str_replace('fix\(', '(', $regex);
-        $regex = str_replace('fix\)', ')', $regex);
+        $regex = preg_replace('#:([\w]+)#i', '(?P<$1>[\w]+)', $query);
         $regex = '#' . $regex . '$#i';
         $this->_info = $regex;
     }
