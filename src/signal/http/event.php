@@ -25,4 +25,13 @@ class Event extends \prggmr\Event {
      */
     public $response = null;
 
+    /**
+     * Constructs a new HTTP Event.
+     * 
+     * @return  void
+     */
+    public function __construct($request, $response = null) 
+    {
+
+    }
 }

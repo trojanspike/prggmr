@@ -1,5 +1,5 @@
 <?php
-namespace prggmr\signal;
+namespace prggmr\signal\time;
 /**
  * Copyright 2010-12 Nickolas Whiting. All rights reserved.
  * Use of this source code is governed by the Apache 2 license
@@ -11,7 +11,7 @@ namespace prggmr\signal;
  *
  * Signal event based on timed intervals.
  */
-class Interval extends \prggmr\signal\Time {
+class Interval extends \prggmr\signal\time\Timeout {
 
     /**
      * Milliseconds elasped before signaling.

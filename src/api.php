@@ -111,8 +111,8 @@ function signal_queue($signal, $create = true, $type = QUEUE_MIN_HEAP)
  */
 function interval($function, $interval, $vars = null, $priority = QUEUE_DEFAULT_PRIORITY)
 {
-    $signal = new \prggmr\signal\time\Interval($interval, $vars);
-    $handle = prggmr::instance()->handle($function, $signal, $priority, null);
+    $signal = new signal\time\Interval($interval, $vars);
+    $handle = \prggmr::instance()->handle($function, $signal, $priority, null);
     return [$signal, $handle];
 }
 
@@ -128,7 +128,7 @@ function interval($function, $interval, $vars = null, $priority = QUEUE_DEFAULT_
  */
 function timeout($function, $timeout, $priority = QUEUE_DEFAULT_PRIORITY)
 {
-    $signal = new \prggmr\signal\time\Time($timeout);
+    $signal = new signal\time\Timeout($timeout);
     $handle = \prggmr::instance()->handle($function, $signal, $priority, 1);
     return [$signal, $handle];
 }
