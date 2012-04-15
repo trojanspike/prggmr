@@ -37,7 +37,7 @@ abstract class Complex extends Standard {
      * @return  boolean|string|array  False on failure. True if matches. String
      *                                or array indicate results to pass handlers
      */
-    public function evaluate($var = null) 
+    public function evaluate($signal = null) 
     {
         return false;
     }

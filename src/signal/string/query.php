@@ -1,5 +1,5 @@
 <?php
-namespace prggmr\signal;
+namespace prggmr\signal\string;
 /**
  * Copyright 2010-12 Nickolas Whiting. All rights reserved.
  * Use of this source code is governed by the Apache 2 license
@@ -34,7 +34,7 @@ class Query extends \prggmr\signal\Complex {
      *
      * @return  boolean|array  Boolean|Array if matches found
      */
-    public function evaluate($signal)
+    public function evaluate($signal = null)
     {
         if (preg_match($this->_info, $signal, $matches)) {
             array_shift($matches);

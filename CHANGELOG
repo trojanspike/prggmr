@@ -1,6 +1,9 @@
-[ 0.3.2 04142012 ]
+[ 1.0.0 04142012 ]
 ------------------
-- Added the http\Request signal.
+- The FIRST OFFICAL 1.0.0
+- Moved the complex signals into a deeper namespacing scheme
+- Added the prggmr\signal\http\Request signal.
+- All API functions now fall into the prggmr namespace.
 
 [ 0.3.1.1 041012 ]
 ------------------

@@ -7,6 +7,7 @@ $usage = "usage: prggmr [options...] file
 
 Current options:
   -c/--config   Configuration file
+  -d            Used for the development of prggmr.
   -h/--help     Show this help message.
   -p/--passthru Pass the given arguments to the script
   -t/--time     Length of time to run in milliseconds.
@@ -56,6 +57,9 @@ foreach ($options as $_i => $_arg) {
         case 'c':
         case 'config':
             include($_arg);
+            break;
+        case 'd':
+            define('PRGGMR_DEV_MODE', true);
             break;
         default:
             exit(sprintf(

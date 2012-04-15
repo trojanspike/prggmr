@@ -178,8 +178,8 @@ class Engine {
     {
         $this->set_state(STATE_DECLARED);
         if (ENGINE_EXCEPTIONS) {
-            if (!class_exists('\prggmr\signal\Range', false)){
-                require_once 'signal/range.php';
+            if (!class_exists('\prggmr\signal\integer\Range', false)){
+                require_once 'signal/integer/range.php';
             }
             $this->handle(function(){
                 $args = func_get_args();
@@ -191,7 +191,7 @@ class Engine {
                     $message = engine_code($type);
                 }
                 throw new EngineException($message, $type, $args);
-            }, new \prggmr\signal\Range(0xE002, 0xE014), 0, null);
+            }, new \prggmr\signal\integer\Range(0xE002, 0xE014), 0, null);
         }
     }
 
@@ -638,9 +638,10 @@ class Engine {
      */
     public function _search_complex($signal)
     {
+        $locate = false;
+        $found = array();
         if (is_string($signal) || is_int($signal)) {
             $locate = true;
-            $found = array();
         } elseif (!$signal instanceof \prggmr\signal\Complex) {
             $this->signal(esig::INVALID_SIGNAL, array($signal));
             return [self::SEARCH_NOOP, null];
@@ -768,7 +769,8 @@ class Engine {
                         $handle[0]->params($data);
                     });
                 }
-                $queue->merge($node[0]->storage());
+                $storage = $node[0]->storage();
+                $queue->merge($storage);
             });
         }
 

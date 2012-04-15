@@ -11,6 +11,12 @@ define('PRGGMR_VERSION', '0.3.1.1');
 // The creator
 define('PRGGMR_MASTERMIND', 'Nickolas Whiting');
 
+// dev mode
+if (defined('PRGGMR_DEV_MODE')) {
+    echo "RUNNING DEV MODE".PHP_EOL;
+    error_reporting(E_ALL);
+}
+
 $dir = dirname(realpath(__FILE__));
 
 // start'er up
@@ -22,8 +28,8 @@ require $dir.'/engine.php';
 require $dir.'/signal/standard.php';
 require $dir.'/signal.php';
 require $dir.'/signal/complex.php';
-require $dir.'/signal/time.php';
-require $dir.'/signal/interval.php';
+require $dir.'/signal/time/time.php';
+require $dir.'/signal/time/interval.php';
 require $dir.'/event.php';
 require $dir.'/queue.php';
 require $dir.'/handle.php';

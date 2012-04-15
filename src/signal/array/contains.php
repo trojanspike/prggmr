@@ -1,5 +1,5 @@
 <?php
-namespace prggmr\signal;
+namespace prggmr\signal\array;
 /**
  * Copyright 2010-12 Nickolas Whiting. All rights reserved.
  * Use of this source code is governed by the Apache 2 license
@@ -10,7 +10,7 @@ namespace prggmr\signal;
   * Array contains signal fires true when the given variable is contained 
   * within the given array allowing for strict mode.
   */
-class ArrayContains extends \prggmr\signal\Complex {
+class Contains extends \prggmr\signal\Complex {
 
     /**
      * Use strict mode.
@@ -39,7 +39,7 @@ class ArrayContains extends \prggmr\signal\Complex {
      *
      * @return  mixed  False on failure. True if matches.
      */
-    public function evaluate($signal)
+    public function evaluate($signal = null)
     {
         if (array_search($signal, $this->_info, $this->_strict) !== false) {
             return $signal;

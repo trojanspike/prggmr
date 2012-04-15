@@ -1,3 +1,23 @@
+[ 04142012 - 2012 ]
+
+- Been quite some time since I last logged here ... 
+
+- It's time to start using a version system that will make it easier for 
+  others to develop with prggmr ... as much as I hate to do it I am going to
+  transition to an official version 1.0.0 ... 
+
+  For the past versions I have been the only one ( that I'm aware of ) 
+  really using the library so my own personal version schema has worked quite
+  well, but now that it's starting to be used more and more by others it will
+  serve well to have an easily recognizable version schema.
+
+- Along with that I am moving all prggmr API functions into the prggmr namespace
+  ... while it is great that you can just load prggmr and BOOM you have this 
+  entire API fully functioning and ready to go, it is apparent others are
+  attempting to develop systems similar to the principals of prggmr ...
+  although I have yet to see any I am impressed with it will defiantly introduce
+  problems.
+
 [ 03242012 - 1120 ]
 
 - Performance testing shows that a handle costs about 2KB each.
@@ -7,22 +27,22 @@
 
 [ 03232012 - 1815 ]
 
-- The Engine is now almost fully refactored with that the Queue, Event and 
+- The Engine is now almost fully re-factored with that the Queue, Event and 
   Signal objects have been completely redesigned. At this point prggmr is
   beginning to evolve and the evolution is incredible, it seems as though I 
   have stumbled upon how to make prggmr a Complex Event Engine ... which I 
   had no clue on how it would be done ... I guess it wasn't as difficult as
-  I had orginally thought it would be.
+  I had originally thought it would be.
 
   With that I still need to establish a method of keeping a history of all
-  signals and their associated events that have occured, I'm thinking this will
+  signals and their associated events that have occurred, I'm thinking this will
   be done by simply inserting it into the Engine's memory with a timestamp and
   simply provide a method for either fully flushing this history or not keeping
   track at all ... but having a timeline of what happened and when during your
-  application and having that easily accesible would be extraordinary.
+  application and having that easily accessible would be extraordinary.
 
 - The states of all objects is still undetermined at this point, some of which
-  are a bit more complex than I orginally thought ... such as recycling a 
+  are a bit more complex than I originally thought ... such as recycling a 
   corrupted event, I have thought of possibly looping through the event's 
   storage and detecting if there are any nodes in an error state but that could
   be incredibly complicated since it would be almost impossible to determine 
@@ -35,14 +55,14 @@
   for anything such as a non-blocking socket connection, real-time based signal
   or complex event algorithms to instruct it on what to, this way it isn't the
   engine that limits what can be done with prggmr but rather what the programmer
-  developing the complex signals can do providing limitless possibilites.
+  developing the complex signals can do providing limitless possibilities.
 
 [ 03082012 - 1300 ]
 
 - With the release of 5.4 this month I'm making PHP 5.4 a requirement, 
   after putting alot of thought into it and having so many places in the 
   code where I need to hack around a Closure not having a bind there 
-  is no reason not to ... well other than noone will support it until 2015 
+  is no reason not to ... well other than no-one will support it until 2015 
   but thats not my problem is it.
 
 - The utils ... the odd ball ... I really wasn't sure what to name this file,

@@ -1,5 +1,5 @@
 <?php
-namespace prggmr\signal;
+namespace prggmr\signal\array;
 /**
  * Copyright 2010-12 Nickolas Whiting. All rights reserved.
  * Use of this source code is governed by the Apache 2 license
@@ -9,7 +9,7 @@ namespace prggmr\signal;
  /**
   * Allows for handles based on a binary search of an array tree.
   */
-class ArrayBinary extends \prggmr\signal\Complex {
+class Binary extends \prggmr\signal\Complex {
 
     /**
      * Constructs a new array binary signal object.
@@ -37,7 +37,7 @@ class ArrayBinary extends \prggmr\signal\Complex {
      *
      * @return  boolean|mixed  False|Contents of key
      */
-    public function evaluate($signal)
+    public function evaluate($signal = null)
     {
         $key = bin_search($signal, $this->_info, $this->_cmp);
         if ($key === null) {

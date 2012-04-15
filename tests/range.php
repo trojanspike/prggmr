@@ -1,9 +1,9 @@
 <?php
-require_once '../src/signal/range.php';
+require_once '../src/signal/integer/range.php';
 
 handle(function($name){
     echo "Hello $name";
-}, new \prggmr\signal\Range(0, 100));
+}, new \prggmr\signal\integer\Range(0, 100));
 
 signal(57);
 

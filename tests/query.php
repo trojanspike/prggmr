@@ -1,9 +1,9 @@
 <?php
-require_once '../src/signal/query.php';
+require_once '../src/signal/string/query.php';
 
 handle(function($name){
     echo "Hello $name";
-}, new \prggmr\signal\Query('user/:name'));
+}, new \prggmr\signal\string\Query('user/:name'));
 
 signal('/user/prggmr');
 
