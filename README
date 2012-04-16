@@ -5,23 +5,21 @@ fast and very simple to use.
 
     <?php
 
-    use prggmr;
-
-    handle(function(){
+    prggmr\handle(function(){
         echo "The light is green go!";
     }, 'light.green');
 
-    handle(function(){
+    prggmr\handle(function(){
         echo "The light is red stop!";
     }, 'light.red');
 
-    handle(function(){
+    prggmr\handle(function(){
         echo "The light is yellow go faster!";
     } 'light.yellow');
 
-    signal('light.green');
-    signal('light.yellow');
-    signal('light.red');
+    prggmr\signal('light.green');
+    prggmr\signal('light.yellow');
+    prggmr\signal('light.red');
 
 ## Installation
 
