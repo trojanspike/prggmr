@@ -13,7 +13,6 @@ define('PRGGMR_MASTERMIND', 'Nickolas Whiting');
 
 // dev mode
 if (defined('PRGGMR_DEV_MODE')) {
-    echo "RUNNING DEV MODE".PHP_EOL;
     error_reporting(E_ALL);
 }
 

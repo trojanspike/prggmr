@@ -758,7 +758,8 @@ class Engine {
         $queue = new Queue();
         $stack = $this->_search($signal);
         if ($stack[0] === self::SEARCH_FOUND) {
-            $queue->merge($stack[1]->storage());
+            $storage = $stack[1]->storage();
+            $queue->merge($storage);
         }
         $complex = $this->_search_complex($signal);
         if ($complex[0] === self::SEARCH_FOUND) {

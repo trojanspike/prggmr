@@ -16,7 +16,7 @@ namespace prggmr;
  *
  * @return  object|boolean  Handle, boolean if error
  */
-function handle($closure, $signal, $priority = null, $exhaust = 1)
+function handle($closure, $signal, $priority = QUEUE_DEFAULT_PRIORITY, $exhaust = 1)
 {
     return \prggmr::instance()->handle($closure, $signal, $priority, $exhaust);
 }
@@ -106,13 +106,14 @@ function signal_queue($signal, $create = true, $type = QUEUE_MIN_HEAP)
  * @param  integer  $timeout  Milliseconds before calling timeout.
  * @param  array  $vars  Variables to pass the timeout function
  * @param  integer  $priority  Timeout priority
+ * @param  integer|null  $exhaust  Exhaustion Rate | Default null
  *
  * @return  array  [signal, handle]
  */
-function interval($function, $interval, $vars = null, $priority = QUEUE_DEFAULT_PRIORITY)
+function interval($function, $interval, $vars = null, $priority = QUEUE_DEFAULT_PRIORITY, $exhaust = null)
 {
     $signal = new signal\time\Interval($interval, $vars);
-    $handle = \prggmr::instance()->handle($function, $signal, $priority, null);
+    $handle = \prggmr::instance()->handle($function, $signal, $priority, $exhaust);
     return [$signal, $handle];
 }
 
@@ -123,13 +124,14 @@ function interval($function, $interval, $vars = null, $priority = QUEUE_DEFAULT_
  * @param  integer  $timeout  Milliseconds before calling timeout.
  * @param  array  $vars  Variables to pass the timeout function
  * @param  integer  $priority  Timeout priority
+ * @param  integer|null  $exhaust  Exhaustion Rate | Default 1
  *
  * @return  array  [signal, handle]
  */
-function timeout($function, $timeout, $priority = QUEUE_DEFAULT_PRIORITY)
+function timeout($function, $timeout, $vars = null, $priority = QUEUE_DEFAULT_PRIORITY, $exhaust = 1)
 {
-    $signal = new signal\time\Timeout($timeout);
-    $handle = \prggmr::instance()->handle($function, $signal, $priority, 1);
+    $signal = new signal\time\Timeout($timeout, $vars);
+    $handle = \prggmr::instance()->handle($function, $signal, $priority, $exhaust);
     return [$signal, $handle];
 }
 
