@@ -112,7 +112,7 @@ class Handle {
     public function execute(&$params = null)
     {
         # test for exhaustion
-        if ($this->is_exhausted()) return false;
+        if ($this->is_exhausted()) return true;
         
         # Increase execution count
         if (null !== $this->_exhaustion) {

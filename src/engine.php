@@ -507,18 +507,21 @@ class Engine {
         if ($heap === QUEUE_MAX_HEAP) {
             $priority = PHP_INT_MAX;
         }
-
-        $this->handle(function() use ($directory){
-            $dir = new RegexIterator(
-                new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($directory)
-                ), '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH
+        $engine = $this;
+        $this->handle(function() use ($directory, $signal, $engine, $handle){
+            $dir = new \RegexIterator(
+                new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($directory)
+                ), '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH
             );
             foreach ($dir as $_file) {
                 array_map(function($i){
-                    include_once $i;
+                    require_once $i;
                 }, $_file);
             }
+            $engine->signal($this->get_signal(), func_get_args());
+            // TODO REMOVE THIS HANDLE
+            return true;
         }, $signal, 0, 1);
     }
 
@@ -802,7 +805,9 @@ class Engine {
         $queue->sort(true);
         $queue->reset();
         while($queue->valid()) {
-            if ($event->get_state() === STATE_HALTED) break;
+            if ($event->get_state() === STATE_HALTED) {
+                break;
+            }
             $handle = $queue->current()[0];
             $handle->set_state(STATE_RUNNING);
             // bind event to allow use of "this"

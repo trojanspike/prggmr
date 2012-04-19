@@ -1,5 +1,6 @@
 [ 1.0.0 -- TBD -- ]
 -------------------
+- handle_loader works properly
 - Disallow changing the signal of an event within a handle.
 - Moved the complex signals into a deeper namespacing scheme
 - Added the prggmr\signal\http\Request signal.

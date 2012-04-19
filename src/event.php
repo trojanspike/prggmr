@@ -6,6 +6,8 @@ namespace prggmr;
  * that can be found in the LICENSE file.
  */
 
+define('EVENT_SELF_PARENT', -0xE4E);
+
 /**
  * Event
  *
@@ -13,7 +15,6 @@ namespace prggmr;
  *
  * As of v0.3.0 the event now inherits the State and Storage traits.
  */
-
 class Event {
 
     use State;
@@ -113,6 +114,8 @@ class Event {
      */
     public function set_parent(Event $event)
     {
+        // Detect if parent is itself to avoid circular referencing
+        if ($this === $event) $event = EVENT_SELF_PARENT;
         $this->_parent = $event;
     }
 
