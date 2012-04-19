@@ -1,5 +1,8 @@
 [ 1.0.0 -- TBD -- ]
 -------------------
+- handle_loader now allows only strings|integers
+- handle_loader auto removes itself after loading
+- Added prggmr\Event::get_handle, set_handle functions
 - handle_loader works properly
 - Disallow changing the signal of an event within a handle.
 - Moved the complex signals into a deeper namespacing scheme

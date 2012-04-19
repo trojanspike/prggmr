@@ -492,7 +492,7 @@ class Engine {
      * @param  integer|string|object  $signal  Signal to register with
      * @param  string  $directory  Directory to load handles from
      * 
-     * @return  object  \prggmr\Handle
+     * @return  object|boolean  \prggmr\Handle|False on error
      */
     public function handle_loader($signal, $directory, $heap = QUEUE_MIN_HEAP)
     {
@@ -501,14 +501,19 @@ class Engine {
                 $directory, $signal
             ));
         }
-
+        if (!is_string() || !is_int($signal)) {
+            $this->signal(esig::INVALID_SIGNAL, array($signal));
+            return false;
+        }
         // ensure handle always has the highest priority
         $priority = 0;
         if ($heap === QUEUE_MAX_HEAP) {
             $priority = PHP_INT_MAX;
         }
         $engine = $this;
-        $this->handle(function() use ($directory, $signal, $engine, $handle){
+        $handle = $this->handle(function() use ($directory, $signal, $engine){
+            // remove the loader
+            $engine->handle_remove($this->get_handle(), $signal);
             $dir = new \RegexIterator(
                 new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($directory)
@@ -519,10 +524,10 @@ class Engine {
                     require_once $i;
                 }, $_file);
             }
-            $engine->signal($this->get_signal(), func_get_args());
-            // TODO REMOVE THIS HANDLE
+            $engine->signal($this->get_signal(), func_get_args(), $this);
             return true;
         }, $signal, 0, 1);
+        return $handle;
     }
 
     /**
@@ -663,7 +668,7 @@ class Engine {
                 }
             } else {
                 if ($this->current()[0] === $signal) {
-                    return [self::SEARCH_FOUND, $signal];
+                    return [self::SEARCH_FOUND, $this->current()[1]];
                 }
             }
             $this->prev();
@@ -722,6 +727,8 @@ class Engine {
     {
         // event execution finished cleanup and reset current
         $event->set_state(STATE_EXITED);
+        // remove handle
+        $event->set_handle(null);
         // are we keeping the history
         if (!ENGINE_EVENT_HISTORY) {
             return null;
@@ -812,6 +819,7 @@ class Engine {
             $handle->set_state(STATE_RUNNING);
             // bind event to allow use of "this"
             $handle->bind($event);
+            $event->set_handle($handle);
             // set event as running
             $event->set_state(STATE_RUNNING);
             if (ENGINE_EXCEPTIONS) {
