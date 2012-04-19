@@ -46,6 +46,11 @@ class Event {
      */
     public function set_signal($signal)
     {
+        if ($this->_state !== STATE_DECLARED &&
+            $this->_state !== STATE_RECYCLED) {
+            echo "INVALID STATE";
+            return false;
+        }
         $this->_signal = $signal;
     }
 

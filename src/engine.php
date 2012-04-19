@@ -688,7 +688,6 @@ class Engine {
                 $this->signal(esig::INVALID_EVENT, array($event));
             }
             $event = new Event();
-            $event->set_state(STATE_RUNNING);
         } else {
             if ($event->get_state() !== STATE_DECLARED) {
                 $event->set_state(STATE_RECYCLED);
@@ -808,6 +807,8 @@ class Engine {
             $handle->set_state(STATE_RUNNING);
             // bind event to allow use of "this"
             $handle->bind($event);
+            // set event as running
+            $event->set_state(STATE_RUNNING);
             if (ENGINE_EXCEPTIONS) {
                 $result = $handle->execute($vars);
             } else {

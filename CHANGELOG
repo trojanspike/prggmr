@@ -1,6 +1,6 @@
-[ 1.0.0 04142012 ]
-------------------
-- The FIRST OFFICAL 1.0.0
+[ 1.0.0 -- TBD -- ]
+-------------------
+- Disallow changing the signal of an event within a handle.
 - Moved the complex signals into a deeper namespacing scheme
 - Added the prggmr\signal\http\Request signal.
 - All API functions now fall into the prggmr namespace.
