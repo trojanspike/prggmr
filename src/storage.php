@@ -41,7 +41,7 @@ trait Storage {
      */
     public function merge(&$array)
     {
-        $this->_storage = array_merge($this->_storage, $array);
+        $this->_storage += $array;
     }
 
     /**

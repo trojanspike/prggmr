@@ -32,28 +32,6 @@ if (!defined('ENGINE_RECURSIVE_DETECTION')) {
 }
 
 /**
- * When to begin binary searching.
- */
-if (!defined('BINARY_ENGINE_SEARCH')) {
-    define('BINARY_ENGINE_SEARCH', 75);
-}
-
-/**
- * Engine Hash table
- */
-define('ENGINE_HASH_STORAGE', 1);
-/**
- * Engine binary storage
- */
-define('ENGINE_BINARY_STORAGE', 2);
-
-if (defined('ENGINE_USE_BINARY')) {
-    define('ENGINE_STORAGE_TYPE', ENGINE_BINARY_STORAGE);
-} else {
-    define('ENGINE_STORAGE_TYPE', ENGINE_HASH_STORAGE);
-}
-
-/**
  * Complex signal return to trigger the signal during routine calculation.
  */
 define('ENGINE_ROUTINE_SIGNAL', -0xF14E);
@@ -115,6 +93,12 @@ class Engine {
     const SEARCH_NULL = 0xA04;
     const SEARCH_FOUND = 0xA05;
     const SEARCH_NOOP = 0xA06;
+
+    /**
+     * Storage container node indices
+     */
+    const HASH_STORAGE = 0;
+    const COMPLEX_STORAGE = 1;
 
     /**
      * Allows for 
@@ -193,6 +177,7 @@ class Engine {
                 throw new EngineException($message, $type, $args);
             }, new \prggmr\signal\integer\Range(0xE002, 0xE014), 0, null);
         }
+        $this->flush();
     }
 
     /**
@@ -210,17 +195,18 @@ class Engine {
             }, new \prggmr\signal\Time($ttr, $this));
         }
         $this->signal(esig::LOOP_START);
-        while($this->_routines()) {
-            // check for signals that need to trigger
+        while($this->_routines() && $this->get_state() !== STATE_HALTED) {
+
+            // directly execute given sig handlers
             if (count($this->_routines[2]) != 0) {
                 foreach ($this->_routines[2] as $_node) {
                     $this->_execute(
-                        $_node[0], $_node[1], $this->_event($_node[0], $_node[0]->event()), $_node[0]->vars()
+                        $_node[0], $_node[1], $this->_event($_node[0], $_node[2]), $_node[0]->vars()
                     );
                 }
             }
 
-            // trigger signals provided to trigger
+            // signal the given signals
             if (count($this->_routines[1]) != 0) {
                 foreach ($this->_routines[1] as $_signals) {
                     foreach ($_signals as $_node) {
@@ -228,9 +214,6 @@ class Engine {
                     }
                 }
             }
-
-            // allow for external shutdown signal
-            if ($this->get_state() === STATE_HALTED) break;
 
             // check for idle time
             if ($this->_routines[0] > 0) {
@@ -250,42 +233,51 @@ class Engine {
     {
         $return = false;
         $this->_routines = [0, [], []];
-        $this->_sort();
-        $this->end();
         // allow for external shutdown signal before running anything
         if ($this->get_state() === STATE_HALTED) return false;
-        while ($this->valid()) {
-            if (!$this->current()[0] instanceof \prggmr\signal\Complex) {
-                break;
-            }
-            $routine = $this->current()[0]->routine($this->_event_history);
+        foreach ($this->_storage[self::COMPLEX_STORAGE] as $_key => $_node) {
+            $routine = $_node[0]->routine($this->_event_history);
             if (is_array($routine) && count($routine) == 2) {
-                $current = $this->current();
                 // Check for signals
                 if (null !== $routine[0]) {
                     if (is_array($routine[0])) {
                         foreach ($routine as $_sig) {
                             if (false === $this->_routine_exhausted($_sig)) {
                                 $return = true;
-                                $this->_routines[1][] = [$_sig, $current[0]->vars(), $current[0]->event()];
+                                if (!isset($_node[2])) {
+                                    if (null !== $_node[0]->event()) {
+                                        $_node[2] = $_node[0]->event();
+                                        // destroy reference
+                                        $_node[0]->event(false);
+                                    } else {
+                                        $_node[2] = null;
+                                    }
+                                }
+                                $this->_routines[1][] = [$_sig, $_node[0]->vars(), $_node[2]];
                             }
                         }
                     } else {
                         // Trigger the signal itself
                         if ($routine[0] === ENGINE_ROUTINE_SIGNAL) {
-                            if (false === $this->_routine_exhausted($current[1])) {
+                            if (false === $this->_routine_exhausted($_node[1])) {
                                 $return = true;
                                 // Recurring signals will always get the same event
-                                if (null === $current[0]->event()) {
-                                    $current[0]->event(new \prggmr\Event());
+                                if (!isset($_node[2])) {
+                                    if (null !== $_node[0]->event()) {
+                                        $this->_storage[self::COMPLEX_STORAGE][$_key][2] = $_node[0]->event();
+                                        // destroy reference
+                                        $_node[0]->event(false); 
+                                    } else {
+                                        $this->_storage[self::COMPLEX_STORAGE][$_key][2] = new Event();
+                                    }
                                 }
-                                $this->_routines[2][] = $current;
+                                $this->_routines[2][] = $_node;
                             }
                         // Trigger one signal
                         } else {
                             if (false === $this->_routine_exhausted($_routine[0])) {
                                 $return = true;
-                                $this->_routines[1][] = [$_routine[0], $current[0]->vars(), $current[0]->event()];
+                                $this->_routines[1][] = [$_routine[0], $_node[0]->vars(), $_node[0]->event()];
                             }
                         }
                     }
@@ -298,7 +290,6 @@ class Engine {
                     }
                 }
             }
-            $this->prev();
         }
         return $return;
     }
@@ -336,6 +327,7 @@ class Engine {
     {
         $queue->reset();
         while($queue->valid()) {
+            // if a non exhausted queue is found return false
             if (!$queue->current()[0]->is_exhausted()) {
                 return false;
             }
@@ -366,7 +358,7 @@ class Engine {
      */
     public function flush(/* ... */)
     {
-        $this->_storage = [];
+        $this->_storage = [[], []];
         $this->set_state(STATE_DECLARED);
     }
 
@@ -409,18 +401,6 @@ class Engine {
     /**
      * Locates or creates a signal Queue in storage.
      * 
-     * The storage is designed to place any sortable types [int, strings and
-     * sortable objects] at top of the stack and place any unstortable types 
-     * [complex objects] at the bottom.
-     * 
-     * A visual representation:
-     * 
-     * [
-     *     1,2,object(3),4
-     *     'a','b',object('c'),'d'
-     *     object(c2), object(c2)
-     * ]
-     * 
      * @param  string|integer|object  $signal  Signal
      * @param  boolean  $create  Create the queue if not found.
      * @param  integer  $type  [QUEUE_MIN_HEAP,QUEUE_MAX_HEAP]
@@ -461,16 +441,12 @@ class Engine {
                 return false;
             }
             $queue = new Queue($type);
-            if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE && !$complex) {
-                $this->_storage[(string) $signal->info()] = [
+            if (!$complex) {
+                $this->_storage[self::HASH_STORAGE][(string) $signal->info()] = [
                     $signal, $queue
                 ];
-                if ($this->_last_sig_added instanceof \prggmr\Signal\Complex) {
-                    $this->_unsorted = true;
-                }
             } else {
-                $this->_storage[] = [$signal, $queue];
-                $this->_unsorted = true;
+                $this->_storage[self::COMPLEX_STORAGE][] = [$signal, $queue];
             }
             $return = [self::QUEUE_NEW, $queue, $signal];
         } else {
@@ -480,7 +456,6 @@ class Engine {
                 $return = [self::QUEUE_NONEMPTY, $queue, $signal];
             }
         }
-
         $this->_last_sig_added = $signal;
         return $return;
     }
@@ -531,49 +506,6 @@ class Engine {
     }
 
     /**
-     * Sorts the storage.
-     * 
-     * @return  void
-     */
-    protected function _sort() 
-    {
-        if (!$this->_unsorted) return null;
-        $cmp = function($_node1, $_node2){
-            if ($_node1[0] instanceof \prggmr\signal\Complex) {
-                return 1;
-            }
-            if ($_node2[0] instanceof \prggmr\signal\Complex) {
-                return -1;
-            }
-            if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE) return 0;
-            $_node1 = $_node1[0]->info();
-            $_node2 = $_node2[0]->info();
-            if (is_int($_node1)){
-                if (is_string($_node2)) {
-                    return -1;
-                }
-                if ($_node1 > $_node2) return 1;
-                if ($_node1 < $_node2) return -1;
-                if ($_node1 == $_node2) return 0;
-            }
-            if (is_string($_node1)) {
-                if (is_int($node_2)) {
-                    return 1;
-                }
-                return strcmp($_node1, $_node2);
-            }
-        };
-
-        if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE) {
-            $this->uasort($cmp);
-        } else {
-            $this->usort($cmp);
-        }
-
-        $this->_unsorted = false;
-    }
-
-    /**
      * Searches for a string or integer signal queue in storage.
      * 
      * @param  string|int|object  $signal  Signal for queue
@@ -588,57 +520,17 @@ class Engine {
         if ($signal instanceof \prggmr\Signal) {
             $signal = $signal->info();
         }
-        $this->_sort();
-        if (ENGINE_STORAGE_TYPE == ENGINE_HASH_STORAGE) {
-            $signal = (string) $signal;
-            if (isset($this->_storage[$signal]) && 
-                !$this->_storage[$signal][0] instanceof \prggmr\signal\Complex) {
-                return [self::SEARCH_FOUND, $this->_storage[$signal][1]];
-            }
-        } else {
-            if ($this->count() >= BINARY_ENGINE_SEARCH) {
-                if ($this->_unsorted) $this->_sort();
-                $signal = ($signal instanceof \prggmr\Signal) ? $signal->info() : $signal;
-                return bin_search($signal, $this->_storage, function($_node1, $_node2){
-                    if ($_node1[0] instanceof \prggmr\signal\Complex) {
-                        return 1;
-                    }
-                    $_node1 = $_node1[0]->info();
-                    if (is_int($_node1)){
-                        if (is_string($_node2)) {
-                            return -1;
-                        }
-                        if ($_node1 > $_node2) return 1;
-                        if ($_node1 < $_node2) return -1;
-                        if ($_node1 == $_node2) return 0;
-                    }
-                    if (is_string($_node1)) {
-                        if (is_int($_node2)) {
-                            return 1;
-                        }
-                        return strcmp($_node1, $_node2);
-                    }
-                });
-            } else {
-                $this->reset();
-                if ($signal instanceof Signal) {
-                    $signal = $signal->info();
-                }
-                while ($this->valid()) {
-                    if ($this->current()[0]->info() === $signal) {
-                        return [self::SEARCH_FOUND, $this->current()[1]];
-                    }
-                    $this->next();
-                }
-            }
+        $signal = (string) $signal;
+        if (isset($this->_storage[self::HASH_STORAGE][$signal])) {
+            return [self::SEARCH_FOUND, $this->_storage[self::HASH_STORAGE][$signal][1]];
         }
         return [self::SEARCH_NULL, null];
     }
 
     /**
      * Searches for a complex signal. If given a complex signal object
-     * it will attempt to locate the signal, otherwise it will attempt to locate
-     * any signal handlers. 
+     * it will attempt to locate the signal, otherwise it will evaluate the
+     * signals.
      * 
      * @param  string|int|object  $signal  Signal(s) to lookup.
      * 
@@ -654,26 +546,21 @@ class Engine {
             $this->signal(esig::INVALID_SIGNAL, array($signal));
             return [self::SEARCH_NOOP, null];
         }
-        $this->_sort();
-        $this->end();
-        while ($this->valid()) {
-            if (!$this->current()[0] instanceof \prggmr\signal\Complex) {
-                // stop looking no longer in complex storage
-                break;
-            }
+        if (count($this->_storage[self::COMPLEX_STORAGE]) == 0) {
+            return [self::SEARCH_NOOP, null];
+        }
+        foreach ($this->_storage[self::COMPLEX_STORAGE] as $_key => $_node) {
             if ($locate) {
-                $eval = $this->current()[0]->evaluate($signal);
+                $eval = $_node[0]->evaluate($signal);
                 if ($eval !== false) {
-                    $found[] = [$this->current()[1], $eval];
+                    $found[] = [$_node[1], $eval];
                 }
             } else {
-                if ($this->current()[0] === $signal) {
+                if ($_node[0] === $signal) {
                     return [self::SEARCH_FOUND, $this->current()[1]];
                 }
             }
-            $this->prev();
         }
-
         if ($locate && count($found) !== 0) {
             return [self::SEARCH_FOUND, $found];
         }
@@ -728,7 +615,7 @@ class Engine {
         // event execution finished cleanup and reset current
         $event->set_state(STATE_EXITED);
         // remove handle
-        $event->set_handle(null);
+        //$event->set_handle(null);
         // are we keeping the history
         if (!ENGINE_EVENT_HISTORY) {
             return null;
