@@ -195,18 +195,7 @@ class Handle {
      */
     public function bind($object)
     {
-        $this->_function =  $this->_function->bindTo($object);
-        $this->_bind = $object;
-    }
-
-    /**
-     * Returns the object the handle has been bound to.
-     * 
-     * @return  object
-     */
-    public function get_bind()
-    {
-        return $this->_bind;
+        $this->_function = $this->_function->bindTo($object);
     }
 }
 

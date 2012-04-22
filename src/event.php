@@ -39,11 +39,6 @@ class Event {
     protected $_signal = null;
 
     /**
-     * Handle currently using this event.
-     */
-    protected $_handle = null;
-
-    /**
      * Sets the signal for the event.
      * 
      * @param  string|int|object
@@ -67,28 +62,6 @@ class Event {
     public function get_signal(/* ... */)
     {
         return $this->_signal;
-    }
-
-    /**
-     * Sets the current handle for the event.
-     * 
-     * @param  object
-     * 
-     * @return  void
-     */
-    public function set_handle($handle)
-    {
-        $this->_handle = $handle;
-    }
-
-    /**
-     * Returns the handle using this event.
-     * 
-     * @return  object|null
-     */
-    public function get_handle(/* ... */)
-    {
-        return $this->_handle;
     }
 
     /**

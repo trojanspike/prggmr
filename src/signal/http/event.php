@@ -12,26 +12,29 @@ namespace prggmr\signal\http;
 class Event extends \prggmr\Event {
 
     /**
-     * The HTTP Request
+     * Requested URI
      * 
-     * @var  object
+     * @var  string|null
      */
-    public $request = null;
+    protected $_uri = null;
 
     /**
-     * The HTTP Response
+     * Sets the event URI.
      * 
-     * @var  object
+     * @return  string
      */
-    public $response = null;
-
-    /**
-     * Constructs a new HTTP Event.
-     * 
-     * @return  void
-     */
-    public function __construct($request, $response = null) 
+    public function set_uri($uri)
     {
+        $this->_uri = $uri;
+    }
 
+    /**
+     * Returns the event URI.
+     * 
+     * @return  string
+     */
+    public function get_uri(/* ... */)
+    {
+        return $this->_uri;
     }
 }

@@ -14,6 +14,8 @@ namespace prggmr\signal\http;
     define('BASE_URI', '');
  }
 
+ require_once 'event.php';
+
  /**
   * Signal HTTP Request URL's to a handle.
   * URLs are matched using the "/path/:param" syntax.
@@ -29,10 +31,15 @@ class Url extends \prggmr\signal\Complex {
      * 
      * @param  string  $url  URL of request to handle.
      * @param  string|array  $method  Type of request to handle.
+     * @param  array  $vars  Additional variables to pass the handle.
+     * @param  object  $event  prggmr\signal\http\Event object
      * @param  string  $uri  REQUEST_URI to use. Defaults to _SERVER given.
      */
-    public function __construct($url, $method = null, $uri = null) 
+    public function __construct($url, $method = null, $vars = null, $event = null, $uri = null) 
     {
+        if (null !== $event && $event instanceof Event) {
+            $this->_event = $event;
+        }
         if (null === $uri) {
             $uri = $_SERVER['REQUEST_URI'];
         }
@@ -42,7 +49,7 @@ class Url extends \prggmr\signal\Complex {
             $method = [$method];
         }
         $this->_info = [
-            '#'.preg_replace('#:([\w]+)#i', '(?P<$1>[\w]+)', $url)."$#i",
+            '#'.preg_replace('#:([\w]+)#i', '(?P<$1>[\w\-_+]+)', $url)."$#i",
             $method,
             str_replace(BASE_URI, '', $uri)
         ];
@@ -53,36 +60,23 @@ class Url extends \prggmr\signal\Complex {
         if (!in_array($_SERVER['REQUEST_METHOD'], $this->_info[1])) {
             return false;
         }
-        if (preg_match($this->_info[0], $this->_info[2], $this->_vars)) {
-            array_shift($this->_vars);
-            if (count($this->_vars) != 0) {
-                foreach ($this->_vars as $_k => $_v) {
+        if (preg_match($this->_info[0], $this->_info[2], $matches)) {
+            array_shift($matches);
+            if (count($matches) != 0) {
+                foreach ($matches as $_k => $_v) {
                     if (is_string($_k)) {
-                        unset($this->_vars[$_k]);
+                        unset($matches[$_k]);
                     }
                 }
+                $this->_vars = array_merge((array) $this->_vars, $matches);
+            }
+            if (null === $this->_event) {
+                $this->_event = new Event();
+            }
+            if (false !== $this->_event) {
+                $this->_event->set_uri($this->_info[2]);
             }
             return [ENGINE_ROUTINE_SIGNAL, null];
         }
     }
-}
-
- /**
-  * Define an API function for this signal.
-  */
-
-/**
- * Creates a new prggmr\signal\http\Request sig handler.
- *
- * @param  object  $callable  Closure
- * @param  string  $url  URL to attach the handler.
- * @param  string|array  $method  String or Array of request methods to handle.
- * @param  integer $priority  Handle priority.
- * @param  integer  $exhaust  Handle exhaustion.
- *
- * @return  object|boolean  Handle, boolean if error
- */
-function handle_url($closure, $url, $method = null, $priority = null, $exhaust = 1)
-{
-    return \prggmr::instance()->handle($closure, new Url($url, $method), $priority, $exhaust);
 }

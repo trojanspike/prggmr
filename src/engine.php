@@ -195,8 +195,10 @@ class Engine {
             }, new \prggmr\signal\Time($ttr, $this));
         }
         $this->signal(esig::LOOP_START);
-        while($this->_routines() && $this->get_state() !== STATE_HALTED) {
-
+        while($this->_routines()) {
+            // check state
+            if ($this->get_state() === STATE_HALTED) break;
+            
             // directly execute given sig handlers
             if (count($this->_routines[2]) != 0) {
                 foreach ($this->_routines[2] as $_node) {
@@ -264,12 +266,13 @@ class Engine {
                                 // Recurring signals will always get the same event
                                 if (!isset($_node[2])) {
                                     if (null !== $_node[0]->event()) {
-                                        $this->_storage[self::COMPLEX_STORAGE][$_key][2] = $_node[0]->event();
+                                        $_node[2] = $_node[0]->event();
                                         // destroy reference
                                         $_node[0]->event(false); 
                                     } else {
-                                        $this->_storage[self::COMPLEX_STORAGE][$_key][2] = new Event();
+                                        $_node[2] = new Event();
                                     }
+                                    $this->_storage[self::COMPLEX_STORAGE][$_key][2] = $_node[2];
                                 }
                                 $this->_routines[2][] = $_node;
                             }
@@ -486,9 +489,7 @@ class Engine {
             $priority = PHP_INT_MAX;
         }
         $engine = $this;
-        $handle = $this->handle(function() use ($directory, $signal, $engine){
-            // remove the loader
-            $engine->handle_remove($this->get_handle(), $signal);
+        $handle = $this->handle(function() use ($directory, $signal, $engine) {
             $dir = new \RegexIterator(
                 new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($directory)
@@ -499,7 +500,11 @@ class Engine {
                     require_once $i;
                 }, $_file);
             }
-            $engine->signal($this->get_signal(), func_get_args(), $this);
+            // Resignal this signal
+            // The current event is not passed so the handles will get a clean
+            // event.
+            // Event analysis will show the handles were loaded from here.
+            $engine->signal($this->get_signal(), func_get_args());
             return true;
         }, $signal, 0, 1);
         return $handle;
@@ -614,8 +619,6 @@ class Engine {
     {
         // event execution finished cleanup and reset current
         $event->set_state(STATE_EXITED);
-        // remove handle
-        //$event->set_handle(null);
         // are we keeping the history
         if (!ENGINE_EVENT_HISTORY) {
             return null;
@@ -706,7 +709,6 @@ class Engine {
             $handle->set_state(STATE_RUNNING);
             // bind event to allow use of "this"
             $handle->bind($event);
-            $event->set_handle($handle);
             // set event as running
             $event->set_state(STATE_RUNNING);
             if (ENGINE_EXCEPTIONS) {
