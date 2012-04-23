@@ -17,19 +17,19 @@ namespace prggmr\signal\http;
  require_once 'event.php';
 
  /**
-  * Signal HTTP Request URL's to a handle.
-  * URLs are matched using the "/path/:param" syntax.
+  * Signal HTTP Request URI's to a handle.
+  * URIs are matched using the "/path/:param" syntax.
   * Parameters by default allow for any alphanumeric and _-+ chars.
   * 
   * The $_SERVER['REQUEST_URI'] and $_SERVER['REQUEST_METHOD'] are used
   * for checking the signal.
   */
-class Url extends \prggmr\signal\Complex {
+class URI extends \prggmr\signal\Complex {
 
     /**
-     * Configures a new URL signal.
+     * Configures a new URI signal.
      * 
-     * @param  string  $url  URL of request to handle.
+     * @param  string  $url  URI of request to handle.
      * @param  string|array  $method  Type of request to handle.
      * @param  array  $vars  Additional variables to pass the handle.
      * @param  object  $event  prggmr\signal\http\Event object
