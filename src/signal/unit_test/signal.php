@@ -13,10 +13,10 @@ namespace prggmr\signal\unit_test;
  * 
  * Testing is performed as:
  * 
- * prggmr\signal\unit_test\test(function(){
+ * handle(function(){
  *     $this->true(true);
  *     $this->false(false);
  *     $this->null(null);
  *     etc ...
- * });
+ * }, new prggmr\signal\unit_test\Test());
  */
