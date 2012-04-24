@@ -20,6 +20,7 @@ $dir = dirname(realpath(__FILE__));
 
 // start'er up
 require $dir.'/utils.php';
+require $dir.'/singleton.php';
 require $dir.'/storage.php';
 require $dir.'/state.php';
 require $dir.'/engine/signals.php';
@@ -48,23 +49,8 @@ if (!defined('SIGNAL_ERRORS_EXCEPTIONS')) {
  * global api.
  */
 final class prggmr extends \prggmr\Engine {
-
-    /**
-     * @var  object|null  Instanceof the singleton
-     */
-    private static $_instance = null;
-
-    /**
-     * Returns instance of the prggmr api.
-     */
-    final public static function instance(/* ... */)
-    {
-        if (null === static::$_instance) {
-            static::$_instance = new self();
-        }
-
-        return self::$_instance;
-    }
+    
+    use Singleton;
 
     /**
      * Returns the current version of prggmr.
