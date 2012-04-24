@@ -11,7 +11,7 @@ namespace prggmr\signal\unit_test;
  * 
  * This allows for unit testing using signals.
  * 
- * Testing is performed 
+ * Testing is performed as:
  * 
  * prggmr\signal\unit_test\test(function(){
  *     $this->true(true);

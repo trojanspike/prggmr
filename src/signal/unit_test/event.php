@@ -26,10 +26,21 @@ class Event extends \prggmr\Event {
     /**
      * Constructs a new event.
      */
-    public function __construct(Assertions $assertions = null) 
+    public function __construct(Assertions $assertions = null, Output $output = null) 
     {
         if (null === $assertions) {
             $this->_assertions = Assertions::instance();
         }
+        if (null === $output) {
+            $this->_output = Output::instance();
+        }
+    }
+
+    /**
+     * Calls an assertion function.
+     */
+    public function __call($func, $args)
+    {
+        $call = $this->_assertions->call_assertion($func, $args);
     }
 }

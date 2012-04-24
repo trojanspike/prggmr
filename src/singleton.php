@@ -17,11 +17,6 @@ trait Singleton {
     private static $_instance = null;
 
     /**
-     * By default constructing is disallowed and performs no logic.
-     */
-    protected function __construct(){}
-
-    /**
      * Returns an instance of the singleton.
      */
     final public static function instance(/* ... */)
@@ -31,5 +26,12 @@ trait Singleton {
         }
 
         return self::$_instance;
+    }
+
+    /**
+     * Disallow cloning
+     */
+    final public function __clone() {
+        return false;
     }
 }

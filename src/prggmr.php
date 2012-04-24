@@ -49,8 +49,8 @@ if (!defined('SIGNAL_ERRORS_EXCEPTIONS')) {
  * global api.
  */
 final class prggmr extends \prggmr\Engine {
-    
-    use Singleton;
+
+    use prggmr\Singleton;
 
     /**
      * Returns the current version of prggmr.
