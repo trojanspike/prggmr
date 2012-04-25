@@ -80,8 +80,11 @@ class Output implements Output_Generator {
             if (file_exists($file)) {
                 require_once $file;
             } else {
-                throw new \Exception(
-                    'Could not load default output generator'
+                throw new \RuntimeException(
+                    sprintf(
+                        'Could not load output generator %s',
+                        $generator
+                    )
                 );
             }
             static::$_generator = new \prggmrunit\Output\CLI();
@@ -92,13 +95,13 @@ class Output implements Output_Generator {
         }
         
         // check for shortvars
-        if (defined('PRGGMRUNIT_SHORTVARS')) {
-            static::$_shortvars = PRGGMRUNIT_SHORTVARS;   
+        if (defined('PRGGMR_UNIT_TEST_SHORTVARS')) {
+            static::$_shortvars = PRGGMR_UNIT_TEST_SHORTVARS;   
         }
         
         // check for transverse depth
-        if (defined('PRGGMRUNIT_MAXVARDEPTH')) {
-            static::$_maxdepth = PRGGMRUNIT_MAXVARDEPTH;   
+        if (defined('PRGGMR_UNIT_TEST_MAXVARDEPTH')) {
+            static::$_maxdepth = PRGGMR_UNIT_TEST_MAXVARDEPTH;   
         }
     }
     
@@ -109,7 +112,7 @@ class Output implements Output_Generator {
      *
      * @return  boolean
      */
-    public static function useShortVar($str = null)
+    public static function use_short_vars($str = null)
     {
         return (null === $str) ? static::$_shortvars :
                 (static::$_shortvars && is_string($str) && strlen($str) >= 60);
@@ -170,7 +173,7 @@ class Output implements Output_Generator {
                 break;
             case is_string($v):
                 return sprintf('string(%s)',
-                    (static::useShortVar($v)) ? substr($v, 0, 60) : $v
+                    (static::use_short_vars($v)) ? substr($v, 0, 60) : $v
                 );
                 break;
             case is_array($v):
@@ -184,7 +187,7 @@ class Output implements Output_Generator {
                     );
                 }
                 $return = sprintf('array(%s)', implode(", ", $r));
-                return (static::useShortVar($return)) ? sprintf('%s...)',
+                return (static::use_short_vars($return)) ? sprintf('%s...)',
                     substr($return, 0, 60)) : $return;
                 break;
             case is_object($v):
@@ -240,9 +243,4 @@ interface Output_Generator {
      * @return  string  
      */
     public static function variable($v);
-    
-    /**
-     * Outputs a test failure.
-     *
-     */
 }

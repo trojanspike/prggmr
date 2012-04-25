@@ -42,5 +42,9 @@ class Event extends \prggmr\Event {
     public function __call($func, $args)
     {
         $call = $this->_assertions->call_assertion($func, $args);
+
+        if (true === $call) {
+            $this->_output->assertion_pass($call);
+        }
     }
 }
