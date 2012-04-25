@@ -22,7 +22,7 @@ trait Singleton {
     final public static function instance(/* ... */)
     {
         if (null === static::$_instance) {
-            static::$_instance = new self();
+            static::$_instance = new self(func_get_args());
         }
 
         return self::$_instance;

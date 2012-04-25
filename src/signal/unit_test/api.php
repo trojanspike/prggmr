@@ -7,6 +7,12 @@ namespace prggmr\signal\unit_test\api;
  */
 
 /**
+ * API can be included to load the entire signal.
+ */
+
+use \prggmr\signal\unit_test as unit_test;
+
+/**
  * Add a new assertion function.
  * 
  * @param  closure  $function  Assertion function
@@ -16,5 +22,13 @@ namespace prggmr\signal\unit_test\api;
  * @return  void
  */
 function create_assertion($function, $name, $message = null) {
-    return Assertion::instance()->create_assertion($function, $name, $message);
+    return unit_test\Assertions::instance()->create_assertion($function, $name, $message);
+}
+
+/**
+ * Creates a new test case.
+ * 
+ */
+function test($function, $name = null) {
+    return \prggmr\handle($function, new unit_test\Test($name));
 }

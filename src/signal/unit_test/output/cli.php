@@ -1,30 +1,17 @@
 <?php
 namespace prggmr\signal\unit_test\output;
 /**
- *  Copyright 2010-12 Nickolas Whiting
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- *
- * @author  Nickolas Whiting  <prggmr@gmail.com>
- * @package  prggmrunit
- * @copyright  Copyright (c), 2010-12 Nickolas Whiting
+ * Copyright 2010-12 Nickolas Whiting. All rights reserved.
+ * Use of this source code is governed by the Apache 2 license
+ * that can be found in the LICENSE file.
  */
+
+use prggmr\signal\unit_test as unit_test;
 
 /**
  * Generates output for the command line.
  */
-class CLI extends unit\Output {
+class Cli {
     
     /**
      * Output using colors.
@@ -41,7 +28,7 @@ class CLI extends unit\Output {
     static public $verbosity = 1;
     
     /**
-     * Compiles the CLI output generator.
+     * Compiles the Cli output generator.
      *
      * Setup colors, our startup events, assertion printouts and end action.
      *
@@ -66,214 +53,94 @@ class CLI extends unit\Output {
      * 
      * @return  void
      */
-    public function assertion_pass($event, $assertion, $args) 
+    public function assertion_pass($test, $assertion, $args) 
     {           
-        switch (CLI::$verbosity) {
+        switch (Cli::$verbosity) {
             case 3:
-                CLI::send(sprintf(
+                Cli::send(sprintf(
                     '%s %s Passed with args %s',
-                    $test->getSubscription()->getIdentifier(),
-                    sprintf('%s\%s', $namespace, $assertion),
-                    \prggmrunit\Output::variable(array_slice($args, 1, count($args) - 1))
-                ), CLI::SYSTEM);
-                CLI::send(sprintf(
+                    $test->get_signal()->get_info(),
+                    $assertion,
+                    unit_test\Output::variable($args)
+                ), unit_test\Output::SYSTEM);
+                Cli::send(sprintf(
                     "%s--------------------------------------------%s",
                     PHP_EOL, PHP_EOL
-                ), CLI::SYSTEM);
+                ), unit_test\Output::SYSTEM);
 
                 break;
             case 2:
-                CLI::send(sprintf(
+                Cli::send(sprintf(
                     "%s Passed%s",
                     $assertion,
                     PHP_EOL
-                ), CLI::SYSTEM);
+                ), unit_test\Output::SYSTEM);
                 break;
             default:
             case 1:
-                CLI::send(".", CLI::SYSTEM);
+                Cli::send(".", Cli::SYSTEM);
                 break;
         }
     }
-        
-        // Assertion Fail
-        \prggmrunit::instance()->subscribe(
-            \prggmrunit\Events::TEST_ASSERTION_FAIL, function($test, $assertion, $args, $namespace, $test){
-                switch (CLI::$verbosity) {
-                    case 3:
-                        CLI::send(sprintf(
-                            '%s %s Failed with args %s',
-                            $test->getSubscription()->getIdentifier(),
-                            sprintf('%s\%s', $namespace, $assertion),
-                            \prggmrunit\Output::variable(array_slice($args, 1, count($args) - 1))
-                        ), CLI::ERROR);
-                        CLI::send(sprintf(
-                            "%s--------------------------------------------%s",
-                            PHP_EOL, PHP_EOL
-                        ), CLI::ERROR);
-
-                        break;
-                    case 2:
-                        CLI::send(sprintf(
-                            "%s Failed%s",
-                            $assertion,
-                            PHP_EOL
-                        ), CLI::ERROR);
-                        break;
-                    default:
-                    case 1:
-                        CLI::send("F", CLI::ERROR);
-                        break;
-                }
-        });
-        
-        // Assertion Skip
-        \prggmrunit::instance()->subscribe(
-            \prggmrunit\Events::TEST_ASSERTION_SKIP, function($test, $assertion, $args, $namespace, $test){
-                switch (CLI::$verbosity) {
-                    case 3:
-                        CLI::send(sprintf(
-                            '%s %s Skipped with args %s',
-                            $test->getSubscription()->getIdentifier(),
-                            sprintf('%s\%s', $namespace, $assertion),
-                            \prggmrunit\Output::variable(array_slice($args, 1, count($args) - 1))
-                        ), CLI::DEBUG);
-                        CLI::send(sprintf(
-                            "%s--------------------------------------------%s",
-                            PHP_EOL, PHP_EOL
-                        ), CLI::DEBUG);
-
-                        break;
-                    case 2:
-                        CLI::send(sprintf(
-                            "%s Skipped%s",
-                            $assertion,
-                            PHP_EOL
-                        ), CLI::DEBUG);
-                        break;
-                    default:
-                    case 1:
-                        CLI::send("S", CLI::DEBUG);
-                        break;
-                }
-        });
-        
-        /**
-         * Provide a line break every 60 assertions.
-         */
-         $break = 0;
-        \prggmrunit::instance()->subscribe(new \prggmr\ArrayContainsSignal(array(
-            \prggmrunit\Events::TEST_ASSERTION_PASS,
-            \prggmrunit\Events::TEST_ASSERTION_FAIL,
-            \prggmrunit\Events::TEST_ASSERTION_SKIP
-        )), function($event) use (&$break){
-                $break++;
-                if ($break == 60) {
-                    $break = 0;
-                    switch (static::$verbosity) {
-                        case 3:
-                        case 2:
-                            CLI::send("60 Assertions have ran", CLI::SYSTEM);
-                            CLI::send(PHP_EOL);
-                            break;
-                        case 1:
-                        default:
-                            CLI::send(" [ 60 ]", CLI::SYSTEM);
-                            CLI::send(PHP_EOL);
-                            break;
-                    }
-                }
-        });
-        
-        // Testing is finished
-        \prggmrunit::instance()->subscribe(\prggmrunit\Events::END, function($event, $engine){
-            
-            $results = $engine->getResults();
-            
-            if (0 != count($results->getMessages())) {
-                CLI::send(sprintf(
-                    "%s%s====================================================",
+     
+    public function assertion_fail($test, $assertion, $args)
+    {
+        switch (Cli::$verbosity) {
+            case 3:
+                Cli::send(sprintf(
+                    '%s %s Failed with args %s',
+                    $test->get_signal()->get_info(),
+                    $assertion,
+                    unit_test\Output::variable($args)
+                ), unit_test\Output::ERROR);
+                Cli::send(sprintf(
+                    "%s--------------------------------------------%s",
                     PHP_EOL, PHP_EOL
-                ), CLI::MESSAGE);
-                CLI::send(sprintf(
-                    "%sTesting Messages%s",
-                    PHP_EOL,
-                    PHP_EOL
-                ), CLI::MESSAGE);
-                foreach ($results->getMessages() as $_type => $_messages) {
-                    foreach ($_messages as $_message) {
-                        foreach ($_message as $_fail) {
-                            CLI::send(sprintf(
-                                "%s--------------------------------------------%s",
-                                PHP_EOL, PHP_EOL
-                            ), $_type);
-                            CLI::send(sprintf(
-                                "File : %s %s",
-                                $_fail['data'][0]['file'],
-                                PHP_EOL
-                            ), $_type);
-                            CLI::send(sprintf(
-                                "Line : %s%sMessage : %s%s%s",
-                                $_fail['data'][0]['line'],
-                                PHP_EOL,
-                                $_fail['message'],
-                                PHP_EOL, PHP_EOL
-                            ), $_type);
-                        }
-                    }
-                }
-            }
-            
-            $size = function($size) {
-                /**
-                 * This was authored by another individual
-                 */
-                $filesizename = array(
-                    " Bytes", " KB", " MB", " GB", 
-                    " TB", " PB", " EB", " ZB", " YB"
-                );
-                return $size ? round(
-                    $size/pow(1024, ($i = floor(log($size, 1024)))), 2
-                ) . $filesizename[$i] : '0 Bytes';
-            };
+                ), unit_test\Output::ERROR);
 
-            
-            CLI::send(sprintf(
-                "%s===================================================%s",
-                PHP_EOL, PHP_EOL
-            ), CLI::MESSAGE);
-            CLI::send(sprintf(
-                "%s tests %s suites - %s seconds - %s%s%s",
-                $results->getTestsTotal(),
-                $results->getSuitesTotal(),
-                $results->getRuntime(),
-                $size($results->getMemoryUsage(), 4),
-                PHP_EOL, PHP_EOL
-            ), CLI::MESSAGE);
-            if ($results->getFailedTests() != 0) {
-                CLI::send(sprintf(
-                    "FAIL (failures=%s, success=%s, skipped=%s)",
-                    $results->getFailedTests(), 
-                    $results->getPassedTests(), 
-                    $results->getSkippedTests()
-                ), CLI::ERROR);
-            } else {
-                CLI::send(sprintf(
-                    "PASS (success=%s, skipped=%s)",
-                    $results->getPassedTests(), 
-                    $results->getSkippedTests()
-                ), CLI::SYSTEM);
-            }
-            CLI::send(sprintf(
-                "%sAssertions (pass=%s, fail=%s, skip=%s)%s",
-                PHP_EOL, 
-                $results->getPassedAssertions(), 
-                $results->getFailedAssertions(), 
-                $results->getSkippedAssertions()
-                ,
-                PHP_EOL
-            ), CLI::MESSAGE);
-        }, "CLI Test Output");
+                break;
+            case 2:
+                Cli::send(sprintf(
+                    "%s Failed%s",
+                    $assertion,
+                    PHP_EOL
+                ), unit_test\Output::ERROR);
+                break;
+            default:
+            case 1:
+                Cli::send("F", Cli::ERROR);
+                break;
+        }
+    }
+    
+    public function assertion_skip($test, $assertion, $args) 
+    { 
+        switch (Cli::$verbosity) {
+            case 3:
+                Cli::send(sprintf(
+                    '%s %s Skipped with args %s',
+                    $test->get_signal()->get_info(),
+                    $assertion,
+                    unit_test\Output::variable($args)
+                ), unit_test\Output::DEBUG);
+                Cli::send(sprintf(
+                    "%s--------------------------------------------%s",
+                    PHP_EOL, PHP_EOL
+                ), unit_test\Output::DEBUG);
+
+                break;
+            case 2:
+                Cli::send(sprintf(
+                    "%s Skipped%s",
+                    $assertion,
+                    PHP_EOL
+                ), unit_test\Output::DEBUG);
+                break;
+            default:
+            case 1:
+                unit_test\Output::send("S", Cli::DEBUG);
+                break;
+        }
     }
     
     /**
@@ -289,7 +156,7 @@ class CLI extends unit\Output {
         $message = null;
         switch ($type) {
             default:
-            case unit\Output::MESSAGE:
+            case unit_test\Output::MESSAGE:
                 if (static::$_colors) {
                     $message .= "\033[1;34m";
                 }
@@ -300,7 +167,7 @@ class CLI extends unit\Output {
                     $message .= "\033[0m";
                 }
                 break;
-            case unit\Output::ERROR:
+            case unit_test\Output::ERROR:
                 if (static::$_colors) {
                     $message .= "\033[1;31m";
                 }
@@ -311,7 +178,7 @@ class CLI extends unit\Output {
                     $message .= "\033[0m";
                 }
                 break;
-            case unit\Output::DEBUG:
+            case unit_test\Output::DEBUG:
                 if (static::$_colors) {
                     $message .= "\033[1;33m";
                 }
@@ -322,7 +189,7 @@ class CLI extends unit\Output {
                     $message .= "\033[0m";
                 }
                 break;
-            case unit\Output::SYSTEM:
+            case unit_test\Output::SYSTEM:
                 if (static::$_colors) {
                     $message .= "\033[1;36m";
                 }

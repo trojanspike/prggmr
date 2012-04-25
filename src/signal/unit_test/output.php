@@ -69,7 +69,7 @@ class Output implements Output_Generator {
         if (null === $generator) {
             $generator = static::$_default;
         }
-        if (is_string($generator)) {
+        if (!is_object($generator)) {
             // first startup
             $file = sprintf(
                 '%s/output/%s.php',
@@ -87,7 +87,7 @@ class Output implements Output_Generator {
                     )
                 );
             }
-            static::$_generator = new \prggmrunit\Output\CLI();
+            static::$_generator = new \prggmr\signal\unit_test\output\Cli();
         } else {
             if ($generator instanceof Output_Generator) {
                 static::$_generator = $generator;

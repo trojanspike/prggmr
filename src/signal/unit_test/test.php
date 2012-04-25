@@ -20,7 +20,7 @@ namespace prggmr\signal\unit_test;
  *     etc ...
  * });
  */
-class Test extends prggmr\signal\Complex {
+class Test extends \prggmr\signal\Complex {
 
     /**
      * Constructs a new test signal.

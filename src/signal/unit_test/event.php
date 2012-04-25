@@ -24,6 +24,11 @@ class Event extends \prggmr\Event {
     protected $_assertion_results = [];
 
     /**
+     * Quick indication of a failure.
+     */
+    protected $_failed = false;
+
+    /**
      * Constructs a new event.
      */
     public function __construct(Assertions $assertions = null, Output $output = null) 
@@ -32,19 +37,41 @@ class Event extends \prggmr\Event {
             $this->_assertions = Assertions::instance();
         }
         if (null === $output) {
-            $this->_output = Output::instance();
+            $this->_output = Output::initalize();
         }
     }
 
     /**
      * Calls an assertion function.
+     * 
+     * @return  boolean  true
      */
     public function __call($func, $args)
     {
-        $call = $this->_assertions->call_assertion($func, $args);
-
-        if (true === $call) {
-            $this->_output->assertion_pass($call);
+        if ($this->failed()) {
+            echo "SKIPPED";
+            //$this->_output->assertion_skip($this, $func, $args);
+        } else {
+            $call = $this->_assertions->call_assertion($func, $args);
+            if (true === $call) {
+                echo "PASSED";
+                //$this->_output->assertion_pass($this, $func, $args);
+            } else {
+                $this->_failed = true;
+                echo "FAILED";
+                //$this->_output->assertion_fail($this, $func, $args);
+            }
         }
+        return true;
+    }
+
+    /**
+     * Checks if the test failed.
+     * 
+     * @return  boolean
+     */
+    public function failed()
+    {
+        return $this->_failed;
     }
 }

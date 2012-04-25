@@ -53,15 +53,18 @@ class Assertions {
      */
     public function call_assertion($name, $vars = null)
     {
-        if (!isset($this->_storage[$name]) {
+        if (!isset($this->_storage[$name])) {
             return self::UNKNOWN_ASSERTION;
+        }
+        if (!is_array($vars)) {
+            $vars = [$vars];
         }
         $test = call_user_func_array($this->_storage[$name][0], $vars);
         if ($test === true) {
             return true;
         }
         if (null !== $this->_storage[$name][1]) {
-            return call_user_func_array('sprintf', $this->_storage[$name][1]);
+            return sprintf($this->_storage[$name][1], $vars);
         }
         return false;
     }
