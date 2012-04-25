@@ -160,7 +160,7 @@ class Engine {
      */
     public function __construct()
     {
-        $this->set_state(STATE_DECLARED);
+        $this->flush();
         if (ENGINE_EXCEPTIONS) {
             if (!class_exists('\prggmr\signal\integer\Range', false)){
                 require_once 'signal/integer/range.php';
@@ -177,7 +177,6 @@ class Engine {
                 throw new EngineException($message, $type, $args);
             }, new \prggmr\signal\integer\Range(0xE002, 0xE014), 0, null);
         }
-        $this->flush();
     }
 
     /**
@@ -268,7 +267,7 @@ class Engine {
                                     if (null !== $_node[0]->event()) {
                                         $_node[2] = $_node[0]->event();
                                         // destroy reference
-                                        $_node[0]->event(false); 
+                                        $this->_storage[self::COMPLEX_STORAGE][$_key][0]->event(false);
                                     } else {
                                         $_node[2] = new Event();
                                     }
@@ -298,7 +297,7 @@ class Engine {
     }
 
     /**
-     * Determines if the given signal queue in the routine has exhausted.
+     * Determines if the given signal queue has exhausted during routine calculation.
      * 
      * @param  string|integer|object  $queue
      * 
@@ -308,11 +307,12 @@ class Engine {
     {
         if (!$queue instanceof Queue) {
             $queue = $this->signal_queue($queue, false);
-            if (false === $queue) return false;
+            if (false === $queue || $queue[0] === self::QUEUE_NEW) return false;
+            $queue = $queue[1];
         }
         if (true === $this->queue_exhausted($queue)) {
             $this->signal(esig::EXHAUSTED_QUEUE_SIGNALED, array(
-                $this->current()[1], $this->current()[0]
+                $queue
             ));
             return true;
         }
@@ -580,7 +580,7 @@ class Engine {
      * 
      * @return  object  \prggmr\Event
      */
-    private function _event($signal, &$event = null)
+    private function _event($signal, $event = null)
     {
         // event creation
         if (!$event instanceof Event) {
@@ -641,7 +641,7 @@ class Engine {
      *
      * @return  object  Event
      */
-    public function signal($signal, $vars = null, &$event = null)
+    public function signal($signal, $vars = null, $event = null)
     {
         // check variables
         if (null !== $vars) {
@@ -696,7 +696,7 @@ class Engine {
      *
      * @return  object  Event
      */
-    protected function _execute($signal, &$queue, &$event, &$vars)
+    protected function _execute($signal, $queue, $event, $vars)
     {
         // execute sig handlers
         $queue->sort(true);

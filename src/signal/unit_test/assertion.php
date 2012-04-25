@@ -64,7 +64,7 @@ class Assertions {
             return true;
         }
         if (null !== $this->_storage[$name][1]) {
-            return sprintf($this->_storage[$name][1], $vars);
+            //return sprintf($this->_storage[$name][1], $vars);
         }
         return false;
     }

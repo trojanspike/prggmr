@@ -1,8 +1,8 @@
 <?php
 
-prggmr\interval(function(){
-    echo "1 second passed";
-}, 1000);
+// prggmr\interval(function(){
+//     echo "1 second passed";
+// }, 1000);
 
 // prggmr\timeout(function(){
 //     echo "Shutting down the engine";
@@ -28,21 +28,21 @@ prggmr\interval(function(){
 //     }
 // }, 1000);
 
-// prggmr\handle(function(){
-//     $this->a = 1;
-// }, "test", 0);
+prggmr\handle(function(){
+    $this->a = 1;
+}, "test", 0);
 
-// prggmr\handle(function(){
-//     var_dump($this->a);
-// }, "test", 1);
+prggmr\handle(function(){
+    var_dump($this->a);
+}, "test", 1);
 
-// prggmr\handle(function(){
-//     var_dump(isset($this->a));
-// }, "test2");
+prggmr\handle(function(){
+    var_dump(isset($this->a));
+}, "test2");
 
-// $event = new prggmr\Event();
-// prggmr\signal('test', null, $event);
-// prggmr\signal('test2', null, $event);
+$event = new prggmr\Event();
+prggmr\signal('test', null, $event);
+prggmr\signal('test2', null, $event);
 
-// // prggmr\signal('test');
-// // prggmr\signal('test2');
+// prggmr\signal('test');
+// prggmr\signal('test2');
