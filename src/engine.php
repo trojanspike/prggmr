@@ -771,6 +771,34 @@ class Engine {
     {
         if (!ENGINE_EVENT_HISTORY) return false;
     }
+
+    /**
+     * Loads a complex signal library.
+     * 
+     * @param  string  $name  Signal library name.
+     * @param  string|null  $dir  Location of the library. 
+     * 
+     * @return  void
+     */
+    public function load_signal($name, $dir = null) 
+    {
+        if ($dir === null) {
+            $dir = dirname(realpath(__FILE__)).'/signal';
+        } else {
+            if (!is_dir($dir)) {
+                $this->signal(esig::INVALID_SIGNAL_DIRECTORY, $dir);
+            }
+        }
+
+        if (is_dir($dir.'/'.$name)) {
+            $path = $dir.'/'.$name;
+            if (file_exists($path.'/__autoload.php')) {
+                require_once $path.'/__autoload.php';
+            } else {
+                $this->signal(esig::SIGNAL_LOAD_FAILURE, [$name, $dir]);
+            }
+        }
+    }
 }
 
 class EngineException extends \Exception {

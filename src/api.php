@@ -156,3 +156,16 @@ function prggmr_shutdown()
 {
     return \prggmr::instance()->shutdown();
 }
+
+/**
+ * Load a signal library.
+ * 
+ * @param  string  $name  Signal library name.
+ * @param  string|null  $dir  Location of the library. 
+ * 
+ * @return  void
+ */
+function load_signal($name, $dir = null) 
+{
+    return \prggmr::instance()->load_signal($name, $dir);
+}

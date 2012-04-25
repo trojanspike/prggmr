@@ -1,5 +1,5 @@
 <?php
-require '../../src/signal/unit_test/__autoload.php';
+prggmr\load_signal('unit_test');
 
 prggmr\signal\unit_test\api\test(function(){
     $this->true(true);

@@ -50,6 +50,14 @@ class Signals {
      */
     const INFINITE_RECURSION_LOOP = 0xE007;
     /**
+     * Invalid signal load directory
+     */
+    const INVALID_SIGNAL_DIRECTORY = 0xE008;
+    /**
+     * Signal library cannot load
+     */
+    const SIGNAL_LOAD_FAILURE = 0xE009;
+    /**
      * Engine loop startup
      */
     const LOOP_START = 0xE015;
@@ -57,7 +65,7 @@ class Signals {
      * Engine loop shutdown.
      */
     const LOOP_SHUTDOWN = 0xE016;
-        /**
+    /**
      * Exhausted queue signaled to trigger.
      */
     const EXHAUSTED_QUEUE_SIGNALED = 0xE017;

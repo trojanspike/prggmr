@@ -137,8 +137,12 @@ function engine_code($code)
         case \prggmr\engine\Signals::INVALID_HANDLE_DIRECTORY:
             return "Invalid handle loading directory";
             break;
-        default:
-            return null;
+        case \prggmr\engine\Signals::INVALID_SIGNAL_DIRECTORY:
+            return "Invalid signal loading directory";
+            break;
+        case \prggmr\engine\Signals::SIGNAL_LOAD_FAILURE:
+            return "Signal library __autoload could not be found";
+            break;
         break;
     }
 }
