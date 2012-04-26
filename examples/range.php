@@ -1,11 +1,11 @@
 <?php
-require_once '../src/signal/integer/range.php';
+prggmr\load_signal('integer');
 
-handle(function($name){
+prggmr\handle(function($name){
     echo "Hello $name";
-}, new \prggmr\signal\integer\Range(0, 100));
+}, new prggmr\signal\integer\Range(0, 100));
 
-signal(57);
+prggmr\signal(57);
 
 // $array = [0, 1, 2, 3];
 // var_dump($array);

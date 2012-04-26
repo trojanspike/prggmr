@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * This demonstrates prggmr's ability to perform CPE using the example 
+ * taking from Wikipedia of a wedding taking place.
+ */
 class Wedding extends \prggmr\signal\Complex {
 
     protected $_signals = array(
@@ -45,46 +48,44 @@ class Wedding extends \prggmr\signal\Complex {
 
 // signal handlers
 
-// wedding
-handle(function(){
+// When the wedding takes places
+prggmr\handle(function(){
     echo "A wedding is taking place!".PHP_EOL;
-    timeout(function(){
-        signal('wedding_over');
+    // A little later the wedding ends
+    prggmr\timeout(function(){
+        prggmr\signal('wedding_over');
     }, 10000);
 }, new Wedding());
 
-// man
-handle(function(){
+// When the man arrives
+prggmr\handle(function(){
     echo "The man has arrived".PHP_EOL;
 }, 'man');
 
-// woman
-handle(function(){
+// When the woman arrives
+prggmr\handle(function(){
     echo "The woman has arrived".PHP_EOL;
 }, 'woman');
 
-// wedding bells
-handle(function(){
+// When the bells ring
+prggmr\handle(function(){
     echo "Wedding bells Ringing".PHP_EOL;
 }, "bells");
 
-// wedding over
-handle(function(){
+// When the wedding is over
+prggmr\handle(function(){
     echo "The wedding is over".PHP_EOL;
 }, 'wedding_over');
 
 // man arrives late because of second thoughts
-timeout(function(){
-    signal('man');
+prggmr\timeout(function(){
+    prggmr\signal('man');
 }, 5000);
 
-timeout(function(){
-    signal('bells');
+// couple seconds after he arrives the bells start ringing
+prggmr\timeout(function(){
+    prggmr\signal('bells');
 }, 10000);
 
-// man is ready first
-signal('woman');
-
-prggmr_loop();
-
-var_dump(event_history());
+// Woman is ready first
+prggmr\signal('woman');

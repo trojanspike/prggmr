@@ -56,7 +56,6 @@ class Handle {
      */
     protected $_params = null;
 
-
     /**
      * Constructs a new handle object.
      *
@@ -84,40 +83,16 @@ class Handle {
     }
 
     /**
-     * Invoke the handle, since PHP disallows passing by reference this throws
-     * a BadMethodCallException.
+     * Invoke the handle.
+     * 
+     * @param  array|mixed  $params  Additional parameters to pass.
      *
-     * @throws  BadMethodCallException
-     *
-     * @return  boolean|void
+     * @return  mixed
      */
-    public function __invoke() 
-    {
-        throw new \BadMethodCallException(
-            'Handles cannot be invoked, use of execute method required.'
-        );
-    }
-
-    /**
-     * Executes this handles function.
-     * Allowing for the first parameter as an array of parameters or
-     * by passing them directly.
-     *
-     * @param  array  $params  Array of parameters to pass.
-     *
-     * @throws  RuntimeException  If an exception is encountered during execution.
-     *
-     * @return  mixed  Results of handle execution.
-     */
-    public function execute(&$params = null)
+    public function __invoke($params = null) 
     {
         # test for exhaustion
         if ($this->is_exhausted()) return true;
-        
-        # Increase execution count
-        if (null !== $this->_exhaustion) {
-            $this->_exhaustion;
-        }
 
         # force array
         if (null === $params) {
@@ -127,7 +102,7 @@ class Handle {
         }
         
         if (null !== $this->_params) {
-            $params = array_merge($params, $this->_params);
+            $params += array_merge($params, $this->_params);
         }
 
         if (null !== $this->_exhaustion) {

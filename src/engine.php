@@ -484,7 +484,7 @@ class Engine {
                 $directory, $signal
             ));
         }
-        if (!is_string() || !is_int($signal)) {
+        if (!is_string($signal) && !is_int($signal)) {
             $this->signal(esig::INVALID_SIGNAL, array($signal));
             return false;
         }
@@ -494,7 +494,7 @@ class Engine {
             $priority = PHP_INT_MAX;
         }
         $engine = $this;
-        $handle = $this->handle(function() use ($directory, $signal, $engine) {
+        $handle = $this->handle(function() use ($directory, $engine) {
             $dir = new \RegexIterator(
                 new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($directory)
@@ -717,7 +717,7 @@ class Engine {
             // set event as running
             $event->set_state(STATE_RUNNING);
             if (ENGINE_EXCEPTIONS) {
-                $result = $handle->execute($vars);
+                $result = $handle($vars);
             } else {
                 try {
                     $result = $handle->execute($vars);

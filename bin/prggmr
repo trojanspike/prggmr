@@ -101,4 +101,4 @@ if (!file_exists($runfile)) {
 }
 
 // start the loop!!
-prggmr\prggmr_loop($ttr);
+prggmr\loop($ttr);

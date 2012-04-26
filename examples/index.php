@@ -1,10 +1,21 @@
 <?php
-
 require '../src/prggmr.php';
-require '../src/signal/http/request.php';
+/**
+ * This must run directly in your browser!
+ * 
+ * Use the php built server:
+ * php -S 127.0.0.1:5000 index.php
+ */
+prggmr\load_signal('http');
 
-prggmr\signal\http\handle_request(function(){
+use prggmr\signal\http\api as http;
+
+http\uri_request(function(){
     echo "Hello World";
 }, "/");
+
+http\uri_request(function($name){
+    echo "Hello $name";
+}, "/user/:name");
 
 prggmr\prggmr_loop();

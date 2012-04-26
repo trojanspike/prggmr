@@ -9,3 +9,4 @@ $dir = dirname(realpath(__FILE__));
 
 require_once $dir.'/event.php';
 require_once $dir.'/uri.php';
+require_once $dir.'/api.php';

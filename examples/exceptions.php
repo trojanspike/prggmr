@@ -1,32 +1,20 @@
 <?php
 
-require '../src/signal/query.php';
 // INVALID_HANDLE
-//handle('a', 'b');
+prggmr\handle('a', 'b');
 
 // HANDLE_EXCEPTION
-// handle(function(){
-//     throw new Exception('test');
-// }, 'error');
-// signal('error');
+prggmr\handle(function(){
+    throw new Exception('test');
+}, 'error');
+
+prggmr\signal('error');
 
 // INVALID_SIGNAL
-//signal(array());
+prggmr\signal(array());
 
 // INVALID_EVENT
-//signal(array(), null, $str = 'asd');
+prggmr\signal(array(), null, $str = 'asd');
 
 // INVALID_HANDLE_DIRECTORY
-//handle_loader('a', '/asjhfasf');
-
-handle(function(){
-        echo "HelloWorld_1";
-    }, "helloworld");
-
-    handle(function(){
-        echo "HelloWorld_2";
-    }, "helloworld", null, null);
-
-    while(true) {
-        signal('helloworld');
-    }
+prggmr\handle_loader('a', '/asjhfasf');

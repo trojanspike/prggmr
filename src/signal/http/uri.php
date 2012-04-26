@@ -6,15 +6,21 @@ namespace prggmr\signal\http;
  * that can be found in the LICENSE file.
  */
  
- /**
-  * Base URI used to remove any unwanted bytes such as index.php from the 
-  * URI.
-  */
- if (!defined('BASE_URI')) {
-    define('BASE_URI', '');
- }
+/**
+ * Base URI used to remove any unwanted bytes such as index.php from the 
+ * URI.
+ */
+if (!defined('BASE_URI')) {
+  define('BASE_URI', '');
+}
 
- require_once 'event.php';
+/**
+ * Request URI to use with routing
+ */
+if (!defined('REQUEST_URI')) {
+  define('REQUEST_URI', $_SERVER['REQUEST_URI']);
+}
+
 
  /**
   * Signal HTTP Request URI's to a handle.
@@ -24,24 +30,23 @@ namespace prggmr\signal\http;
   * The $_SERVER['REQUEST_URI'] and $_SERVER['REQUEST_METHOD'] are used
   * for checking the signal.
   */
-class URI extends \prggmr\signal\Complex {
+class Uri extends \prggmr\signal\Complex {
 
     /**
      * Configures a new URI signal.
      * 
-     * @param  string  $url  URI of request to handle.
+     * @param  string  $uri  URI of request to handle.
      * @param  string|array  $method  Type of request to handle.
      * @param  array  $vars  Additional variables to pass the handle.
      * @param  object  $event  prggmr\signal\http\Event object
-     * @param  string  $uri  REQUEST_URI to use. Defaults to _SERVER given.
      */
-    public function __construct($url, $method = null, $vars = null, $event = null, $uri = null) 
+    public function __construct($uri, $method = null, $vars = null, $event = null) 
     {
         if (null !== $event && $event instanceof Event) {
             $this->_event = $event;
         }
         if (null === $uri) {
-            $uri = $_SERVER['REQUEST_URI'];
+            $uri = REQUEST_URI;
         }
         if (null === $method) {
             $method = ['GET', 'POST'];

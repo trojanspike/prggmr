@@ -142,7 +142,7 @@ function timeout($function, $timeout, $vars = null, $priority = QUEUE_DEFAULT_PR
  *
  * @return  void
  */
-function prggmr_loop($ttr = null)
+function loop($ttr = null)
 {
     return \prggmr::instance()->loop($ttr);
 }
@@ -152,7 +152,7 @@ function prggmr_loop($ttr = null)
  *
  * @return  void
  */
-function prggmr_shutdown()
+function shutdown()
 {
     return \prggmr::instance()->shutdown();
 }

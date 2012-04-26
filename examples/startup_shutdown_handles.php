@@ -1,13 +1,13 @@
 <?php
 
-handle(function(){
+prggmr\handle(function(){
     echo "The engine is shutting down!";
 }, \prggmr\engine\Signals::LOOP_SHUTDOWN);
 
-handle(function(){
+prggmr\handle(function(){
     echo "The loop is starting";
 }, \prggmr\engine\Signals::LOOP_START);
 
-timeout(function(){
-    echo "1 second just passed";
+prggmr\timeout(function(){
+    echo "Delaying a second";
 }, 1000);
