@@ -45,18 +45,15 @@ class Uri extends \prggmr\signal\Complex {
         if (null !== $event && $event instanceof Event) {
             $this->_event = $event;
         }
-        if (null === $uri) {
-            $uri = REQUEST_URI;
-        }
         if (null === $method) {
             $method = ['GET', 'POST'];
         } elseif (!is_array($method)) {
             $method = [$method];
         }
         $this->_info = [
-            '#'.preg_replace('#:([\w]+)#i', '(?P<$1>[\w\-_+]+)', $url)."$#i",
+            '#'.preg_replace('#:([\w]+)#i', '(?P<$1>[\w\-_+]+)', $uri)."$#i",
             $method,
-            str_replace(BASE_URI, '', $uri)
+            str_replace(BASE_URI, '', REQUEST_URI)
         ];
     }
 
