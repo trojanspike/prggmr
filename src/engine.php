@@ -123,7 +123,7 @@ class Engine {
      * 
      * @var  array
      */
-    protected $_event_history = array();
+    protected $_event_history = [];
 
     /**
      * Current event in execution
@@ -144,14 +144,19 @@ class Engine {
      * 
      * @var  array
      */
-    protected $_event_children = array();
+    protected $_event_children = [];
 
     /**
      * Routine data.
      * 
      * @var  array
      */
-    private $_routines = array();
+    private $_routines = [];
+
+    /**
+     * Libraries loaded
+     */
+    protected $_libraries = [];
 
     /**
      * Starts the engine.
@@ -782,6 +787,8 @@ class Engine {
      */
     public function load_signal($name, $dir = null) 
     {
+        // already loaded
+        if (isset($this->_libraries[$name])) return true;
         if ($dir === null) {
             $dir = dirname(realpath(__FILE__)).'/signal';
         } else {
@@ -793,6 +800,8 @@ class Engine {
         if (is_dir($dir.'/'.$name)) {
             $path = $dir.'/'.$name;
             if (file_exists($path.'/__autoload.php')) {
+                // keep history of what has been loaded
+                $this->_libraries[$name] = true;
                 require_once $path.'/__autoload.php';
             } else {
                 $this->signal(esig::SIGNAL_LOAD_FAILURE, [$name, $dir]);

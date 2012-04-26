@@ -3,15 +3,11 @@ prggmr\load_signal('unit_test');
 
 prggmr\signal\unit_test\api\test(function(){
     $this->true(true);
-    $this->true(false);
     $this->true(true);
     $this->true(true);
     $this->true(true);
     $this->true(true);
-});
-
-prggmr\signal\unit_test\api\test(function(){
-    $this->object(new \stdClass());
+    $this->true(true);
 });
 
 prggmr\handle(function(){
@@ -21,5 +17,7 @@ prggmr\handle(function(){
             $tests++;
         }
     }
+    echo PHP_EOL;
     echo "Ran $tests tests";
+    echo PHP_EOL;
 }, prggmr\engine\Signals::LOOP_SHUTDOWN);

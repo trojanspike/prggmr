@@ -11,6 +11,7 @@ Current options:
   -h/--help     Show this help message.
   -p/--passthru Pass the given arguments to the script
   -t/--time     Length of time to run in milliseconds.
+  -u/--unit     Load the unit testing signal library.
   -v/--version  Displays current prggmr version.
 ";
 
@@ -25,11 +26,12 @@ $runfile = $argv[$argc - 1];
 $options = getopt(
     'qwert:yuiopasdfghjklzxc:vbnm',
     array(
-        'help', 'config:', 'version', 'time:'
+        'help', 'config:', 'version', 'time:', 'unit'
     )
 );
 
 $tmp = $argv;
+$unittesting = false;
 // parse args and check for options
 foreach ($options as $_i => $_arg) {
     // Hack
@@ -61,6 +63,10 @@ foreach ($options as $_i => $_arg) {
         case 'd':
             define('PRGGMR_DEV_MODE', true);
             break;
+        case 'u':
+        case 'unit':
+            $unittest = true;
+            break;
         default:
             exit(sprintf(
                 "Unknown option '%s'\n%s",
@@ -83,6 +89,10 @@ if (!class_exists('prggmr')) {
 
 if (isset($showversion)) exit('prggmr version '.PRGGMR_VERSION."
 ");
+
+if (isset($unittest)) {
+    prggmr\load_signal('unit_test');
+}
 
 if (!file_exists($runfile)) {
     die("Could not open $runfile\n");

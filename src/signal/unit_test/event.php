@@ -37,7 +37,7 @@ class Event extends \prggmr\Event {
             $this->_assertions = Assertions::instance();
         }
         if (null === $output) {
-            $this->_output = Output::initalize();
+            $this->_output = Output::instance();
         }
     }
 
@@ -49,17 +49,14 @@ class Event extends \prggmr\Event {
     public function __call($func, $args)
     {
         if ($this->failed()) {
-            echo "SKIPPED";
-            //$this->_output->assertion_skip($this, $func, $args);
+            $this->_output->assertion_skip($this, $func, $args);
         } else {
             $call = $this->_assertions->call_assertion($func, $args);
             if (true === $call) {
-                echo "PASSED";
-                //$this->_output->assertion_pass($this, $func, $args);
+                $this->_output->assertion_pass($this, $func, $args);
             } else {
                 $this->_failed = true;
-                echo "FAILED";
-                //$this->_output->assertion_fail($this, $func, $args);
+                $this->_output->assertion_fail($this, $func, $args);
             }
         }
         return true;

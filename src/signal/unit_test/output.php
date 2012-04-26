@@ -5,48 +5,44 @@ namespace prggmr\signal\unit_test;
  * Use of this source code is governed by the Apache 2 license
  * that can be found in the LICENSE file.
  */
+
+/**
+ * Output colors
+ */
+if (!defined('OUTPUT_COLORS')) {
+    define('OUTPUT_COLORS', true);
+}
+
+/**
+ * Maximum depth to transverse a tree or object while outputing.
+ */
+if (!defined('MAX_DEPTH')) {
+    define('MAX_DEPTH', 2);
+}
+
+/**
+ * Use shorterned variables within the output
+ */
+if (!defined('SHORT_VARS')) {
+    define('SHORT_VARS', true);
+}
+
+/**
+ * Level of verbosity for output
+ */
+if (!defined('VERBOSITY_LEVEL')) {
+    define('VERBOSITY_LEVEL', 1);
+}
+
 /**
  * Generates output for a unit test.
  *
  * The object itself is only an interface to call a generator object,
  * the default is CLI.
  */
-class Output implements Output_Generator {
-    
-    /**
-     * Output generator
-     *
-     * @var  object
-     */
-    protected static $_generator = null;
-    
-    /**
-     * Default generator used.
-     *
-     * @var string
-     */
-    protected static $_default = 'cli';
-    
-    /**
-     * Flag to use output buffering.
-     *
-     * @var  boolean
-     */
-    protected static $_outputbuffer = false;
-    
-    /**
-     * Output short version of variables.
-     *
-     * @var  boolean
-     */
-    protected static $_shortvars = true;
-    
-    /**
-     * Maximum transverse depth.
-     *
-     * @var  int
-     */
-    protected static $_maxdepth = 2;
+class Output {
+
+    use \prggmr\Singleton;
     
     /**
      * Output message types.
@@ -57,52 +53,167 @@ class Output implements Output_Generator {
     const SYSTEM  = 0xF03;
     
     /**
-     * Initalizes output.
-     *
-     * @param  string  $generator  Output generation object
-     * @param  boolean  $buffer  use output buffer
-     *
-     * @return   void
+     * Outputs an assertion pass
+     * 
+     * @param  object  $event  Test event object
+     * @param  string  $assertion  Name of the assertion
+     * @param  array|null  $args  Array of arguments used during test
+     * 
+     * @return  void
      */
-    public static function initalize(Output_Generator $generator = null)
+    public function assertion_pass($test, $assertion, $args) 
+    {           
+        switch (VERBOSITY_LEVEL) {
+            case 3:
+               $this->send(sprintf(
+                    '%s %s Passed with args %s',
+                    $test->get_signal()->get_info(),
+                    $assertion,
+                    $this->variable($args)
+                ), self::SYSTEM);
+               $this->send(sprintf(
+                    "%s--------------------------------------------%s",
+                    PHP_EOL, PHP_EOL
+                ), self::SYSTEM);
+
+                break;
+            case 2:
+               $this->send(sprintf(
+                    "%s Passed%s",
+                    $assertion,
+                    PHP_EOL
+                ), self::SYSTEM);
+                break;
+            default:
+            case 1:
+                $this->send(".", self::SYSTEM);
+                break;
+        }
+    }
+     
+    public function assertion_fail($test, $assertion, $args)
     {
-        if (null === $generator) {
-            $generator = static::$_default;
+        switch (VERBOSITY_LEVEL) {
+            case 3:
+                $this->send(sprintf(
+                    '%s %s Failed with args %s',
+                    $test->get_signal()->get_info(),
+                    $assertion,
+                    $this->variable($args)
+                ), self::ERROR);
+                $this->send(sprintf(
+                    "%s--------------------------------------------%s",
+                    PHP_EOL, PHP_EOL
+                ), self::ERROR);
+
+                break;
+            case 2:
+                $this->send(sprintf(
+                    "%s Failed%s",
+                    $assertion,
+                    PHP_EOL
+                ), self::ERROR);
+                break;
+            default:
+            case 1:
+                $this->send("F", self::ERROR);
+                break;
         }
-        if (!is_object($generator)) {
-            // first startup
-            $file = sprintf(
-                '%s/output/%s.php',
-                dirname(realpath(__FILE__)),
-                $generator
-            );
-            // attempt to load
-            if (file_exists($file)) {
-                require_once $file;
-            } else {
-                throw new \RuntimeException(
-                    sprintf(
-                        'Could not load output generator %s',
-                        $generator
-                    )
+    }
+    
+    public function assertion_skip($test, $assertion, $args) 
+    { 
+        switch (VERBOSITY_LEVEL) {
+            case 3:
+                $this->send(sprintf(
+                    '%s %s Skipped with args %s',
+                    $test->get_signal()->get_info(),
+                    $assertion,
+                    $this->variable($args)
+                ), self::DEBUG);
+                $this->send(sprintf(
+                    "%s--------------------------------------------%s",
+                    PHP_EOL, PHP_EOL
+                ), self::DEBUG);
+                break;
+            case 2:
+               $this->send(sprintf(
+                    "%s Skipped%s",
+                    $assertion,
+                    PHP_EOL
+                ), self::DEBUG);
+                break;
+            default:
+            case 1:
+                $this->send("S", self::DEBUG);
+                break;
+        }
+    }
+    
+    /**
+     * Sends a string to output.
+     *
+     * @param  string  $string  Message to output
+     * @param  string  $type  Type of message
+     * @param  boolean  $newline  Output line after string.
+     *
+     * @return  void
+     */
+    public static function send($string, $type = null, $newline = false)
+    {
+        $message = null;
+        if (null === $type) {
+            $type = self::MESSAGE;
+        }
+        switch ($type) {
+            default:
+            case self::MESSAGE:
+                if (OUTPUT_COLORS) {
+                    $message .= "\033[1;34m";
+                }
+                $message .= sprintf("%s",
+                    $string
                 );
-            }
-            static::$_generator = new \prggmr\signal\unit_test\output\Cli();
-        } else {
-            if ($generator instanceof Output_Generator) {
-                static::$_generator = $generator;
-            }
+                if (OUTPUT_COLORS) {
+                    $message .= "\033[0m";
+                }
+                break;
+            case self::ERROR:
+                if (OUTPUT_COLORS) {
+                    $message .= "\033[1;31m";
+                }
+                $message .= sprintf("%s",
+                    $string
+                );
+                if (OUTPUT_COLORS) {
+                    $message .= "\033[0m";
+                }
+                break;
+            case self::DEBUG:
+                if (OUTPUT_COLORS) {
+                    $message .= "\033[1;33m";
+                }
+                $message .= sprintf("%s",
+                    $string
+                );
+                if (OUTPUT_COLORS) {
+                    $message .= "\033[0m";
+                }
+                break;
+            case self::SYSTEM:
+                if (OUTPUT_COLORS) {
+                    $message .= "\033[1;36m";
+                }
+                $message .= sprintf("%s",
+                    $string
+                );
+                if (OUTPUT_COLORS) {
+                    $message .= "\033[0m";
+                }
+                break;
         }
-        
-        // check for shortvars
-        if (defined('PRGGMR_UNIT_TEST_SHORTVARS')) {
-            static::$_shortvars = PRGGMR_UNIT_TEST_SHORTVARS;   
-        }
-        
-        // check for transverse depth
-        if (defined('PRGGMR_UNIT_TEST_MAXVARDEPTH')) {
-            static::$_maxdepth = PRGGMR_UNIT_TEST_MAXVARDEPTH;   
-        }
+        print($message);
+        if ($newline) print PHP_EOL;
     }
     
     /**
@@ -112,29 +223,10 @@ class Output implements Output_Generator {
      *
      * @return  boolean
      */
-    public static function use_short_vars($str = null)
+    public function use_short_vars($str = null)
     {
-        return (null === $str) ? static::$_shortvars :
-                (static::$_shortvars && is_string($str) && strlen($str) >= 60);
-    }
-    
-    /**
-     * Sends a string to output.
-     *
-     * @param  string  $string
-     * @param  string  $type  
-     *
-     * @return  void
-     */
-    public static function send($string, $type = null)
-    {
-        if (null === static::$_generator) {
-            static::initalize();
-        }
-        if (null === $type) {
-            $type = Output::MESSAGE;
-        }
-        static::$_generator->send($string, $type);
+        return (null === $str) ? SHORT_VARS :
+                (SHORT_VARS && is_string($str) && strlen($str) >= 60);
     }
     
     /**
@@ -148,7 +240,7 @@ class Output implements Output_Generator {
      *
      * @return  string  
      */
-    public static function variable($v, &$depth = 0)
+    public function variable($v, &$depth = 0)
     {
         switch ($v) {
             case is_bool($v):
@@ -173,21 +265,21 @@ class Output implements Output_Generator {
                 break;
             case is_string($v):
                 return sprintf('string(%s)',
-                    (static::use_short_vars($v)) ? substr($v, 0, 60) : $v
+                    ($this->use_short_vars($v)) ? substr($v, 0, 60) : $v
                 );
                 break;
             case is_array($v):
                 $r = array();
                 foreach ($v as $_key => $_var) {
-                    if ($depth >= static::$_maxdepth) break;
+                    if ($depth >= $this->_maxdepth) break;
                     $depth++;
                     $r[] = sprintf('[%s] => %s',
                         $_key,
-                        static::variable($_var, $depth)
+                        $this->variable($_var, $depth)
                     );
                 }
                 $return = sprintf('array(%s)', implode(", ", $r));
-                return (static::use_short_vars($return)) ? sprintf('%s...)',
+                return ($this->use_short_vars($return)) ? sprintf('%s...)',
                     substr($return, 0, 60)) : $return;
                 break;
             case is_object($v):
@@ -206,7 +298,7 @@ class Output implements Output_Generator {
      *
      * @return  void
      */
-    public static function backtrace($backtrace)
+    public function backtrace($backtrace)
     {
         $endtrace = '';
         for($a=0;$a!=count($backtrace);$a++) {
@@ -219,28 +311,6 @@ class Output implements Output_Generator {
                 );
             }
         }
-        static::send($endtrace, static::ERROR);
+        $this->send($endtrace, static::ERROR);
     }
-}
-
-/**
- * Output Generator
- */
-interface Output_Generator {
-
-    /**
-     * Sends a string to output.
-     *
-     * @param  string  $string
-     */
-    public static function send($string, $type = null);
-    
-    /**
-     * Generates readable PHP vars.
-     *
-     * @param  mixed  $var
-     *
-     * @return  string  
-     */
-    public static function variable($v);
 }

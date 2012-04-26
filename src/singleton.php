@@ -18,6 +18,8 @@ trait Singleton {
 
     /**
      * Returns an instance of the singleton.
+     * 
+     * Passes args to constructor
      */
     final public static function instance(/* ... */)
     {
