@@ -720,7 +720,7 @@ class Engine {
                 $result = $handle($vars);
             } else {
                 try {
-                    $result = $handle->execute($vars);
+                    $result = $handle($vars);
                 } catch (\Exception $exception) {
                     $event->set_state(STATE_ERROR);
                     $handle->set_state(STATE_ERROR);
