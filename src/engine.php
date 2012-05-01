@@ -196,7 +196,7 @@ class Engine {
         if (null !== $ttr) {
             $this->handle(function($engine){
                 $engine->shutdown();
-            }, new \prggmr\signal\Time($ttr, $this));
+            }, new \prggmr\signal\time\Timeout($ttr, $this));
         }
         $this->signal(esig::LOOP_START);
         while($this->_routines()) {

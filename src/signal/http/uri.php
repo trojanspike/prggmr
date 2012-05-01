@@ -50,6 +50,12 @@ class Uri extends \prggmr\signal\Complex {
         } elseif (!is_array($method)) {
             $method = [$method];
         }
+        if (null !== $vars) {
+            if (!is_array($vars)) {
+                $vars = [$vars];
+            }
+            $this->_vars = $vars;
+        }
         $this->_info = [
             '#'.preg_replace('#:([\w]+)#i', '(?P<$1>[\w\-_+]+)', $uri)."$#i",
             $method,
@@ -70,7 +76,7 @@ class Uri extends \prggmr\signal\Complex {
                         unset($matches[$_k]);
                     }
                 }
-                $this->_vars = array_merge((array) $this->_vars, $matches);
+                $this->_vars = array_merge($this->_vars, $matches);
             }
             if (null === $this->_event) {
                 $this->_event = new Event();
