@@ -59,7 +59,7 @@ class Uri extends \prggmr\signal\Complex {
         $base = str_replace(BASE_URI, '', REQUEST_URI);
         $reg = function($str) {
             return '#'.preg_replace('#:([\w]+)#i', '(?P<$1>[\w\-_+]+)', $str)."$#i";
-        }
+        };
         if (is_array($uri)) {
             $this->_info = [];
             foreach ($uri as $_uri) {
