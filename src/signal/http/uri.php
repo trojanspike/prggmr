@@ -80,10 +80,10 @@ class Uri extends \prggmr\signal\Complex {
 
     public function routine($history = null) 
     {
-        if (!in_array($_SERVER['REQUEST_METHOD'], $this->_info[1])) {
-            return false;
-        }
         foreach ($this->_info as $_info) {
+            if (!in_array($_SERVER['REQUEST_METHOD'], $_info[1])) {
+                return false;
+            }
             if (preg_match($_info[0], $_info[2], $matches)) {
                 array_shift($matches);
                 if (count($matches) != 0) {
