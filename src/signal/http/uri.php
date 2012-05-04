@@ -56,11 +56,26 @@ class Uri extends \prggmr\signal\Complex {
             }
             $this->_vars = $vars;
         }
-        $this->_info = [
-            '#'.preg_replace('#:([\w]+)#i', '(?P<$1>[\w\-_+]+)', $uri)."$#i",
-            $method,
-            str_replace(BASE_URI, '', REQUEST_URI)
-        ];
+        $base = str_replace(BASE_URI, '', REQUEST_URI);
+        $reg = function($str) {
+            return '#'.preg_replace('#:([\w]+)#i', '(?P<$1>[\w\-_+]+)', $str)."$#i";
+        }
+        if (is_array($uri)) {
+            $this->_info = [];
+            foreach ($uri as $_uri) {
+                $this->_info[] = [
+                    $reg($_uri),
+                    $method,
+                    $base
+                ];
+            }
+        } else {
+            $this->_info = [[
+                $reg($uri),
+                $method,
+                $base
+            ]];
+        }
     }
 
     public function routine($history = null) 
@@ -68,23 +83,26 @@ class Uri extends \prggmr\signal\Complex {
         if (!in_array($_SERVER['REQUEST_METHOD'], $this->_info[1])) {
             return false;
         }
-        if (preg_match($this->_info[0], $this->_info[2], $matches)) {
-            array_shift($matches);
-            if (count($matches) != 0) {
-                foreach ($matches as $_k => $_v) {
-                    if (is_string($_k)) {
-                        unset($matches[$_k]);
+        foreach ($this->_info as $_info) {
+            if (preg_match($_info[0], $_info[2], $matches)) {
+                array_shift($matches);
+                if (count($matches) != 0) {
+                    foreach ($matches as $_k => $_v) {
+                        if (is_string($_k)) {
+                            unset($matches[$_k]);
+                        }
                     }
+                    $this->_vars = array_merge((array) $this->_vars, $matches);
                 }
-                $this->_vars = array_merge((array) $this->_vars, $matches);
+                if (null === $this->_event) {
+                    $this->_event = new Event();
+                }
+                if (false !== $this->_event) {
+                    $this->_event->set_uri($_info[2]);
+                }
+                return [ENGINE_ROUTINE_SIGNAL, null];
             }
-            if (null === $this->_event) {
-                $this->_event = new Event();
-            }
-            if (false !== $this->_event) {
-                $this->_event->set_uri($this->_info[2]);
-            }
-            return [ENGINE_ROUTINE_SIGNAL, null];
         }
+        return null;
     }
 }
