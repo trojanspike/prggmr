@@ -76,7 +76,7 @@ class Uri extends \prggmr\signal\Complex {
                         unset($matches[$_k]);
                     }
                 }
-                $this->_vars = array_merge($this->_vars, $matches);
+                $this->_vars = array_merge((array) $this->_vars, $matches);
             }
             if (null === $this->_event) {
                 $this->_event = new Event();
