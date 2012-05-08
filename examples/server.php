@@ -3,6 +3,7 @@
  * !!!!!THIS DOES NOT WORK!!!!!!
  * Non-Blocking Server Example
  */
+throw new \LogicException("NOT IMPLEMENTED");
 handle(function(){
     $this->headers(['Content-Type': 'text/plain']);
     $this->write('Hello World');

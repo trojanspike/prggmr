@@ -832,7 +832,7 @@ class Engine {
     }
 
     /**
-     * Registers a function to interupt the signal stack before or after a 
+     * Registers a function to interrupt the signal stack before or after a 
      * signal fires.
      * 
      * @param  object  $handle  Handle to execute
@@ -859,23 +859,12 @@ class Engine {
         if (!is_int($interrupt) || $interrupt >= 3) {
             $this->signal(esig::INVALID_INTERRUPT, $interrupt);
         }
-        if (is_object($signal)) {
-            if (!$signal instanceof signal\Standard) {
-                $this->signal(esig::INVALID_SIGNAL, $signal);
-                return false;
-            } else {
-                $name = get_class($signal);
-            }
-        } else {
-            $name = $signal;
-        }
         if (!isset($this->_storage[self::INTERRUPT_STORAGE][$interrupt])) {
             $this->_storage[self::INTERRUPT_STORAGE][$interrupt] = [];
-            $storage =& $this->_storage[self::INTERRUPT_STORAGE][$interrupt];
-        } else {
-            $storage =& $this->_storage[self::INTERRUPT_STORAGE][$interrupt];
         }
-        $storage[] = [$signal, $handle, $priority];
+        $this->_storage[self::INTERRUPT_STORAGE][$interrupt][] = [
+            $signal, $handle, $priority
+        ];
         return true;
     }
 
@@ -898,14 +887,16 @@ class Engine {
         if (!isset($this->_storage[self::INTERRUPT_STORAGE][$type])) {
             return true;
         }
-        $storage =& $this->_storage[self::INTERRUPT_STORAGE][$type];
         $queue = null;
-        foreach ($storage as $_node) {
+        foreach ($this->_storage[self::INTERRUPT_STORAGE][$type] as $_node) {
             if ($_node[0] instanceof signal\Complex) {
-                $eval = $_node[0]->evaluate($signal);
+                $eval = $_node[0]->evalute($signal);
                 if (false !== $eval) {
                     if (true !== $eval) {
-                        $_node[1]->vars($eval);
+                        $_node[1]->params($eval);
+                    }
+                    if (null === $queue) {
+                        $queue = new Queue();
                     }
                     $queue->enqueue($_node[1], $_node[2]);
                 }
@@ -914,7 +905,6 @@ class Engine {
                     $queue = new Queue();
                 }
                 $queue->enqueue($_node[1], $_node[2]);
-                break;
             }
         }
         if (null !== $queue) {
