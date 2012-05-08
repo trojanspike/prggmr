@@ -279,7 +279,7 @@ class Engine {
                 }
                 // Trigger the signal itself
                 if (null !== $routine[1]) {
-                    if ($routine[0] === ENGINE_ROUTINE_SIGNAL) {
+                    if ($routine[1] === ENGINE_ROUTINE_SIGNAL) {
                         if (false === $this->_routine_exhausted($_node[1])) {
                             $return = true;
                             // Recurring signals will always get the same event
@@ -299,9 +299,9 @@ class Engine {
                 }
                 // check for idle
                 if ($routine[2] !== null) {
-                    if ($this->_routines[0] === 0 || $this->_routines[0] > $routine[1]) {
+                    if ($this->_routines[0] === 0 || $this->_routines[0] > $routine[2]) {
                         $return = true;
-                        $this->_routines[0] = $routine[1];
+                        $this->_routines[0] = $routine[2];
                     }
                 }
             }
