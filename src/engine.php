@@ -893,11 +893,11 @@ class Engine {
      */
     protected function _interrupt($signal, $type, $vars, &$event)
     {
-        $name = (is_object($signal)) ? get_class($signal) : $signal;
         // do nothing no interupt registered
         if (!isset($this->_storage[self::INTERRUPT_STORAGE][$type])) {
             return true;
         }
+        $name = (is_object($signal)) ? get_class($signal) : $signal;
         $queue = null;
         if (count($this->_storage[self::INTERRUPT_STORAGE][$type][self::COMPLEX_STORAGE]) != 0) {
             foreach ($this->_storage[self::INTERRUPT_STORAGE][$type][self::COMPLEX_STORAGE] as $_node) {
