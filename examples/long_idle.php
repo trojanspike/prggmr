@@ -5,7 +5,7 @@ prggmr\handle(function(){
 
 prggmr\handle(function(){
     echo "Loop END";
-    var_dump(prggmr::instance());
+    var_dump(prggmr\prggmr());
 }, \prggmr\engine\Signals::LOOP_SHUTDOWN);
 
 prggmr\interval(function(){

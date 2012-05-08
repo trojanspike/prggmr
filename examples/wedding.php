@@ -38,7 +38,7 @@ class Wedding extends \prggmr\signal\Complex {
             }
         }
         if ($man && $woman && $bells) {
-            return [ENGINE_ROUTINE_SIGNAL, null];
+            return [null, ENGINE_ROUTINE_SIGNAL, null];
         }
 
         return false;
