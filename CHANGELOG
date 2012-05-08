@@ -1,5 +1,10 @@
 [ 1.0.0 -- TBD -- ]
 -------------------
+- The engine will now clean it's storage because it likes to be tidy
+- Added unit_test signal library
+- Routine function now must return a 3 node array to simply checking signals
+- added prggmr\prggmr API function
+- added signal_interupt function to engine
 - handle_loader now allows only strings|integers
 - handle_loader auto removes itself after loading
 - Added prggmr\Event::get_handle, set_handle functions

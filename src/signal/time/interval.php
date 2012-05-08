@@ -49,6 +49,6 @@ class Interval extends \prggmr\signal\time\Timeout {
             $this->_info = $this->_time + milliseconds();
             $return = ENGINE_ROUTINE_SIGNAL;
         }
-        return [$return, $this->_info - $current];
+        return [null, $return, $this->_info - $current];
     }
 }

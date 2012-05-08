@@ -52,8 +52,8 @@ class Timeout extends \prggmr\signal\Complex {
         if (null === $this->_info) return false;
         if ($current >= $this->_info) {
             $this->_info = null;
-            return [ENGINE_ROUTINE_SIGNAL, null];
+            return [null, ENGINE_ROUTINE_SIGNAL, null];
         }
-        return [null, $this->_info - $current];
+        return [null, null, $this->_info - $current];
     }
 }

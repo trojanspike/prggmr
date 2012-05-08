@@ -31,6 +31,11 @@ class Cron extends \prggmr\signal\Interval {
      */
     public function __construct($time, $vars = null)
     {
+        if (!PRGGMR_DEBUG) {
+            throw new \RuntimeException(
+                "This signal is currenlty under development!"
+            );  
+        }
         parent::__construct($time, $vars);
         $this->_time = $time;
     }

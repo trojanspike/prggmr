@@ -43,6 +43,6 @@ class Test extends \prggmr\signal\Complex {
             $this->_event = new Event();
         }
         // test signals always return to fire immediatly
-        return [ENGINE_ROUTINE_SIGNAL, null];
+        return [null, ENGINE_ROUTINE_SIGNAL, null];
     }
 }

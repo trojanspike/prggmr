@@ -143,6 +143,8 @@ function engine_code($code)
         case \prggmr\engine\Signals::SIGNAL_LOAD_FAILURE:
             return "Signal library __autoload could not be found";
             break;
+        case \prggmr\engine\Signals::INVALID_INTERUPT:
+            return "Invalid signal interuption";
         break;
     }
 }

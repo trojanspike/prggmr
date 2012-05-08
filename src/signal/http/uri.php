@@ -21,7 +21,6 @@ if (!defined('REQUEST_URI')) {
   define('REQUEST_URI', $_SERVER['REQUEST_URI']);
 }
 
-
  /**
   * Signal HTTP Request URI's to a handle.
   * URIs are matched using the "/path/:param" syntax.
@@ -100,7 +99,29 @@ class Uri extends \prggmr\signal\Complex {
                 if (false !== $this->_event) {
                     $this->_event->set_uri($_info[2]);
                 }
-                return [ENGINE_ROUTINE_SIGNAL, null];
+                return [null, ENGINE_ROUTINE_SIGNAL, null];
+            }
+        }
+        return null;
+    }
+
+    public function evalute($signal = null) 
+    {
+        foreach ($this->_info as $_info) {
+            if (!in_array($_SERVER['REQUEST_METHOD'], $_info[1])) {
+                return false;
+            }
+            if (preg_match($_info[0], $_info[2], $matches)) {
+                array_shift($matches);
+                if (count($matches) != 0) {
+                    foreach ($matches as $_k => $_v) {
+                        if (is_string($_k)) {
+                            unset($matches[$_k]);
+                        }
+                    }
+                    return $matches;
+                }
+                return true;
             }
         }
         return null;

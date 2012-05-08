@@ -99,6 +99,13 @@ class Engine {
      */
     const HASH_STORAGE = 0;
     const COMPLEX_STORAGE = 1;
+    const INTERRUPT_STORAGE = 2;
+
+    /**
+     * Interuption Types
+     */
+    const INTERRUPT_PRE = 0;
+    const INTERRUPT_POST = 1;
 
     /**
      * Allows for 
@@ -243,7 +250,7 @@ class Engine {
         if ($this->get_state() === STATE_HALTED) return false;
         foreach ($this->_storage[self::COMPLEX_STORAGE] as $_key => $_node) {
             $routine = $_node[0]->routine($this->_event_history);
-            if (is_array($routine) && count($routine) == 2) {
+            if (is_array($routine) && count($routine) == 3) {
                 // Check for signals
                 if (null !== $routine[0]) {
                     if (is_array($routine[0])) {
@@ -262,35 +269,36 @@ class Engine {
                                 $this->_routines[1][] = [$_sig, $_node[0]->vars(), $_node[2]];
                             }
                         }
+                    // Trigger one signal
                     } else {
-                        // Trigger the signal itself
-                        if ($routine[0] === ENGINE_ROUTINE_SIGNAL) {
-                            if (false === $this->_routine_exhausted($_node[1])) {
-                                $return = true;
-                                // Recurring signals will always get the same event
-                                if (!isset($_node[2])) {
-                                    if (null !== $_node[0]->event()) {
-                                        $_node[2] = $_node[0]->event();
-                                        // destroy reference
-                                        $this->_storage[self::COMPLEX_STORAGE][$_key][0]->event(false);
-                                    } else {
-                                        $_node[2] = new Event();
-                                    }
-                                    $this->_storage[self::COMPLEX_STORAGE][$_key][2] = $_node[2];
+                        if (false === $this->_routine_exhausted($_routine[0])) {
+                            $return = true;
+                            $this->_routines[1][] = [$_routine[0], $_node[0]->vars(), $_node[0]->event()];
+                        }
+                    }
+                }
+                // Trigger the signal itself
+                if (null !== $routine[1]) {
+                    if ($routine[0] === ENGINE_ROUTINE_SIGNAL) {
+                        if (false === $this->_routine_exhausted($_node[1])) {
+                            $return = true;
+                            // Recurring signals will always get the same event
+                            if (!isset($_node[2])) {
+                                if (null !== $_node[0]->event()) {
+                                    $_node[2] = $_node[0]->event();
+                                    // destroy reference
+                                    $this->_storage[self::COMPLEX_STORAGE][$_key][0]->event(false);
+                                } else {
+                                    $_node[2] = new Event();
                                 }
-                                $this->_routines[2][] = $_node;
+                                $this->_storage[self::COMPLEX_STORAGE][$_key][2] = $_node[2];
                             }
-                        // Trigger one signal
-                        } else {
-                            if (false === $this->_routine_exhausted($_routine[0])) {
-                                $return = true;
-                                $this->_routines[1][] = [$_routine[0], $_node[0]->vars(), $_node[0]->event()];
-                            }
+                            $this->_routines[2][] = $_node;
                         }
                     }
                 }
                 // check for idle
-                if ($routine[1] !== null) {
+                if ($routine[2] !== null) {
                     if ($this->_routines[0] === 0 || $this->_routines[0] > $routine[1]) {
                         $return = true;
                         $this->_routines[0] = $routine[1];
@@ -366,7 +374,7 @@ class Engine {
      */
     public function flush(/* ... */)
     {
-        $this->_storage = [[], []];
+        $this->_storage = [[], [], []];
         $this->set_state(STATE_DECLARED);
     }
 
@@ -698,11 +706,21 @@ class Engine {
      * @param  object  $event  Event instance.
      *
      * @param  array  $vars  Array of variables to pass handles.
+     * 
+     * @param  boolean  $interupt  Run the interupt functions.
      *
      * @return  object  Event
      */
-    protected function _execute($signal, $queue, $event, $vars)
+    protected function _execute($signal, $queue, $event, $vars, $interrupt = true)
     {
+        // handle pre interupt functions
+        if ($interrupt) {
+            $this->_interrupt($signal, self::INTERRUPT_PRE, $vars, $event);
+            if (!$event->get_state() === STATE_HALTED) {
+                $this->_event_exit($event);
+                return $event;
+            }
+        }
         // execute sig handlers
         $queue->sort(true);
         $queue->reset();
@@ -740,6 +758,10 @@ class Engine {
             }
             $handle->set_state(STATE_EXITED);
             $queue->next();
+        }
+        // handle interupt functions
+        if ($interupt) {
+            $this->_interrupt($signal, self::INTERRUPT_POST, $vars, $event);
         }
         $this->_event_exit($event);
         return $event;
@@ -806,6 +828,97 @@ class Engine {
             } else {
                 $this->signal(esig::SIGNAL_LOAD_FAILURE, [$name, $dir]);
             }
+        }
+    }
+
+    /**
+     * Registers a function to interupt the signal stack before or after a 
+     * signal fires.
+     * 
+     * @param  object  $handle  Handle to execute
+     * @param  string|object  $signal
+     * @param  int|null  $place  Interuption location. INTERUPT_PRE|INTERUPT_POST
+     * @param  int|null  $priority  Interupt priority
+     * @param  object|null  $object  Event object
+     * 
+     * @return  boolean  True|False false is failure
+     */
+    public function signal_interrupt($handle, $signal, $interrupt = null, $priority = null) 
+    {
+        // Variable Checks
+        if (!$handle instanceof Handle) {
+            if (!$handle instanceof \Closure) {
+                $this->signal(esig::INVALID_HANDLE, $handle);
+            } else {
+                $handle = new Handle($handle);
+            }
+        }
+        if (null === $interrupt) {
+            $interrupt = self::INTERRUPT_PRE;
+        }
+        if (!is_int($interrupt) || $interrupt >= 3) {
+            $this->signal(esig::INVALID_INTERRUPT, $interrupt);
+        }
+        if (is_object($signal)) {
+            if (!$signal instanceof signal\Standard) {
+                $this->signal(esig::INVALID_SIGNAL, $signal);
+                return false;
+            } else {
+                $name = get_class($signal);
+            }
+        } else {
+            $name = $signal;
+        }
+        if (!isset($this->_storage[self::INTERRUPT_STORAGE][$interrupt])) {
+            $this->_storage[self::INTERRUPT_STORAGE][$interrupt] = [];
+            $storage =& $this->_storage[self::INTERRUPT_STORAGE][$interrupt];
+        } else {
+            $storage =& $this->_storage[self::INTERRUPT_STORAGE][$interrupt];
+        }
+        $storage[] = [$signal, $handle, $priority];
+        return true;
+    }
+
+    /**
+     * Handle signal interuption functions.
+     * 
+     * @param  object  $signal  Signal
+     * @param  int  $interupt  Interupt type
+     * 
+     * @return  boolean
+     */
+    protected function _interrupt($signal, $type, $vars, $event)
+    {
+        if (is_object($signal)) {
+            $name = get_class($signal);
+        } else {
+            $name = $signal;
+        }
+        // do nothing no interupt registered
+        if (!isset($this->_storage[self::INTERRUPT_STORAGE][$type])) {
+            return true;
+        }
+        $storage =& $this->_storage[self::INTERRUPT_STORAGE][$type];
+        $queue = null;
+        foreach ($storage as $_node) {
+            if ($_node[0] instanceof signal\Complex) {
+                $eval = $_node[0]->evaluate($signal);
+                if (false !== $eval) {
+                    if (true !== $eval) {
+                        $_node[1]->vars($eval);
+                    }
+                    $queue->enqueue($_node[1], $_node[2]);
+                }
+            } elseif ($name === $_node[0] || $signal === $_node[0]) {
+                if (null === $queue) {
+                    $queue = new Queue();
+                }
+                $queue->enqueue($_node[1], $_node[2]);
+                break;
+            }
+        }
+        if (null !== $queue) {
+            $this->_execute($signal, $queue, $event, $vars, false);
         }
     }
 }

@@ -8,6 +8,8 @@ namespace prggmr\signal;
 
 /**
  * Standard Signal
+ * 
+ * Base class for all prggmr signals.
  */
 abstract class Standard {
 

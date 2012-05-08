@@ -58,6 +58,10 @@ class Signals {
      */
     const SIGNAL_LOAD_FAILURE = 0xE009;
     /**
+     * Invalid signal interuption location
+     */
+    const INVALID_INTERRUPT = 0xE010;
+    /**
      * Engine loop startup
      */
     const LOOP_START = 0xE015;

@@ -169,3 +169,30 @@ function load_signal($name, $dir = null)
 {
     return \prggmr::instance()->load_signal($name, $dir);
 }
+
+/**
+ * Registers a function to interupt the signal stack before or after a 
+ * signal fires.
+ * 
+ * @param  object  $handle  Handle to execute
+ * @param  string|object  $signal
+ * @param  int|null  $place  Interuption location. INTERUPT_PRE|INTERUPT_POST
+ * @param  int|null  $priority  Interupt priority
+ * @param  object|null  $object  Event object
+ * 
+ * @return  boolean  True|False false is failure
+ */
+function signal_interrupt($handle, $signal, $interrupt = null, $priority = null) 
+{
+    return \prggmr::instance()->signal_interrupt($handle, $signal, $interrupt, $priority);
+}
+
+/**
+ * Returns the prggmr object instance.
+ * 
+ * @return  object  prggmr\Engine
+ */
+function prggmr()
+{
+    return \prggmr::instance();
+}
