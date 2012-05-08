@@ -1,8 +1,7 @@
 <?php
 
-prggmr::instance()->signal_interrupt(function(){
-    $this->a = "HAHAHA";
-    return false;
+prggmr\signal_interrupt(function(){
+    $this->a = "I interrupted this call!";
 }, "test");
 
 prggmr\handle(function(){
@@ -10,3 +9,14 @@ prggmr\handle(function(){
 }, "test");
 
 prggmr\signal("test");
+
+prggmr\signal_interrupt(function(){
+    echo "I'm stopping the stack right here";
+    $this->halt();
+}, "helloworld");
+
+prggmr\handle(function(){
+    echo "hellWorld";
+}, "helloworld");
+
+prggmr\signal("helloworld");

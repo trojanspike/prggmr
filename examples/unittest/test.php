@@ -1,7 +1,7 @@
 <?php
-prggmr\load_signal('unit_test');
+prggmr\load_signal('unittest');
 
-prggmr\signal\unit_test\api\test(function(){
+prggmr\signal\unittest\api\test(function(){
     $this->true(true);
     $this->true(true);
     $this->true(true);
@@ -13,7 +13,7 @@ prggmr\signal\unit_test\api\test(function(){
 prggmr\handle(function(){
     $tests = 0;
     foreach (prggmr\event_history() as $_node) {
-        if ($_node[0] instanceof prggmr\signal\unit_test\Event) {
+        if ($_node[0] instanceof prggmr\signal\unittest\Event) {
             $tests++;
         }
     }

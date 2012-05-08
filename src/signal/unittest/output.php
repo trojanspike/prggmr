@@ -1,5 +1,5 @@
 <?php
-namespace prggmr\signal\unit_test;
+namespace prggmr\signal\unittest;
 /**
  * Copyright 2010-12 Nickolas Whiting. All rights reserved.
  * Use of this source code is governed by the Apache 2 license

@@ -11,7 +11,7 @@ Current options:
   -h/--help     Show this help message.
   -p/--passthru Pass the given arguments to the script
   -t/--time     Length of time to run in milliseconds.
-  -u/--unit     Load the unit testing signal library.
+  -u/--unittest Load the unit testing signal library.
   -v/--version  Displays current prggmr version.
 ";
 
@@ -64,7 +64,7 @@ foreach ($options as $_i => $_arg) {
             define('PRGGMR_DEV_MODE', true);
             break;
         case 'u':
-        case 'unit':
+        case 'unittest':
             $unittest = true;
             break;
         default:
@@ -91,7 +91,7 @@ if (isset($showversion)) exit('prggmr version '.PRGGMR_VERSION."
 ");
 
 if (isset($unittest)) {
-    prggmr\load_signal('unit_test');
+    prggmr\load_signal('unittest');
 }
 
 if (!file_exists($runfile)) {

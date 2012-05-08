@@ -1,5 +1,5 @@
 <?php
-namespace prggmr\signal\unit_test\api;
+namespace prggmr\signal\unittest\api;
 /**
  * Copyright 2010-12 Nickolas Whiting. All rights reserved.
  * Use of this source code is governed by the Apache 2 license
@@ -10,7 +10,7 @@ namespace prggmr\signal\unit_test\api;
  * API can be included to load the entire signal.
  */
 
-use \prggmr\signal\unit_test as unit_test;
+use \prggmr\signal\unittest as unittest;
 
 /**
  * Add a new assertion function.
@@ -22,7 +22,7 @@ use \prggmr\signal\unit_test as unit_test;
  * @return  void
  */
 function create_assertion($function, $name, $message = null) {
-    return unit_test\Assertions::instance()->create_assertion($function, $name, $message);
+    return unittest\Assertions::instance()->create_assertion($function, $name, $message);
 }
 
 /**
@@ -30,5 +30,5 @@ function create_assertion($function, $name, $message = null) {
  * 
  */
 function test($function, $name = null) {
-    return \prggmr\handle($function, new unit_test\Test($name));
+    return \prggmr\handle($function, new unittest\Test($name));
 }

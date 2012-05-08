@@ -370,7 +370,7 @@ class Engine {
     public function flush(/* ... */)
     {
         $this->_storage = [[], [], []];
-        $this->_event_history = [];        
+        $this->_event_history = [];
         $this->set_state(STATE_DECLARED);
     }
 
@@ -626,8 +626,10 @@ class Engine {
      */
     private function _event_exit($event)
     {
-        // event execution finished cleanup and reset current
-        $event->set_state(STATE_EXITED);
+        // event execution finished cleanup state if clean
+        if ($event->get_state() === STATE_RUNNING) {
+            $event->set_state(STATE_EXITED);
+        }
         // are we keeping the history
         if (!ENGINE_EVENT_HISTORY) {
             return null;
@@ -693,17 +695,17 @@ class Engine {
     }
 
     /**
-     * Fires a handle.
+     * Executes a queue. 
+     * 
+     * This will monitor the event status and break on a HALT or ERROR state.
+     * 
+     * Executes interruption functions before and after queue execution.
      *
      * @param  object  $signal  Signal instance.
-     *
-     * @param  object  $handle  Handle instance.
-     *
+     * @param  object  $queue  Queue instance.
      * @param  object  $event  Event instance.
-     *
      * @param  array  $vars  Array of variables to pass handles.
-     * 
-     * @param  boolean  $interupt  Run the interupt functions.
+     * @param  boolean  $interupt  Run the interrupt functions.
      *
      * @return  object  Event
      */
@@ -712,7 +714,7 @@ class Engine {
         // handle pre interupt functions
         if ($interrupt) {
             $this->_interrupt($signal, self::INTERRUPT_PRE, $vars, $event);
-            if (!$event->get_state() === STATE_HALTED) {
+            if ($event->get_state() === STATE_HALTED) {
                 $this->_event_exit($event);
                 return $event;
             }
@@ -836,18 +838,24 @@ class Engine {
      * @param  int|null  $place  Interuption location. INTERUPT_PRE|INTERUPT_POST
      * @param  int|null  $priority  Interupt priority
      * @param  object|null  $object  Event object
+     * @param  boolean  $complex  Register the given complex signal as a complex interrupt signal
      * 
      * @return  boolean  True|False false is failure
      */
-    public function signal_interrupt($handle, $signal, $interrupt = null, $priority = null) 
+    public function signal_interrupt($handle, $signal, $interrupt = null, $priority = null, $complex = false) 
     {
         // Variable Checks
         if (!$handle instanceof Handle) {
             if (!$handle instanceof \Closure) {
                 $this->signal(esig::INVALID_HANDLE, $handle);
+                return false;
             } else {
                 $handle = new Handle($handle);
             }
+        }
+        if (!is_object($signal) && !is_int($signal) && !is_string($signal)) {
+            $this->signal(esig::INVALID_SIGNAL, $signal);
+            return false;
         }
         if (null === $interrupt) {
             $interrupt = self::INTERRUPT_PRE;
@@ -856,11 +864,22 @@ class Engine {
             $this->signal(esig::INVALID_INTERRUPT, $interrupt);
         }
         if (!isset($this->_storage[self::INTERRUPT_STORAGE][$interrupt])) {
-            $this->_storage[self::INTERRUPT_STORAGE][$interrupt] = [];
+            $this->_storage[self::INTERRUPT_STORAGE][$interrupt] = [[], []];
         }
-        $this->_storage[self::INTERRUPT_STORAGE][$interrupt][] = [
-            $signal, $handle, $priority
-        ];
+        $storage =& $this->_storage[self::INTERRUPT_STORAGE][$interrupt];
+        if ($signal instanceof signal\Complex && $complex) {
+            $storage[self::COMPLEX_STORAGE][] =  [
+                $signal, $handle, $priority
+            ];
+        } else {
+            $name = (is_object($signal)) ? get_class($signal) : $signal;
+            if (!isset($storage[self::HASH_STORAGE][$name])) {
+                $storage[self::HASH_STORAGE][$name] = [];
+            }
+            $storage[self::HASH_STORAGE][$name][] = [
+                $signal, $handle, $priority
+            ];
+        }
         return true;
     }
 
@@ -872,20 +891,16 @@ class Engine {
      * 
      * @return  boolean
      */
-    protected function _interrupt($signal, $type, $vars, $event)
+    protected function _interrupt($signal, $type, $vars, &$event)
     {
-        if (is_object($signal)) {
-            $name = get_class($signal);
-        } else {
-            $name = $signal;
-        }
+        $name = (is_object($signal)) ? get_class($signal) : $signal;
         // do nothing no interupt registered
         if (!isset($this->_storage[self::INTERRUPT_STORAGE][$type])) {
             return true;
         }
         $queue = null;
-        foreach ($this->_storage[self::INTERRUPT_STORAGE][$type] as $_node) {
-            if ($_node[0] instanceof signal\Complex) {
+        if (count($this->_storage[self::INTERRUPT_STORAGE][$type][self::COMPLEX_STORAGE]) != 0) {
+            foreach ($this->_storage[self::INTERRUPT_STORAGE][$type][self::COMPLEX_STORAGE] as $_node) {
                 $eval = $_node[0]->evalute($signal);
                 if (false !== $eval) {
                     if (true !== $eval) {
@@ -896,11 +911,16 @@ class Engine {
                     }
                     $queue->enqueue($_node[1], $_node[2]);
                 }
-            } elseif ($name === $_node[0] || $signal === $_node[0]) {
-                if (null === $queue) {
-                    $queue = new Queue();
+            }
+        }
+        if (isset($this->_storage[self::INTERRUPT_STORAGE][$type][self::HASH_STORAGE][$name])) {
+            foreach ($this->_storage[self::INTERRUPT_STORAGE][$type][self::HASH_STORAGE][$name] as $_node) {
+                if ($name === $_node[0] || $signal === $_node[0]) {
+                    if (null === $queue) {
+                        $queue = new Queue();
+                    }
+                    $queue->enqueue($_node[1], $_node[2]);
                 }
-                $queue->enqueue($_node[1], $_node[2]);
             }
         }
         if (null !== $queue) {
