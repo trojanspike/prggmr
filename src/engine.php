@@ -49,11 +49,6 @@ define('ENGINE_ROUTINE_SIGNAL', -0xF14E);
  * 
  * The queue storage has also been improved in 0.3.0, previously the storage used
  * a non-index and index based storage, the storage now uses only a single array.
- * 
- * The major improvement is the storage uses a binary search algorithm or a 
- * hash table for locating the queues, the algorithm works with 
- * strings, integers and \prggmr\signal\Complex objects providing a major 
- * performance increase over the previous implementation.
  */
 class Engine {
 
@@ -375,6 +370,7 @@ class Engine {
     public function flush(/* ... */)
     {
         $this->_storage = [[], [], []];
+        $this->_event_history = [];        
         $this->set_state(STATE_DECLARED);
     }
 
