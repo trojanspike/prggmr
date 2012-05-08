@@ -26,11 +26,15 @@ class Test extends \prggmr\signal\Complex {
      * Constructs a new test signal.
      * 
      * @param  string  $name  Name of the test.
+     * @param  object  $event  prggmr\signal\unittest\Event
      * 
      * @return  void
      */
-    public function __construct($info = null)
+    public function __construct($info = null, $event = null)
     {
+        if (null !== $event && $event instanceof Event) {
+            $this->_event = $event;
+        }
         $this->_info = $info;
     }
 

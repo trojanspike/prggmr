@@ -758,7 +758,7 @@ class Engine {
             $queue->next();
         }
         // handle interupt functions
-        if ($interupt) {
+        if ($interrupt) {
             $this->_interrupt($signal, self::INTERRUPT_POST, $vars, $event);
         }
         $this->_event_exit($event);
@@ -837,7 +837,6 @@ class Engine {
      * @param  string|object  $signal
      * @param  int|null  $place  Interuption location. INTERUPT_PRE|INTERUPT_POST
      * @param  int|null  $priority  Interupt priority
-     * @param  object|null  $object  Event object
      * @param  boolean  $complex  Register the given complex signal as a complex interrupt signal
      * 
      * @return  boolean  True|False false is failure

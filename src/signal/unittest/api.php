@@ -28,7 +28,26 @@ function create_assertion($function, $name, $message = null) {
 /**
  * Creates a new test case.
  * 
+ * @param  object  $function  Test function
+ * @param  string  $name  Test name
+ * @param  object  $event  prggmr\signal\unittest\Event
+ * 
+ * @return  array  [Handle, Signal]
  */
-function test($function, $name = null) {
-    return \prggmr\handle($function, new unittest\Test($name));
+function test($function, $name = null, $event = null) {
+    $signal = new unittest\Test($name, $event);
+    $handle = \prggmr\handle($function, $signal);
+    return [$handle, $signal];
+}
+
+/**
+ * Constructs a new unit testing suite.
+ * 
+ * @param  object  $function  Closure
+ * @param  object|null  $event  prggmr\signal\unittest\Event
+ * 
+ * @return  void
+ */
+function suite($function, $event = null) {
+    return new unittest\Suite($function, \prggmr\prggmr(), $event);
 }

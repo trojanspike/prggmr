@@ -1,13 +1,33 @@
 <?php
 prggmr\load_signal('unittest');
 
-prggmr\signal\unittest\api\test(function(){
+use prggmr\signal\unittest as unittest;
+
+unittest\api\test(function(){
     $this->true(true);
     $this->true(true);
     $this->true(true);
     $this->true(false);
     $this->true(true);
     $this->true(true);
+});
+
+unittest\api\suite(function(){
+    $this->setup(function(){
+        $this->a = 1;
+        echo "SETUP";
+    });
+    $this->teardown(function(){
+        echo "TEARDOWN";
+    });
+    $this->test(function(){
+        echo $this->a;
+        $this->true(true);
+    });
+    $this->test(function(){
+        echo $this->a;
+        $this->false(true);
+    });
 });
 
 prggmr\handle(function(){

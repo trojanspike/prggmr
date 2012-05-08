@@ -176,16 +176,15 @@ function load_signal($name, $dir = null)
  * 
  * @param  object  $handle  Handle to execute
  * @param  string|object  $signal
- * @param  int|null  $place  Interuption location. INTERUPT_PRE|INTERUPT_POST
- * @param  int|null  $priority  Interupt priority
- * @param  object|null  $object  Event object
+ * @param  int|null  $place  Interruption location. prggmr\Engine::INTERRUPT_PRE|prggmr\Engine::INTERRUPT_POST
+ * @param  int|null  $priority  Interrupt priority
  * @param  boolean  $complex  Register the given complex signal as a complex interrupt signal
  * 
  * @return  boolean  True|False false is failure
  */
 function signal_interrupt($handle, $signal, $interrupt = null, $priority = null, $complex = false) 
 {
-    return \prggmr::instance()->signal_interrupt($handle, $signal, $interrupt, $priority, $complex = false);
+    return \prggmr::instance()->signal_interrupt($handle, $signal, $interrupt, $priority, $complex);
 }
 
 /**

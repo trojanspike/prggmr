@@ -6,6 +6,7 @@
  */
 $dir = dirname(realpath(__FILE__));
 require_once $dir.'/test.php';
+require_once $dir.'/suite.php';
 require_once $dir.'/output.php';
 require_once $dir.'/event.php';
 require_once $dir.'/assertion.php';
