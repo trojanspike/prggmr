@@ -1,4 +1,4 @@
-[ 1.0.0 -- TBD -- ]
+[ 1.0.0 050912 ]
 -------------------
 - The engine will now clean it's storage because it likes to be tidy
 - Added unit_test signal library
