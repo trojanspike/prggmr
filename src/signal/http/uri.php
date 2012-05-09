@@ -124,6 +124,6 @@ class Uri extends \prggmr\signal\Complex {
                 return true;
             }
         }
-        return null;
+        return false;
     }
 }

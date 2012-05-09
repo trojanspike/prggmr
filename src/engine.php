@@ -552,15 +552,15 @@ class Engine {
      */
     public function _search_complex($signal)
     {
+        if (count($this->_storage[self::COMPLEX_STORAGE]) == 0) {
+            return [self::SEARCH_NOOP, null];
+        }
         $locate = false;
         $found = array();
         if (is_string($signal) || is_int($signal)) {
             $locate = true;
         } elseif (!$signal instanceof \prggmr\signal\Complex) {
             $this->signal(esig::INVALID_SIGNAL, array($signal));
-            return [self::SEARCH_NOOP, null];
-        }
-        if (count($this->_storage[self::COMPLEX_STORAGE]) == 0) {
             return [self::SEARCH_NOOP, null];
         }
         foreach ($this->_storage[self::COMPLEX_STORAGE] as $_key => $_node) {
