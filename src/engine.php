@@ -228,6 +228,7 @@ class Engine {
                 // idle for the given time in milliseconds
                 usleep($this->_routines[0] * 1000);
             }
+            gc_collect_cycles();
         }
         $this->signal(esig::LOOP_SHUTDOWN);
     }
@@ -548,7 +549,7 @@ class Engine {
      * 
      * @param  string|int|object  $signal  Signal(s) to lookup.
      * 
-     * @return  array  [SEARCH_NULL|SEARCH_FOUND|SEARCH_NOOP, object|array|null]
+     * @return  array  [SEARCH_NULL|SEARCH_FOUND|SEARCH_NOOP, object|array|null, index]
      */
     public function _search_complex($signal)
     {
@@ -571,7 +572,7 @@ class Engine {
                 }
             } else {
                 if ($_node[0] === $signal) {
-                    return [self::SEARCH_FOUND, $this->current()[1]];
+                    return [self::SEARCH_FOUND, $_node[1], $_key];
                 }
             }
         }
@@ -926,6 +927,95 @@ class Engine {
             $this->_execute($signal, $queue, $event, $vars, false);
         }
     }
+
+    /**
+     * Cleans any exhausted signal queues from the engine.
+     * 
+     * @param  boolean  $history  Erase any history of the signal the signals cleaned.
+     * 
+     * @return  void
+     */
+    public function clean($history = false)
+    {
+        $storages = [
+            self::HASH_STORAGE, self::COMPLEX_STORAGE, self::INTERRUPT_STORAGE
+        ];
+        foreach ($storages as $_storage) {
+            if (count($this->_storage[$_storage]) == 0) continue;
+            foreach ($this->_storage[$_storage] as $_index => $_node) {
+                if ($this->queue_exhausted($_node[1])) {
+                    unset($this->_storage[$_storage][$_index]);
+                    if ($history) {
+                        $this->erase_signal_history(
+                            ($_node[0] instanceof signal\Complex) ?
+                                $_node[0] : $_node[0]->info()
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Delete a signal from the engine.
+     * 
+     * @param  string|object|int  $signal  Signal to delete.
+     * @param  boolean  $history  Erase any history of the signal.
+     * 
+     * @return  boolean
+     */
+    public function delete_signal($signal, $history = false)
+    {
+        if ($signal instanceof signal\Complex) {
+            $search = $this->_search_complex($signal);
+            if ($search[0] !== self::SEARCH_FOUND) return false;
+            unset($this->_storage[self::COMPLEX_STORAGE][$search[3]]);
+        } elseif (isset($this->_storage[self::HASH_STORAGE][$signal])) {
+            unset($this->_storage[self::HASH_STORAGE][$signal]);
+        } else {
+            return false;
+        }
+
+        if ($history) {
+            $this->erase_signal_history($signal);
+        }
+        return true;
+    }
+
+    /**
+     * Erases any history of a signal.
+     * 
+     * @param  string|object  $signal  Signal to be erased from history.
+     * 
+     * @return  void
+     */
+    public function erase_signal_history($signal)
+    {
+        if (!ENGINE_EVENT_HISTORY || count($this->_event_history) == 0) {
+            return false;
+        }
+        // recursivly check if any events are a child of the given signal
+        // because if the chicken doesn't exist neither does the egg ...
+        // or does it?
+        $descend_destory = function($event) use ($signal, &$descend_destory) {
+            // child and not a child of itself
+            if ($event->is_child() && $event->get_parent() !== $event) {
+                return $descend_destory($event->get_parent());
+            }
+            if ($event->get_signal() === $signal) {
+                return true;
+            }
+        };
+        foreach ($this->_event_history as $_key => $_node) {
+            if ($_node[1] === $signal) {
+                unset($this->_event_history[$_key]);
+            } elseif ($_node[0]->is_child() && $_node[0]->get_parent() !== $_node[0]) {
+                if ($descend_destory($_node[0]->get_parent())) {
+                    unset($this->_event_history[$_key]);
+                }
+            }
+        }
+    } 
 }
 
 class EngineException extends \Exception {

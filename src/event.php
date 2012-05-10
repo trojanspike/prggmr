@@ -125,7 +125,7 @@ class Event {
      */
     public function get_parent(/* ... */)
     {
-        return $this->_parent;
+        return ($this->_parent === EVENT_SELF_PARENT) ? $this : $this->_parent;
     }
 
     /**

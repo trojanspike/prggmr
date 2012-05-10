@@ -196,3 +196,40 @@ function prggmr()
 {
     return \prggmr::instance();
 }
+
+/**
+ * Cleans any exhausted signal queues from the engine.
+ * 
+ * @param  boolean  $history  Erase any history of the signals cleaned.
+ * 
+ * @return  void
+ */
+function clean($history = false)
+{
+    return \prggmr::instance()->clean($history);
+}
+
+/**
+ * Delete a signal from the engine.
+ * 
+ * @param  string|object|int  $signal  Signal to delete.
+ * @param  boolean  $history  Erase any history of the signal.
+ * 
+ * @return  boolean
+ */
+function delete_signal($signal, $history = false)
+{
+    return \prggmr::instance()->delete_signal($storage, $history);
+}
+
+/**
+ * Erases any history of a signal.
+ * 
+ * @param  string|object  $signal  Signal to be erased from history.
+ * 
+ * @return  void
+ */
+function erase_signal_history($signal)
+{
+    return \prggmr::instance()->erase_signal_history($signal);
+}

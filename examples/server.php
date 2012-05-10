@@ -5,7 +5,7 @@
  */
 throw new \LogicException("NOT IMPLEMENTED");
 handle(function(){
-    $this->headers(['Content-Type': 'text/plain']);
+    $this->headers(['Content-Type' => 'text/plain']);
     $this->write('Hello World');
     return 200;
 }, \prggmr\signal\sockets\HttpServer('127.0.0.1', 1337));

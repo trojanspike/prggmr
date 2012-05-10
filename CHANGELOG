@@ -1,3 +1,6 @@
+[ 1.1.0 050912 ]
+- Added clean, delete_signal and erase_signal_history API functions.
+
 [ 1.0.0 050912 ]
 -------------------
 - The engine will now clean it's storage because it likes to be tidy
