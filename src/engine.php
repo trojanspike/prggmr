@@ -943,7 +943,8 @@ class Engine {
         foreach ($storages as $_storage) {
             if (count($this->_storage[$_storage]) == 0) continue;
             foreach ($this->_storage[$_storage] as $_index => $_node) {
-                if ($this->queue_exhausted($_node[1])) {
+                if ($_node[1] instanceof Handle && $_node[1]->is_exhausted() ||
+                    $_node[1] instanceof Queue && $this->queue_exhausted($_node[1])) {
                     unset($this->_storage[$_storage][$_index]);
                     if ($history) {
                         $this->erase_signal_history(
