@@ -38,6 +38,7 @@ class Assertions {
                 'assertion function must be a closure'
             );
         }
+        $function = $function->bindTo(new \stdClass());
         $this->_storage[$name] = [$function, $message];
     }
 
@@ -64,7 +65,8 @@ class Assertions {
             return true;
         }
         if (null !== $this->_storage[$name][1]) {
-            //return sprintf($this->_storage[$name][1], $vars);
+            $sprintf = array_merge([$this->_storage[$name][1]], $vars);
+            return call_user_func_array('sprintf', $sprintf);
         }
         return false;
     }

@@ -31,7 +31,7 @@ if (!defined('SHORT_VARS')) {
  * Level of verbosity for output
  */
 if (!defined('VERBOSITY_LEVEL')) {
-    define('VERBOSITY_LEVEL', 1);
+    define('VERBOSITY_LEVEL', 2);
 }
 
 /**
@@ -67,7 +67,7 @@ class Output {
             case 3:
                $this->send(sprintf(
                     '%s %s Passed with args %s',
-                    $test->get_signal()->get_info(),
+                    $test->get_signal()->info(),
                     $assertion,
                     $this->variable($args)
                 ), self::SYSTEM);
@@ -97,7 +97,7 @@ class Output {
             case 3:
                 $this->send(sprintf(
                     '%s %s Failed with args %s',
-                    $test->get_signal()->get_info(),
+                    $test->get_signal()->info(),
                     $assertion,
                     $this->variable($args)
                 ), self::ERROR);
@@ -108,6 +108,7 @@ class Output {
 
                 break;
             case 2:
+                var_dump(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));
                 $this->send(sprintf(
                     "%s Failed%s",
                     $assertion,
@@ -127,7 +128,7 @@ class Output {
             case 3:
                 $this->send(sprintf(
                     '%s %s Skipped with args %s',
-                    $test->get_signal()->get_info(),
+                    $test->get_signal()->info(),
                     $assertion,
                     $this->variable($args)
                 ), self::DEBUG);
