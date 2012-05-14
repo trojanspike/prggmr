@@ -5,19 +5,12 @@
  * that can be found in the LICENSE file.
  */
 
+prggmr\load_signal("unittest");
+
+// load the standard unittest output
+prggmr\signal\unittest\api\generate_output();
+
 foreach (glob('*.php') as $file)
 {
     include_once ($file);
 }
-
-prggmr\handle(function(){
-    $tests = 0;
-    foreach (prggmr\event_history() as $_node) {
-        if ($_node[0] instanceof prggmr\signal\unittest\Event) {
-            $tests++;
-        }
-    }
-    echo PHP_EOL;
-    echo "Ran $tests tests";
-    echo PHP_EOL;
-}, prggmr\engine\Signals::LOOP_SHUTDOWN);

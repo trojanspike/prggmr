@@ -10,7 +10,7 @@ namespace prggmr\signal\unittest;
  * Output colors
  */
 if (!defined('OUTPUT_COLORS')) {
-    define('OUTPUT_COLORS', false);
+    define('OUTPUT_COLORS', true);
 }
 
 /**
@@ -31,7 +31,7 @@ if (!defined('SHORT_VARS')) {
  * Level of verbosity for output
  */
 if (!defined('VERBOSITY_LEVEL')) {
-    define('VERBOSITY_LEVEL', 3);
+    define('VERBOSITY_LEVEL', 1);
 }
 
 /**
@@ -49,15 +49,32 @@ class Output {
     /**
      * Line break count
      */
-    static protected $_breakcount = 0;
+    protected $_breakcount = 0;
+
+    /**
+     * Failed tests
+     */
+    protected $_fail = [];
     
     /**
      * Output message types.
      */
-    const MESSAGE = 0xF00;
-    const ERROR   = 0xF01;
-    const DEBUG   = 0xF02;
-    const SYSTEM  = 0xF03;
+    const MESSAGE = 0;
+    const SUCCESS = 1;
+    const ERROR   = 2;
+    const DEBUG   = 3;
+    const SYSTEM  = 4;
+
+    /**
+     * Color codes
+     */
+    public static $colors = [
+        '0;34',
+        '0;32',
+        '0;31',
+        '0;35',
+        '0;36'
+    ];
     
     /**
      * Outputs an assertion result.
@@ -69,32 +86,69 @@ class Output {
      * 
      * @return  void
      */
-    public function assertion($test, $assertion, $args) 
+    public function assertion($test, $assertion, $args, $result) 
     {
+        if ($result === true) {
+            $type = self::SUCCESS;
+        } elseif ($result === null) {
+            $type = self::DEBUG;
+        } else {
+            $type = self::ERROR;
+        }
         switch (VERBOSITY_LEVEL) {
             case 3:
+                if ($result === true) {
+                    $print = "Passed";
+                } elseif ($result === null) {
+                    $print = "Skipped";
+                } else {
+                    $print = "Failed";
+                }
                 $this->send(sprintf(
-                    '%s %s Passed (%s)',
+                    '%s - %s (%s) [%s]',
                     $test->get_signal()->info(),
                     $assertion,
+                    $print,
                     $this->variable($args)
-                ), self::SYSTEM);
-                $this->send(sprintf(
-                    "%s--------------------------------------------%s",
-                    PHP_EOL, PHP_EOL
-                ), self::SYSTEM);
-                $this->send($this->get_assertion_call_line(), self::SYSTEM);
+                ), $type);
+                $this->send_linkbreak();
+                $this->send($this->get_assertion_call_line(), self::DEBUG);
                 break;
             case 2:
-               $this->send(sprintf(
-                    "%s%s",
-                    $assertion,
-                    PHP_EOL
-                ), self::SYSTEM);
+                if ($result === true) {
+                    $print = "Passed";
+                } elseif ($result === null) {
+                    $print = "Skipped";
+                } else {
+                    $print = "Failed";
+                }
+                $this->send(sprintf(
+                    "%s - %s",
+                    $print,
+                    $assertion
+                ), $type, true);
                 break;
             default:
             case 1:
-                $this->send(".", self::SYSTEM);
+                if ($this->_breakcount >= 60) {
+                    $nl = true;
+                    $this->_breakcount = -1;
+                } else {
+                    $nl = false;
+                }
+                if ($result === true) {
+                    $print = ".";
+                } elseif ($result === null) {
+                    $print = "S";
+                } else {
+                    $print = "F";
+                }
+                $this->send(
+                    $print, 
+                    $type, 
+                    $nl
+                );
+                $this->_breakcount++;
                 break;
         }
     }
@@ -103,65 +157,20 @@ class Output {
      * Sends a string to output.
      *
      * @param  string  $string  Message to output
-     * @param  string  $type  Type of message
+     * @param  string  $type  Type of message for color generation if used.
      * @param  boolean  $newline  Output line after string.
      *
      * @return  void
      */
     public static function send($string, $type = null, $newline = false)
     {
-        $message = null;
         if (null === $type) {
             $type = self::MESSAGE;
         }
-        switch ($type) {
-            default:
-            case self::MESSAGE:
-                if (OUTPUT_COLORS) {
-                    $message .= "\033[1;34m";
-                }
-                $message .= sprintf("%s",
-                    $string
-                );
-                if (OUTPUT_COLORS) {
-                    $message .= "\033[0m";
-                }
-                break;
-            case self::ERROR:
-                if (OUTPUT_COLORS) {
-                    $message .= "\033[1;31m";
-                }
-                $message .= sprintf("%s",
-                    $string
-                );
-                if (OUTPUT_COLORS) {
-                    $message .= "\033[0m";
-                }
-                break;
-            case self::DEBUG:
-                if (OUTPUT_COLORS) {
-                    $message .= "\033[1;33m";
-                }
-                $message .= sprintf("%s",
-                    $string
-                );
-                if (OUTPUT_COLORS) {
-                    $message .= "\033[0m";
-                }
-                break;
-            case self::SYSTEM:
-                if (OUTPUT_COLORS) {
-                    $message .= "\033[1;36m";
-                }
-                $message .= sprintf("%s",
-                    $string
-                );
-                if (OUTPUT_COLORS) {
-                    $message .= "\033[0m";
-                }
-                break;
+        if (OUTPUT_COLORS) {
+            $string = "\033[".self::$colors[$type]."m".$string."\033[0m";
         }
-        print($message);
+        print($string);
         if ($newline) print PHP_EOL;
     }
     
@@ -275,13 +284,58 @@ class Output {
     public function get_assertion_call_line()
     {
         $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[3];
-        return sprintf("File: %s%sLine: %s%sFunction: %s%s",
+        return sprintf("File: %s%sLine: %s%sFunction: %s",
             $trace['file'],
             PHP_EOL,
             $trace['line'],
             PHP_EOL,
-            $trace['function'],
-            PHP_EOL
+            $trace['function']
         );
+    }
+
+    /**
+     * Generates an error indicating an unknown assertion has been called.
+     * 
+     * @param  object  $event  Test event
+     * @param  string  $func  Assertion function called
+     * @param  array  $args  Array of arguments passed to the assertion
+     * @param  object  $assertion  The assertion object used
+     * 
+     * @return  void
+     */
+    public function unknown_assertion($event, $func, $args, $assertion) 
+    {
+        $assertions = array_keys($assertion->storage());
+        $suggestions = array_filter($assertions, 
+            function($var) use ($func){
+                if (\similar_text($var, $func) >= 5) return true;
+                return false;
+            }
+        );
+        $this->send_linkbreak();
+        $this->send(sprintf(
+            "TEST : %s%sASSERTION : [ %s ] is not a valid assertion %s",
+            $event->get_signal()->info(), PHP_EOL,
+            $func, (count($suggestions != 0) ? 
+                'did you want ('.implode(', ', $suggestions).')?' :
+                'no suggestions found.')
+        ), self::ERROR);
+        $this->send_linkbreak(self::ERROR);
+        $this->send($this->get_assertion_call_line(), self::ERROR);
+        $this->send_linkbreak(self::ERROR);
+        // reset break count
+        $this->__breakcount = 0;
+    }
+
+    /**
+     * Sends a line break to the output with a border.
+     * 
+     * @return  void
+     */
+    public function send_linebreak($type = null){
+        $this->send(sprintf(
+            "%s--------------------------------------------%s",
+            PHP_EOL, PHP_EOL
+        ), $type);
     }
 }

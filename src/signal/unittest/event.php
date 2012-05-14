@@ -6,6 +6,10 @@ namespace prggmr\signal\unittest;
  * that can be found in the LICENSE file.
  */
 
+if (!defined('SKIP_TESTS_ON_FAILURE')) {
+    define('SKIP_TESTS_ON_FAILURE', false);
+}
+
 /**
  * Unit testing event object
  * 
@@ -17,6 +21,11 @@ class Event extends \prggmr\Event {
      * Assertion functions
      */
     protected $_assertions = [];
+
+    /**
+     * Assertion tests ran.
+     */
+    protected $_assertions_ran = []; 
 
     /**
      * Assertions run and their results.
@@ -48,13 +57,48 @@ class Event extends \prggmr\Event {
      */
     public function __call($func, $args)
     {
-        if ($this->failed()) {
+        $this->_assertions_ran[] = $func;
+        if ($this->_failed && SKIP_TESTS_ON_FAILURE) {
             $this->_output->assertion($this, $func, $args, null);
         } else {
-            $call = $this->_assertions->call_assertion($func, $args);
+            try {
+                $call = $this->_assertions->call_assertion($func, $args);
+            } catch (\BadMethodCallException $e) {
+                $call = null;
+                $this->_output->unknown_assertion(
+                    $this, $func, $args, $this->_assertions
+                );
+            }
+            if ($call !== true) {
+                $this->_failed = true;
+            }
             $this->_output->assertion($this, $func, $args, $call);
         }
+        // Add call to results
+        $this->_assertion_results[] = [
+            $call, $func, $args, debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
+        ];
         return true;
+    }
+
+    /**
+     * Returns the assertion results.
+     * 
+     * @return  array
+     */
+    public function get_assertion_results()
+    {
+        return $this->_assertion_results;
+    }
+
+    /**
+     * Returns the assertions run.
+     * 
+     * @return  array
+     */
+    public function get_assertions_ran()
+    {
+        return $this->_assertions_ran;
     }
 
     /**

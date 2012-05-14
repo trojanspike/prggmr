@@ -15,8 +15,6 @@ class Assertions {
 
     use \prggmr\Storage, \prggmr\Singleton;
 
-    const UNKNOWN_ASSERTION = 0xA330;
-
     /**
      * Adds a new assertion function.
      * 
@@ -55,7 +53,7 @@ class Assertions {
     public function call_assertion($name, $vars = null)
     {
         if (!isset($this->_storage[$name])) {
-            return self::UNKNOWN_ASSERTION;
+            throw new \BadMethodCallException;
         }
         if (!is_array($vars)) {
             $vars = [$vars];
