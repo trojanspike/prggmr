@@ -49,15 +49,10 @@ class Event extends \prggmr\Event {
     public function __call($func, $args)
     {
         if ($this->failed()) {
-            $this->_output->assertion_skip($this, $func, $args);
+            $this->_output->assertion($this, $func, $args, null);
         } else {
             $call = $this->_assertions->call_assertion($func, $args);
-            if (true === $call) {
-                $this->_output->assertion_pass($this, $func, $args);
-            } else {
-                $this->_failed = true;
-                $this->_output->assertion_fail($this, $func, $args);
-            }
+            $this->_output->assertion($this, $func, $args, $call);
         }
         return true;
     }

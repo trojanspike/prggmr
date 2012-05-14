@@ -10,7 +10,7 @@ namespace prggmr\signal\unittest;
  * Output colors
  */
 if (!defined('OUTPUT_COLORS')) {
-    define('OUTPUT_COLORS', true);
+    define('OUTPUT_COLORS', false);
 }
 
 /**
@@ -24,25 +24,32 @@ if (!defined('MAX_DEPTH')) {
  * Use shorterned variables within the output
  */
 if (!defined('SHORT_VARS')) {
-    define('SHORT_VARS', true);
+    define('SHORT_VARS', false);
 }
 
 /**
  * Level of verbosity for output
  */
 if (!defined('VERBOSITY_LEVEL')) {
-    define('VERBOSITY_LEVEL', 2);
+    define('VERBOSITY_LEVEL', 3);
 }
 
 /**
  * Generates output for a unit test.
- *
- * The object itself is only an interface to call a generator object,
- * the default is CLI.
  */
 class Output {
 
     use \prggmr\Singleton;
+
+    /**
+     * Max recursion depth.
+     */
+    protected $_maxdepth = MAX_DEPTH;
+
+    /**
+     * Line break count
+     */
+    static protected $_breakcount = 0;
     
     /**
      * Output message types.
@@ -53,33 +60,34 @@ class Output {
     const SYSTEM  = 0xF03;
     
     /**
-     * Outputs an assertion pass
+     * Outputs an assertion result.
      * 
      * @param  object  $event  Test event object
      * @param  string  $assertion  Name of the assertion
      * @param  array|null  $args  Array of arguments used during test
+     * @param  null|boolean  $result  True-pass,False-fail,null-skipped
      * 
      * @return  void
      */
-    public function assertion_pass($test, $assertion, $args) 
-    {           
+    public function assertion($test, $assertion, $args) 
+    {
         switch (VERBOSITY_LEVEL) {
             case 3:
-               $this->send(sprintf(
-                    '%s %s Passed with args %s',
+                $this->send(sprintf(
+                    '%s %s Passed (%s)',
                     $test->get_signal()->info(),
                     $assertion,
                     $this->variable($args)
                 ), self::SYSTEM);
-               $this->send(sprintf(
+                $this->send(sprintf(
                     "%s--------------------------------------------%s",
                     PHP_EOL, PHP_EOL
                 ), self::SYSTEM);
-
+                $this->send($this->get_assertion_call_line(), self::SYSTEM);
                 break;
             case 2:
                $this->send(sprintf(
-                    "%s Passed%s",
+                    "%s%s",
                     $assertion,
                     PHP_EOL
                 ), self::SYSTEM);
@@ -87,66 +95,6 @@ class Output {
             default:
             case 1:
                 $this->send(".", self::SYSTEM);
-                break;
-        }
-    }
-     
-    public function assertion_fail($test, $assertion, $args)
-    {
-        switch (VERBOSITY_LEVEL) {
-            case 3:
-                $this->send(sprintf(
-                    '%s %s Failed with args %s',
-                    $test->get_signal()->info(),
-                    $assertion,
-                    $this->variable($args)
-                ), self::ERROR);
-                $this->send(sprintf(
-                    "%s--------------------------------------------%s",
-                    PHP_EOL, PHP_EOL
-                ), self::ERROR);
-
-                break;
-            case 2:
-                var_dump(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));
-                $this->send(sprintf(
-                    "%s Failed%s",
-                    $assertion,
-                    PHP_EOL
-                ), self::ERROR);
-                break;
-            default:
-            case 1:
-                $this->send("F", self::ERROR);
-                break;
-        }
-    }
-    
-    public function assertion_skip($test, $assertion, $args) 
-    { 
-        switch (VERBOSITY_LEVEL) {
-            case 3:
-                $this->send(sprintf(
-                    '%s %s Skipped with args %s',
-                    $test->get_signal()->info(),
-                    $assertion,
-                    $this->variable($args)
-                ), self::DEBUG);
-                $this->send(sprintf(
-                    "%s--------------------------------------------%s",
-                    PHP_EOL, PHP_EOL
-                ), self::DEBUG);
-                break;
-            case 2:
-               $this->send(sprintf(
-                    "%s Skipped%s",
-                    $assertion,
-                    PHP_EOL
-                ), self::DEBUG);
-                break;
-            default:
-            case 1:
-                $this->send("S", self::DEBUG);
                 break;
         }
     }
@@ -299,7 +247,7 @@ class Output {
      *
      * @return  void
      */
-    public function backtrace($backtrace)
+    public function backtrace($backtrace, $type = self::ERROR)
     {
         $endtrace = '';
         for($a=0;$a!=count($backtrace);$a++) {
@@ -312,6 +260,28 @@ class Output {
                 );
             }
         }
-        $this->send($endtrace, static::ERROR);
+        $this->send($endtrace, $type);
+    }
+
+    /**
+     * Returns the location an assertion was called.
+     * 
+     * Currently this just returns the node at index 3 a more advanced method
+     * for determaining the assertion call will need to be developed to 
+     * account for changes in the flow.
+     * 
+     * @return  array
+     */
+    public function get_assertion_call_line()
+    {
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)[3];
+        return sprintf("File: %s%sLine: %s%sFunction: %s%s",
+            $trace['file'],
+            PHP_EOL,
+            $trace['line'],
+            PHP_EOL,
+            $trace['function'],
+            PHP_EOL
+        );
     }
 }

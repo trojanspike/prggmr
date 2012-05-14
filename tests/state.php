@@ -35,5 +35,5 @@ unittest\api\suite(function(){
         $this->state->set_state(STATE_ERROR);
         $this->equal($this->state->get_state(), STATE_ERROR);
         $this->iequal('one', 'One');
-    }, 'set state');
+    }, 'Test setting the state');
 });
