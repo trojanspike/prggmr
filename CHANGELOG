@@ -1,3 +1,10 @@
+[ 1.2.1 051412 ]
+- Added unittest generate_output function
+- Removed unittest\Output assertion_pass, assertion_fail, assertion_skip functions
+- Added unittest\Output assertion function
+- Added unittest\Output send_linebreak function
+- unittest\Event now logs a history of assertions and results
+
 [ 1.1.0 050912 ]
 - Added clean, delete_signal and erase_signal_history API functions.
 
