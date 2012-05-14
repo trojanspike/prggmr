@@ -116,7 +116,7 @@ function generate_output() {
         }
 
         $output->send_linebreak();
-        $output->send("Ran $tests tests", unittest\Output::SYSTEM, true);
+        $output->send("Ran ".count($tests)." tests", unittest\Output::SYSTEM, true);
 
         $output->send(sprintf("%s Assertions: %s Passed, %s Failed, %s Skipped",
             $pass + $fail + $skip,
