@@ -26,7 +26,7 @@ unittest\api\suite(function(){
 
     $this->test(function(){
         $this->equal($this->state->get_state(), STATE_DECLARED);
-    }, 'Test default stat');
+    }, 'Test default state');
 
     $this->test(function(){
         $this->exception('InvalidArgumentException', function(){

@@ -75,8 +75,12 @@ function generate_output() {
         $fail = 0;
         $skip = 0;
         $output = unittest\Output::instance();
+        $tests = [];
         foreach (\prggmr\event_history() as $_node) {
             if ($_node[0] instanceof unittest\Event) {
+                // suites
+                if (in_array($_node[0], $tests)) continue;
+                $tests[] = $_node[0];
                 $tests++;
                 $failures = [];
                 // Get passed
@@ -93,17 +97,18 @@ function generate_output() {
 
                 if (count($failures) != 0) {
                     $output->send_linebreak(unittest\Output::ERROR);
-                    $output->send(sprintf(
-                        "%s had failures", 
-                        $_node[1]->info()
-                    ), unittest\Output::ERROR);
-                    $output->send_linebreak(unittest\Output::ERROR);
                     foreach ($failures as $_failure) {
-                        $output->send($_failure[0], unittest\Output::ERROR, true);
+                        $output->send("FAILURE", unittest\Output::ERROR);
+                        $output->send_linebreak(unittest\Output::ERROR, true);
+                        $output->send("ASSERTION : " . $_failure[1], unittest\Output::ERROR, true);
+                        $output->send("MESSAGE : " . $_failure[0], unittest\Output::ERROR, true);
                         $output->send(sprintf(
-                            'ARGS : %s',
+                            'ARGUMENTS : %s',
                             $output->variable($_failure[2])
-                        ), unittest\Output::ERROR);
+                        ), unittest\Output::ERROR, true);
+                        $trace = $_failure[3][1];
+                        $output->send("FILE : " . $trace["file"], unittest\Output::ERROR, true);
+                        $output->send("LINE : " . $trace["line"], unittest\Output::ERROR);
                         $output->send_linebreak(unittest\Output::ERROR);
                     }
                 }
@@ -113,7 +118,7 @@ function generate_output() {
         $output->send_linebreak();
         $output->send("Ran $tests tests", unittest\Output::SYSTEM, true);
 
-        $output->send(sprintf("%s Assertions Run. %s Passed, %s Failed, %s Skipped",
+        $output->send(sprintf("%s Assertions: %s Passed, %s Failed, %s Skipped",
             $pass + $fail + $skip,
             $pass, $fail, $skip
         ), unittest\Output::SYSTEM, true);

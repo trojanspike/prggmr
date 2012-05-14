@@ -111,7 +111,7 @@ class Output {
                     $print,
                     $this->variable($args)
                 ), $type);
-                $this->send_linkbreak();
+                $this->send_linebreak();
                 $this->send($this->get_assertion_call_line(), self::DEBUG);
                 break;
             case 2:
@@ -312,17 +312,17 @@ class Output {
                 return false;
             }
         );
-        $this->send_linkbreak();
+        $this->send_linebreak();
         $this->send(sprintf(
             "TEST : %s%sASSERTION : [ %s ] is not a valid assertion %s",
             $event->get_signal()->info(), PHP_EOL,
-            $func, (count($suggestions != 0) ? 
+            $func, (count($suggestions) != 0) ? 
                 'did you want ('.implode(', ', $suggestions).')?' :
-                'no suggestions found.')
+                'no suggestions found.'
         ), self::ERROR);
-        $this->send_linkbreak(self::ERROR);
+        $this->send_linebreak(self::ERROR);
         $this->send($this->get_assertion_call_line(), self::ERROR);
-        $this->send_linkbreak(self::ERROR);
+        $this->send_linebreak(self::ERROR);
         // reset break count
         $this->__breakcount = 0;
     }
