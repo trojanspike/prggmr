@@ -14,14 +14,12 @@ prggmr\load_signal('http');
 
 // Shorten namespace down
 use prggmr\signal\http as http;
-
-
 /**
  * Route to /
  */
 prggmr\signal_interrupt(function(){
     $this->db = new stdClass();
-    echo "Here";
+    // echo "Here";
     return false;
 }, 'prggmr\signal\http\Uri');
 
@@ -30,12 +28,24 @@ http\api\uri_request(function(){
     var_dump($this->db);
 }, "/");
 
+http\api\uri_request(function(){
+    echo 1111;
+},['/dashboard/:param', ['param' => '.*']]);
+
+http\api\uri_request(function(){
+    echo "At the dashboard";
+}, '/dashboard');
+
 /**
  * Route to /user/:name
  */
 prggmr\signal_interrupt(function($name){
     echo "Performing pre-handle action on $name";
-}, new http\Uri("/user/:name"));
+}, new http\Uri("/user/:name"), null, null, true);
+
+http\api\uri_request(function($name, $dog){
+    echo "WHAT $name $dog";
+}, "/user/:name/:dog");
 
 http\api\uri_request(function($name){
     echo "Hello $name";
