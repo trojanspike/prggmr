@@ -1,0 +1,14 @@
+# prggmr's unit tests
+
+prggmr's unit tests are written using the prggmr unittest signal library.
+
+All tests can be run by simply running the ```run.php``` file with prggmr.
+
+    prggmr run.php
+
+To run individual tests just run the test file
+
+    prggmr event.php
+
+Note that individual tests do not generate the standard output and only output
+the assertion results.
