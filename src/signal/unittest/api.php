@@ -60,6 +60,7 @@ function suite($function, $event = null) {
 function generate_output() {
     // Startup
     \prggmr\handle(function(){
+        define('UNITTEST_START_TIME', milliseconds());
         $output = unittest\Output::instance();
         $output->send("prggmr unittest library " . PRGGMR_VERSION, 
             unittest\Output::SYSTEM
@@ -69,21 +70,21 @@ function generate_output() {
 
     // Shutdown
     \prggmr\handle(function(){
-
+        define('UNITTEST_END_TIME', milliseconds());
         $tests = 0;
         $pass = 0;
         $fail = 0;
         $skip = 0;
         $output = unittest\Output::instance();
-        $tests = [];
+        $tests_run = [];
         foreach (\prggmr\event_history() as $_node) {
             if ($_node[0] instanceof unittest\Event) {
                 // suites
-                if (in_array($_node[0], $tests)) continue;
-                $tests[] = $_node[0];
                 $tests++;
+                if (in_array($_node[0], $tests_run)) continue;
+                $tests_run[] = $_node[0];
                 $failures = [];
-                // Get passed
+                // Get passedprggmr 
                 foreach ($_node[0]->get_assertion_results() as $_assertion) {
                     if ($_assertion[0] === true) {
                         $pass++;
@@ -114,9 +115,25 @@ function generate_output() {
                 }
             }
         }
-
+        $size = function($size) {
+            /**
+             * This was authored by another individual by whom i don't know
+             */
+            $filesizename = array(
+                " Bytes", "KB", "MB", "GB", 
+                "TB", "PB", " EB", "ZB", "YB"
+            );
+            return $size ? round(
+                $size/pow(1024, ($i = floor(log($size, 1024)))), 2
+            ) . $filesizename[$i] : '0 Bytes';
+        };
         $output->send_linebreak();
-        $output->send("Ran ".count($tests)." tests", unittest\Output::SYSTEM, true);
+        $output->send(sprintf(
+            "Ran %s tests in %sms and used %s memory", 
+            $tests,
+            UNITTEST_END_TIME - UNITTEST_START_TIME,
+            $size(memory_get_peak_usage())
+        ), unittest\Output::SYSTEM, true);
 
         $output->send(sprintf("%s Assertions: %s Passed, %s Failed, %s Skipped",
             $pass + $fail + $skip,

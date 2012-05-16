@@ -102,7 +102,7 @@ class Handle {
         }
         
         if (null !== $this->_params) {
-            $params += array_merge($params, $this->_params);
+            $params = array_merge($params, $this->_params);
         }
 
         if (null !== $this->_exhaustion) {
@@ -152,13 +152,12 @@ class Handle {
      *
      * @return  void
      */
-    public function params(&$params)
+    public function params($params)
     {
         if (!is_array($params)) {
-            $params = array($params);
+            $params = [$params];
         }
-        
-        $this->_params = $params;
+        $this->_params = array_merge((array) $this->_params, $params);
     }
 
     /**

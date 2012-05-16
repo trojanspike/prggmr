@@ -166,12 +166,6 @@ class Event {
      */
     public function __set($key, $value)
     {
-        if (stripos($key, '_') === 0 && isset($this->$key)) {
-            throw new \LogicException(sprintf(
-                "%s is a read-only event property", 
-                $key
-            ));
-        }
         $this->$key = $value;
         return true;
     }

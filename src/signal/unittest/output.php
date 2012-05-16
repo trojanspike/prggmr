@@ -312,7 +312,7 @@ class Output {
                 return false;
             }
         );
-        $this->send_linebreak();
+        $this->send_linebreak(self::ERROR);
         $this->send(sprintf(
             "TEST : %s%sASSERTION : [ %s ] is not a valid assertion %s",
             $event->get_signal()->info(), PHP_EOL,
