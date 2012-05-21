@@ -6,7 +6,7 @@
  */
 
 // library version
-define('PRGGMR_VERSION', '1.2.2');
+define('PRGGMR_VERSION', '1.2.3');
 
 // The creator
 define('PRGGMR_MASTERMIND', 'Nickolas Whiting');
