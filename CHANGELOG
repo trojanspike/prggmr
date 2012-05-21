@@ -1,3 +1,6 @@
+[ 1.2.3 052112 ]
+- Account for the BASE_URI setting in the http\Uri signal
+
 [ 1.2.2 051512 ]
 - http\URI regex fixed
 

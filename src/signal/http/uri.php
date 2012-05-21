@@ -21,7 +21,7 @@ if (!defined('REQUEST_URI')) {
     if ($pos) {
         $request = substr($request, 0, $pos);
     }
-    define('REQUEST_URI', $request);
+    define('REQUEST_URI', str_replace(BASE_URI, '', $request));
 }
 
  /**
