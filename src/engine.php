@@ -224,7 +224,7 @@ class Engine {
             }
 
             // check for idle time
-            if ($this->_routines[0] > 0) {
+            if ($this->_routines[0] !== null && $this->_routines[0] !== 0) {
                 // idle for the given time in milliseconds
                 usleep($this->_routines[0] * 1000);
             }
@@ -241,11 +241,11 @@ class Engine {
     private function _routines()
     {
         $return = false;
-        $this->_routines = [0, [], []];
+        $this->_routines = [null, [], []];
         // allow for external shutdown signal before running anything
         if ($this->get_state() === STATE_HALTED) return false;
         foreach ($this->_storage[self::COMPLEX_STORAGE] as $_key => $_node) {
-            $routine = $_node[0]->routine($this->_event_history);
+            $routine = $_node[0]->routine(null);
             if (is_array($routine) && count($routine) == 3) {
                 // Check for signals
                 if (null !== $routine[0]) {
@@ -294,8 +294,8 @@ class Engine {
                     }
                 }
                 // check for idle
-                if ($routine[2] !== null) {
-                    if ($this->_routines[0] === 0 || $this->_routines[0] > $routine[2]) {
+                if ($routine[2] !== null && is_int($routine[2])) {
+                    if ($this->_routines[0] > $routine[2]) {
                         $return = true;
                         $this->_routines[0] = $routine[2];
                     }
@@ -611,12 +611,12 @@ class Engine {
         // TODO : infinite loop detection algorithm
         // if possible ... or needed
         // event history management
-        if (null !== $this->_current_event) {
-            $this->_event_children[] = $this->_current_event;
-            $event->set_parent($this->_current_event);
-        }
-        $this->_current_event = $event;
-        $this->_event_history[] = [$event, $signal, milliseconds()];
+    if (null !== $this->_current_event) {
+        $this->_event_children[] = $this->_current_event;
+        $event->set_parent($this->_current_event);
+    }
+    $this->_current_event = $event;
+    $this->_event_history[] = [$event, $signal, milliseconds()];
         return $event;
     }
 
@@ -787,15 +787,16 @@ class Engine {
     }
 
     /**
-     * Provides a tree structure for analyzing the system event architecture.
+     * Generates html output for analyzing the system event architecture.
      * 
-     * TODO
+     * @param  string  $file  File to output analysis, null to return.
      * 
      * @return  string
      */
-    public function event_analysis()
+    public function event_analysis($file = null)
     {
         if (!ENGINE_EVENT_HISTORY) return false;
+
     }
 
     /**
