@@ -224,7 +224,7 @@ class Engine {
             }
 
             // check for idle time
-            if ($this->_routines[0] !== null && $this->_routines[0] !== 0) {
+            if ($this->_routines[0] !== null) {
                 // idle for the given time in milliseconds
                 usleep($this->_routines[0] * 1000);
             }
@@ -245,7 +245,7 @@ class Engine {
         // allow for external shutdown signal before running anything
         if ($this->get_state() === STATE_HALTED) return false;
         foreach ($this->_storage[self::COMPLEX_STORAGE] as $_key => $_node) {
-            $routine = $_node[0]->routine(null);
+            $routine = $_node[0]->routine($this->_event_history);
             if (is_array($routine) && count($routine) == 3) {
                 // Check for signals
                 if (null !== $routine[0]) {
@@ -294,8 +294,8 @@ class Engine {
                     }
                 }
                 // check for idle
-                if ($routine[2] !== null && is_int($routine[2])) {
-                    if ($this->_routines[0] > $routine[2]) {
+                if ($routine[2] !== null && is_int($routine[2]) || is_float($routine[2])) {
+                    if (null === $this->_routines[0] || $this->_routines[0] > $routine[2]) {
                         $return = true;
                         $this->_routines[0] = $routine[2];
                     }
@@ -611,12 +611,12 @@ class Engine {
         // TODO : infinite loop detection algorithm
         // if possible ... or needed
         // event history management
-    if (null !== $this->_current_event) {
-        $this->_event_children[] = $this->_current_event;
-        $event->set_parent($this->_current_event);
-    }
-    $this->_current_event = $event;
-    $this->_event_history[] = [$event, $signal, milliseconds()];
+        if (null !== $this->_current_event) {
+            $this->_event_children[] = $this->_current_event;
+            $event->set_parent($this->_current_event);
+        }
+        $this->_current_event = $event;
+        $this->_event_history[] = [$event, $signal, milliseconds()];
         return $event;
     }
 
