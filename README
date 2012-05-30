@@ -31,7 +31,7 @@ Include the following in your ```composer.json``` file.
 
     {
         "require": {
-            "prggmr/prggmr": "1.0.*"
+            "prggmr/prggmr": "1.*.*"
         }
     }
 
