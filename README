@@ -3,45 +3,89 @@ fast and very simple to use.
 
 ## Usage
 
-### Global Instance
+### Global events
 
-    <?php
+#### Registering handles
 
-    prggmr\handle(function(){
-        echo "The light is green go!";
-    }, 'light.green');
+```php
+prggmr\handle(function(){
+    echo "The light is green go!";
+}, 'light.green');
+```
 
-    prggmr\handle(function(){
-        echo "The light is red stop!";
-    }, 'light.red');
+#### Dispatching signals
 
-    prggmr\handle(function(){
-        echo "The light is yellow go faster!";
-    } 'light.yellow');
+```php
+prggmr\signal('light.green');
+```
 
-    prggmr\signal('light.green');
-    prggmr\signal('light.yellow');
-    prggmr\signal('light.red');
+#### Signal interruption before handle execution
 
-### Engine instance
+```php
+prggmr\signal_interrupt(function(){
+    echo "Inserting some data into the event for handles..";
+    $this->data = "HelloWorld";
+}, 'light.green', prggmr\Engine::INTERRUPT_PRE);
+```
 
-    $engine = new prggmr\Engine();
+#### Signal interruption after handle execution
 
-    $engine->handle(function(){
-        echo "The light is green go!";
-    }, 'light.green');
+```php
+prggmr\signal_interrupt(function(){
+    echo "Checking what happened in the handle";
+}, 'light.green', prggmr\Engine::INTERRUPT_POST);
+```
 
-    $engine->handle(function(){
-        echo "The light is red stop!";
-    }, 'light.red');
+#### Event history
 
-    $engine->handle(function(){
-        echo "The light is yellow go faster!";
-    } 'light.yellow');
+```php
+var_dump(prggmr\event_history());
+```
 
-    $engine->signal('light.green');
-    $engine->signal('light.yellow');
-    $engine->signal('light.red');
+### Managed engine instance
+
+#### Registering a prggmr\Engine
+
+```php
+$engine = new prggmr\Engine();
+```
+
+#### Registering handles
+
+```php
+$engine->handle(function(){
+    echo "The light is green go!";
+}, 'light.green');
+```
+
+#### Dispatching signals
+
+```php
+$engine->signal('light.green');
+```
+
+#### Signal interruption before handle execution
+
+```php
+$engine->signal_interrupt(function(){
+    echo "Inserting some data into the event for handles..";
+    $this->data = "HelloWorld";
+}, 'light.green', prggmr\Engine::INTERRUPT_PRE);
+```
+
+#### Signal interruption after handle execution
+
+```php
+$engine->signal_interrupt(function(){
+    echo "Checking what happened in the handle";
+}, 'light.green', prggmr\Engine::INTERRUPT_POST);
+```
+
+#### Event history
+
+```php
+var_dump($engine->event_history());
+```
 
 ## Installation
 
@@ -51,19 +95,24 @@ Depending on your needs prggmr can be installed using two different methods.
 
 Include the following in your ```composer.json``` file.
 
-    {
-        "require": {
-            "prggmr/prggmr": "1.*.*"
-        }
+```JSON
+{
+    "require": {
+        "prggmr/prggmr": "1.*.*"
     }
+}
+```
 
 Run the installer.
 
-    php composer.phar install
+    $ curl -s http://getcomposer.org/installer | php
+    $ php composer.phar install
 
 And include the library
 
-    require_once 'vendor/prggmr/prggmr/src/prggmr.php';
+```php
+require_once 'vendor/prggmr/prggmr/src/prggmr.php';
+```
 
 ### Global system installation
 
@@ -72,18 +121,24 @@ This method will install prggmr to your php include path.
 Download the latest release and navigate a terminal to the extract directory.
 
     # cd into the prggmr library so you see the README, LICENSE etc..
-    cd path/to/prggmr/extraction
+    $ cd path/to/prggmr/extraction
     # Get include path
-    php -r "echo get_include_path();"
+    $ php -r "echo get_include_path();"
     # My output .:/usr/local/lib/php
     # Copy prggmr to lib
-    sudo cp -Rf * /usr/local/lib/php/prggmr/*
+    $ sudo cp -Rf * /usr/local/lib/php/prggmr/*
     # Copy bin
-    sudo ln -ls /usr/local/lib/php/prggmr/bin/prggmr /usr/bin/
+    $ sudo ln -ls /usr/local/lib/php/prggmr/bin/prggmr /usr/bin/
     # Test
-    prggmr -v
+    $ prggmr -v
     # Result
-    prggmr version 0.3.1.1
+    $ prggmr version 1.2.3
+
+And include the library
+
+```php
+require_once 'prggmr/src/prggmr.php';
+```
 
 ## Documentation
 
