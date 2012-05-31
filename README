@@ -8,6 +8,8 @@ fast and very simple to use.
 #### Registering handles
 
 ```php
+<?php
+
 prggmr\handle(function(){
     echo "The light is green go!";
 }, 'light.green');
@@ -16,12 +18,16 @@ prggmr\handle(function(){
 #### Dispatching signals
 
 ```php
+<?php
+
 prggmr\signal('light.green');
 ```
 
 #### Signal interruption before handle execution
 
 ```php
+<?php
+
 prggmr\signal_interrupt(function(){
     echo "Inserting some data into the event for handles..";
     $this->data = "HelloWorld";
@@ -31,6 +37,8 @@ prggmr\signal_interrupt(function(){
 #### Signal interruption after handle execution
 
 ```php
+<?php
+
 prggmr\signal_interrupt(function(){
     echo "Checking what happened in the handle";
 }, 'light.green', prggmr\Engine::INTERRUPT_POST);
@@ -39,6 +47,8 @@ prggmr\signal_interrupt(function(){
 #### Event history
 
 ```php
+<?php
+
 var_dump(prggmr\event_history());
 ```
 
@@ -47,12 +57,16 @@ var_dump(prggmr\event_history());
 #### Registering a prggmr\Engine
 
 ```php
+<?php
+
 $engine = new prggmr\Engine();
 ```
 
 #### Registering handles
 
 ```php
+<?php
+
 $engine->handle(function(){
     echo "The light is green go!";
 }, 'light.green');
@@ -61,12 +75,16 @@ $engine->handle(function(){
 #### Dispatching signals
 
 ```php
+<?php
+
 $engine->signal('light.green');
 ```
 
 #### Signal interruption before handle execution
 
 ```php
+<?php
+
 $engine->signal_interrupt(function(){
     echo "Inserting some data into the event for handles..";
     $this->data = "HelloWorld";
@@ -76,6 +94,8 @@ $engine->signal_interrupt(function(){
 #### Signal interruption after handle execution
 
 ```php
+<?php
+
 $engine->signal_interrupt(function(){
     echo "Checking what happened in the handle";
 }, 'light.green', prggmr\Engine::INTERRUPT_POST);
@@ -84,6 +104,8 @@ $engine->signal_interrupt(function(){
 #### Event history
 
 ```php
+<?php
+
 var_dump($engine->event_history());
 ```
 
@@ -111,6 +133,8 @@ Run the installer.
 And include the library
 
 ```php
+<?php
+
 require_once 'vendor/prggmr/prggmr/src/prggmr.php';
 ```
 
@@ -137,6 +161,8 @@ Download the latest release and navigate a terminal to the extract directory.
 And include the library
 
 ```php
+<?php
+
 require_once 'prggmr/src/prggmr.php';
 ```
 
@@ -162,17 +188,21 @@ CRON based time signals based on http://docs.oracle.com/cd/E14592_01/doc.10142/e
 
 #### Example
 
-    // every 15 minutes
-    prggmr\handle(function(){
-    }, new prggmr\signal\time\Cron('*/15 * * * *'));
+```php
+<?php
 
-    // 23:00:00 every weekday night
-    prggmr\handle(function(){
-    } new prggmr\signal\time\Cron('0 23 ? * MON-FRI'));
+// every 15 minutes
+prggmr\handle(function(){
+}, new prggmr\signal\time\Cron('*/15 * * * *'));
 
-    // 10:15 everyday
-    prggmr\handle(function(){
-    }, new prggmr\signal\time\Cron('0 15 10 * * ?'));
+// 23:00:00 every weekday night
+prggmr\handle(function(){
+} new prggmr\signal\time\Cron('0 23 ? * MON-FRI'));
+
+// 10:15 everyday
+prggmr\handle(function(){
+}, new prggmr\signal\time\Cron('0 15 10 * * ?'));
+```
 
 ### Event Stream Server
 
@@ -180,15 +210,19 @@ W3C Event-Stream (Specs)[http://dev.w3.org/html5/eventsource/].
 
 #### Example
 
-    $socket = new \prggmr\signal\http\EventStream();
+```php
+<?php
 
-    handle(function($bytes){
-        // do something
-    }, $socket->read());
+$socket = new \prggmr\signal\http\EventStream();
 
-    handle(function($bytes){
-        // do something
-    }, $socket->write());
+handle(function($bytes){
+    // do something
+}, $socket->read());
+
+handle(function($bytes){
+    // do something
+}, $socket->write());
+```
 
 ### Non-Blocking Asynchronous Signal I/O
 
@@ -197,28 +231,28 @@ networking socktes.
 
 #### Example
     
-    <?php
+```php
+<?php
 
-    $socket = new \prggmr\signal\io\Socket('127.0.0.1', 8888);
+$socket = new \prggmr\signal\io\Socket('127.0.0.1', 8888);
 
-    handle(function($bytes){
-        echo "Read bytes";
-        echo $bytes;
-    }, $socket->read(1024));
+handle(function($bytes){
+    echo "Read bytes";
+    echo $bytes;
+}, $socket->read(1024));
 
-    handle(function($bytes){
-        echo "Writing bytes";
-        echo $bytes;
-    }, $socket->write());
+handle(function($bytes){
+    echo "Writing bytes";
+    echo $bytes;
+}, $socket->write());
 
-    handle(function($client){
-        echo "Client connected";
-        echo $client->ip_address;
-    }, $socket->connect());
+handle(function($client){
+    echo "Client connected";
+    echo $client->ip_address;
+}, $socket->connect());
 
-    handle(function($client){
-        echo "Client disconnected";
-        echo $client->ip_address;
-    }, $socket->disconnect());
-
-Or something like that ...
+handle(function($client){
+    echo "Client disconnected";
+    echo $client->ip_address;
+}, $socket->disconnect());
+```
