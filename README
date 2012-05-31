@@ -1,111 +1,98 @@
 prggmr is an event processing engine for PHP 5.4. designed to be lightweight, 
 fast and very simple to use.
 
-## Usage
+## Global events usage
 
-### Global events
-
-#### Registering handles
+### Registering handles
 
 ```php
 <?php
-
 prggmr\handle(function(){
     echo "The light is green go!";
 }, 'light.green');
 ```
 
-#### Dispatching signals
+### Dispatching signals
 
 ```php
 <?php
-
 prggmr\signal('light.green');
 ```
 
-#### Signal interruption before handle execution
+### Signal interruption before handle execution
 
 ```php
 <?php
-
 prggmr\signal_interrupt(function(){
     echo "Inserting some data into the event for handles..";
     $this->data = "HelloWorld";
 }, 'light.green', prggmr\Engine::INTERRUPT_PRE);
 ```
 
-#### Signal interruption after handle execution
+### Signal interruption after handle execution
 
 ```php
 <?php
-
 prggmr\signal_interrupt(function(){
     echo "Checking what happened in the handle";
 }, 'light.green', prggmr\Engine::INTERRUPT_POST);
 ```
 
-#### Event history
+### Event history
 
 ```php
 <?php
-
 var_dump(prggmr\event_history());
 ```
 
-### Managed engine instance
+## Engine instance usage
 
-#### Registering a prggmr\Engine
+### Registering a prggmr\Engine
 
 ```php
 <?php
-
 $engine = new prggmr\Engine();
 ```
 
-#### Registering handles
+### Registering handles
 
 ```php
 <?php
-
 $engine->handle(function(){
     echo "The light is green go!";
 }, 'light.green');
 ```
 
-#### Dispatching signals
+### Dispatching signals
 
 ```php
 <?php
-
 $engine->signal('light.green');
 ```
 
-#### Signal interruption before handle execution
+### Signal interruption before handle execution
 
 ```php
 <?php
-
 $engine->signal_interrupt(function(){
     echo "Inserting some data into the event for handles..";
     $this->data = "HelloWorld";
 }, 'light.green', prggmr\Engine::INTERRUPT_PRE);
 ```
 
-#### Signal interruption after handle execution
+### Signal interruption after handle execution
 
 ```php
 <?php
-
 $engine->signal_interrupt(function(){
     echo "Checking what happened in the handle";
 }, 'light.green', prggmr\Engine::INTERRUPT_POST);
 ```
 
-#### Event history
+### Event history
 
 ```php
 <?php
-
 var_dump($engine->event_history());
 ```
 
