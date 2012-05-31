@@ -572,7 +572,7 @@ class Engine {
                 }
             } else {
                 if ($_node[0] === $signal) {
-                    return [self::SEARCH_FOUND, $_node[1], $_key];
+                    return [self::SEARCH_FOUND, [[$_node[1], null]], $_key];
                 }
             }
         }

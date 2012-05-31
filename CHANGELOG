@@ -1,3 +1,6 @@
+[ 1.2.4 TBD ]
+- Added pcntl signal library
+
 [ 1.2.3 052112 ]
 - Account for the BASE_URI setting in the http\Uri signal
 
