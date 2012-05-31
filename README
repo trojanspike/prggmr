@@ -3,6 +3,8 @@ fast and very simple to use.
 
 ## Usage
 
+### Global Instance
+
     <?php
 
     prggmr\handle(function(){
@@ -20,6 +22,26 @@ fast and very simple to use.
     prggmr\signal('light.green');
     prggmr\signal('light.yellow');
     prggmr\signal('light.red');
+
+### Engine instance
+
+    $engine = new prggmr\Engine();
+
+    $engine->handle(function(){
+        echo "The light is green go!";
+    }, 'light.green');
+
+    $engine->handle(function(){
+        echo "The light is red stop!";
+    }, 'light.red');
+
+    $engine->handle(function(){
+        echo "The light is yellow go faster!";
+    } 'light.yellow');
+
+    $engine->signal('light.green');
+    $engine->signal('light.yellow');
+    $engine->signal('light.red');
 
 ## Installation
 
@@ -73,11 +95,29 @@ The prggmr mailing list is located here [mailing list](https://groups.google.com
 
 ## Versions
 
-prggmr uses [semver](http://semver.org) you should to.
+prggmr uses [semver](http://semver.org) you should too.
 
 ## Signals Roadmap
 
 The following signals are on the development roadmap.
+
+### CRON
+
+CRON based time signals based on http://docs.oracle.com/cd/E14592_01/doc.10142/e14611/cron_expressions.htm
+
+#### Example
+
+    // every 15 minutes
+    prggmr\handle(function(){
+    }, new prggmr\signal\time\Cron('*/15 * * * *'));
+
+    // 23:00:00 every weekday night
+    prggmr\handle(function(){
+    } new prggmr\signal\time\Cron('0 23 ? * MON-FRI'));
+
+    // 10:15 everyday
+    prggmr\handle(function(){
+    }, new prggmr\signal\time\Cron('0 15 10 * * ?'));
 
 ### Event Stream Server
 
