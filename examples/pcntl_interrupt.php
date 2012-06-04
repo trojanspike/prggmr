@@ -7,11 +7,11 @@ prggmr\handle(function(){
     // if you dont exit it will not exit on SIGINT
     exit;
 }, new prggmr\signal\pcntl\Interrupt());
-
-// $engine = new prggmr\Engine();
-// $engine->handle(function(){
-//     echo PHP_EOL."CATCHING SHUTDOWN".PHP_EOL;
-//     exit
-// }, new prggmr\signal\pcntl\Interrupt($engine));
+$engine = new prggmr\Engine();
+$engine->handle(function(){
+    echo PHP_EOL."CATCHING SHUTDOWN IN ENGINE".PHP_EOL;
+    var_dump($this);
+    exit;
+}, new prggmr\signal\pcntl\Interrupt($engine));
 // inifite loop to demonstrate ctrl-c to exit
 while(1){}

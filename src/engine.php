@@ -228,7 +228,6 @@ class Engine {
                 // idle for the given time in milliseconds
                 usleep($this->_routines[0] * 1000);
             }
-            gc_collect_cycles();
         }
         $this->signal(esig::LOOP_SHUTDOWN);
     }
@@ -787,16 +786,35 @@ class Engine {
     }
 
     /**
-     * Generates html output for analyzing the system event architecture.
+     * Generates output for analyzing the system event architecture.
      * 
-     * @param  string  $file  File to output analysis, null to return.
+     * @param  string  $output  File to output analysis, null to return.
+     * @param  string  $template  Template to use for generation
      * 
-     * @return  string
+     * @return  void
      */
-    public function event_analysis($file = null)
+    public function event_analysis($output, $template = null)
     {
         if (!ENGINE_EVENT_HISTORY) return false;
-
+        if (null === $template) {
+            $template = 'html';
+        }
+        $path = dirname(realpath(__FILE__));
+        $template_file = sprintf(
+            '%s/%s/%s.php',
+            $path, 'templates', $template
+        );
+        if (!file_exists($template_file) {
+            throw new \InvalidArgumentException(sprintf(
+                "Event analysis file %s does not exist",
+                $template_file
+            ));
+        }
+        ob_start();
+        include $template_file;
+        $output = ob_get_contents();
+        ob_end_clean();
+        file_put_contents($output);
     }
 
     /**

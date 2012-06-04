@@ -17,5 +17,9 @@ unittest\api\suite(function(){
     $this->teardown(function(){
         unset($this->engine);
     });
+
+    $this->test(function(){
+
+    });
     
 });
