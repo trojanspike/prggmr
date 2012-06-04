@@ -6,10 +6,12 @@
 $usage = "usage: prggmr [options...] file
 
 Current options:
+  -a/--analysis Generate event analysis output using default configuration.
   -c/--config   Configuration file
   -d            Used for the development of prggmr.
   -h/--help     Show this help message.
-  -p/--passthru Pass the given arguments to the script
+  -o/--output   Send the event analysis output to the specified file.
+  -p/--passthru Pass the given arguments to the script.
   -t/--time     Length of time to run in milliseconds.
   -u/--unittest Load the unit testing signal library.
   -v/--version  Displays current prggmr version.
