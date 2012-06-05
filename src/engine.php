@@ -404,6 +404,16 @@ class Engine {
      */
     public function handle($callable, $signal, $priority = QUEUE_DEFAULT_PRIORITY, $exhaust = 1)
     {
+        /**
+         * Allow for giving the signal first
+         */
+        if ($signal instanceof Closure) {
+            $tmp = $callable;
+            $callable = $signal;
+            $signal = $tmp;
+            unset($tmp);
+        }
+
         if (is_int($signal) && $signal >= 0xE001 && $signal <= 0xE02A) {
             $this->signal(esig::RESTRICTED_SIGNAL, array(
                 func_get_args()
