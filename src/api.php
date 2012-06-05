@@ -76,27 +76,15 @@ function event_history(/* ... */)
 /**
  * Locates or creates a signal Queue in storage.
  * 
- * The storage is designed to place any sortable types [int, strings and
- * sortable objects] at top of the stack and place any unstortable types 
- * [complex objects] at the bottom.
- * 
- * A visual representation:
- * 
- * [
- *     1,2,object(3),4
- *     'a','b',object('c'),'d'
- *     object(c2), object(c2)
- * ]
- * 
  * @param  string|integer|object  $signal  Signal
  * @param  boolean  $create  Create the queue if not found.
  * @param  integer  $type  [QUEUE_MIN_HEAP,QUEUE_MAX_HEAP]
  *
- * @return  boolean|array  [QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, queue, signal]
+ * @return  boolean|array  False|[QUEUE_NEW|QUEUE_EMPTY|QUEUE_NONEMPTY, queue, signal]
  */
 function signal_queue($signal, $create = true, $type = QUEUE_MIN_HEAP)
 {
-    return \prggmr::instance()->signal_queue($signal);
+    return \prggmr::instance()->signal_queue($signal, $create, $type);
 }
 
 /**
