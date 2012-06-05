@@ -314,7 +314,7 @@ class Engine {
                     if ($this->_routines[2] !== null) {
                         $this->signal(esig::IDLE_FUNCTION_OVERFLOW, array($_node[0]));
                     } else {
-                        
+                        $this->_routines[2] = $function;
                     }
                 }
             }
