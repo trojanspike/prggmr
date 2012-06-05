@@ -62,6 +62,14 @@ class Signals {
      */
     const INVALID_INTERRUPT = 0xE010;
     /**
+     * Expired event given to execute.
+     */
+    const EVENT_EXPIRED = 0xE011;
+    /**
+     * Multiple signals returned a function to idle the engine.
+     */
+    const IDLE_FUNCTION_OVERFLOW = 0xE012;
+    /**
      * Engine loop startup
      */
     const LOOP_START = 0xE015;

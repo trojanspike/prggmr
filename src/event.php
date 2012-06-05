@@ -41,7 +41,7 @@ class Event {
     /**
      * Event TTL
      */
-    protected $_ttl = null;
+    private $_ttl = null;
 
     /**
      * Construction allow for setting the event TTL.

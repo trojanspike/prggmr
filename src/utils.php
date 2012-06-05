@@ -124,27 +124,36 @@ function engine_code($code)
 {
     switch($code) {
         case \prggmr\engine\Signals::INVALID_HANDLE:
-            return "Invalid function provided for signal handler";
+            return "($code) Invalid function provided for signal handler";
             break;
         case \prggmr\engine\Signals::HANDLE_EXCEPTION:
-            return "Exception occured during handle execution";
+            return "($code) Exception occured during handle execution";
         case \prggmr\engine\Signals::INVALID_SIGNAL:
-            return "Invalid or unknown signal";
+            return "($code) Invalid or unknown signal";
             break;
         case \prggmr\engine\Signals::INVALID_EVENT:
-            return "Invalid or unknown event";
+            return "($code) Invalid or unknown event";
             break;
         case \prggmr\engine\Signals::INVALID_HANDLE_DIRECTORY:
-            return "Invalid handle loading directory";
+            return "($code) Invalid handle loading directory";
             break;
         case \prggmr\engine\Signals::INVALID_SIGNAL_DIRECTORY:
-            return "Invalid signal loading directory";
+            return "($code) Invalid signal loading directory";
             break;
         case \prggmr\engine\Signals::SIGNAL_LOAD_FAILURE:
-            return "Signal library __autoload could not be found";
+            return "($code) Signal library __autoload could not be found";
             break;
         case \prggmr\engine\Signals::INVALID_INTERUPT:
-            return "Invalid signal interuption";
+            return "($code) Invalid signal interuption";
         break;
+        case \prggmr\engine\Signals::EVENT_EXPIRED:
+            return "($code) Expired event has attempted execution";
+            break;
+        case \prggmr\engine\Signals::IDLE_FUNCTION_OVERFLOW:
+            return "($code) Multiple signals have returned an engine idle function";
+            break;
+        default:
+            return "($code) Unknown engine code";
+            break;
     }
 }
