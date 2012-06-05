@@ -94,7 +94,7 @@ abstract class Complex extends Standard {
      *
      * @return  integer|null
      */
-    final public function get_idle_time()
+    final public function get_idle_time(/* ... */)
     {
         return $this->_idle_time;
     }
@@ -110,7 +110,7 @@ abstract class Complex extends Standard {
      *
      * @return  array
      */
-    final public function get_dispatch_signals()
+    final public function get_dispatch_signals(/* ... */)
     {
         return $this->_dispatch_signals;
     }
@@ -120,7 +120,7 @@ abstract class Complex extends Standard {
      *
      * @return  null|closure
      */
-    final public function get_idle_function()
+    final public function get_idle_function(/* ... */)
     {
         return $this->_idle_function();
     }
