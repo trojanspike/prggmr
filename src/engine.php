@@ -604,10 +604,11 @@ class Engine {
      * 
      * @param  int|string|object  $signal
      * @param  object  $event  \prggmr\Event
+     * @param  int|null  $ttl  Event TTL
      * 
      * @return  object  \prggmr\Event
      */
-    private function _event($signal, $event = null)
+    private function _event($signal, $event = null, $ttl = null)
     {
         // event creation
         if (!$event instanceof Event) {
