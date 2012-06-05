@@ -202,9 +202,17 @@ class Engine {
         }
         $this->signal(esig::LOOP_START);
         while($this->_routines()) {
+
             // check state
             if ($this->get_state() === STATE_HALTED) break;
             
+            if (count($this->_routines[1]) !== 0) {
+                foreach ($this->_routines[1] as $_signal) {
+                    $this->_execute(
+
+                    )
+                }
+            }
             // directly execute given sig handlers
             if (count($this->_routines[2]) != 0) {
                 foreach ($this->_routines[2] as $_node) {
@@ -240,63 +248,73 @@ class Engine {
     private function _routines()
     {
         $return = false;
-        $this->_routines = [null, [], []];
+        $this->_routines = [null, [], null];
         // allow for external shutdown signal before running anything
         if ($this->get_state() === STATE_HALTED) return false;
         foreach ($this->_storage[self::COMPLEX_STORAGE] as $_key => $_node) {
             $routine = $_node[0]->routine($this->_event_history);
-            if (is_array($routine) && count($routine) == 3) {
-                // Check for signals
-                if (null !== $routine[0]) {
-                    if (is_array($routine[0])) {
-                        foreach ($routine as $_sig) {
-                            if (false === $this->_routine_exhausted($_sig)) {
-                                $return = true;
+            if (false != $routine) {
+                $signals = $routine->get_dispatch_signals();
+                $idle = $routine->get_idle_time();
+                $function = $routine->get_idle_function();
+                // Check signals
+                if (null !== $signals && is_array($signals)) {
+                    foreach ($signals as $_signal) {
+                        // check for ttl
+                        if (is_array($_signal)) {
+                            $_sig = $_signal[0];
+                            $_ttl = $_signal[1];
+                        } else {
+                            $_sig = $_signal;
+                            $_ttl = null;
+                        }
+                        $_event = null;
+                        // check for routine signal
+                        if ($_sig === ENGINE_ROUTINE_SIGNAL) {
+                            $_sig = $_node[0];
+                        }
+                        // ensure it has not exhausted
+                        if (false === $this->_has_routine_exhausted($_sig)) {
+                            $return = true;
+                            // Routine signal
+                            if ($_sig === ENGINE_ROUTINE_SIGNAL) {
+                                // recurring signals will always get the same event
+                                // was the even registered with the signal at the handle?
                                 if (!isset($_node[2])) {
+                                    // has this signal provided an event?
                                     if (null !== $_node[0]->event()) {
-                                        $_node[2] = $_node[0]->event();
+                                        $_event = $_node[0]->event();
                                         // destroy reference
-                                        $_node[0]->event(false);
+                                        $this->_storage[self::COMPLEX_STORAGE][$_key][0]->event(false);
                                     } else {
-                                        $_node[2] = null;
+                                        $_event = new Event($_ttl);
                                     }
-                                }
-                                $this->_routines[1][] = [$_sig, $_node[0]->vars(), $_node[2]];
-                            }
-                        }
-                    // Trigger one signal
-                    } else {
-                        if (false === $this->_routine_exhausted($_routine[0])) {
-                            $return = true;
-                            $this->_routines[1][] = [$_routine[0], $_node[0]->vars(), $_node[0]->event()];
-                        }
-                    }
-                }
-                // Trigger the signal itself
-                if (null !== $routine[1]) {
-                    if ($routine[1] === ENGINE_ROUTINE_SIGNAL) {
-                        if (false === $this->_routine_exhausted($_node[1])) {
-                            $return = true;
-                            // Recurring signals will always get the same event
-                            if (!isset($_node[2])) {
-                                if (null !== $_node[0]->event()) {
-                                    $_node[2] = $_node[0]->event();
-                                    // destroy reference
-                                    $this->_storage[self::COMPLEX_STORAGE][$_key][0]->event(false);
+                                    // store future reference
+                                    $this->_storage[self::COMPLEX_STORAGE][$_key][2] = $_event;
                                 } else {
-                                    $_node[2] = new Event();
+                                    $_event = $_node[2];
                                 }
-                                $this->_storage[self::COMPLEX_STORAGE][$_key][2] = $_node[2];
+                                $this->_routines[1][] = $_node;
+                            // String, Int signals
+                            } else {
+                                $this->_routines[1][] = [$_sig, $_event, $_ttl];
                             }
-                            $this->_routines[2][] = $_node;
                         }
                     }
                 }
-                // check for idle
-                if ($routine[2] !== null && is_int($routine[2]) || is_float($routine[2])) {
-                    if (null === $this->_routines[0] || $this->_routines[0] > $routine[2]) {
+                // Idle Time
+                if ($idle !== null && is_int($idle) || is_float($idle)) {
+                    if (null === $this->_routines[0] || $this->_routines[0] > $idle) {
                         $return = true;
-                        $this->_routines[0] = $routine[2];
+                        $this->_routines[0] = $idle;
+                    }
+                }
+                // Idle function
+                if ($function !== null) {
+                    if ($this->_routines[2] !== null) {
+                        $this->signal(esig::IDLE_FUNCTION_OVERFLOW, array($_node[0]));
+                    } else {
+                        
                     }
                 }
             }
@@ -311,7 +329,7 @@ class Engine {
      * 
      * @return  boolean
      */
-    private function _routine_exhausted($queue)
+    private function _has_routine_exhausted($queue)
     {
         if (!$queue instanceof Queue) {
             $queue = $this->signal_queue($queue, false);
@@ -596,7 +614,7 @@ class Engine {
             if (null !== $event) {
                 $this->signal(esig::INVALID_EVENT, array($event));
             }
-            $event = new Event();
+            $event = new Event($ttl);
         } else {
             if ($event->get_state() !== STATE_DECLARED) {
                 $event->set_state(STATE_RECYCLED);
@@ -652,7 +670,7 @@ class Engine {
      *
      * @return  object  Event
      */
-    public function signal($signal, $vars = null, $event = null)
+    public function signal($signal, $vars = null, $event = null, $ttl = null)
     {
         // check variables
         if (null !== $vars) {
@@ -662,7 +680,7 @@ class Engine {
         }
 
         // load engine event
-        $event = $this->_event($signal, $event);
+        $event = $this->_event($signal, $event, $ttl);
 
         // locate sig handlers
         $queue = new Queue();
@@ -711,6 +729,10 @@ class Engine {
      */
     protected function _execute($signal, $queue, $event, $vars, $interrupt = true)
     {
+        if ($event->has_expired()) {
+            $this->signal(esig::EVENT_EXPIRED, [$event]);
+            return $event;
+        }
         // handle pre interupt functions
         if ($interrupt) {
             $this->_interrupt($signal, self::INTERRUPT_PRE, $vars, $event);
