@@ -39,6 +39,42 @@ class Event {
     protected $_signal = null;
 
     /**
+     * Event TTL
+     */
+    protected $_ttl = null;
+
+    /**
+     * Construction allow for setting the event TTL.
+     *
+     * @param  integer  $ttl  TTL in milliseconds for the event.
+     *
+     * @return  object  prggmr\Event
+     */
+    public function __construct($ttl = null)
+    {
+        if (null !== $ttl) {
+            if (!is_int($ttl)) {
+                throw new \InvalidArgumentException(sprintf(
+                    "Event TTL must be an integer %s given",
+                    gettype($ttl)
+                ));
+            }
+            $this->_ttl = milliseconds() + $ttl;
+        }
+    }
+
+    /**
+     * Returns if the event's TTL has passed.
+     *
+     * @return  boolean
+     */
+    public function has_expired()
+    {
+        if (null === $this->_ttl) return false;
+        return milliseconds() >= $this->_ttl;
+    }
+
+    /**
      * Sets the signal for the event.
      * 
      * @param  string|int|object

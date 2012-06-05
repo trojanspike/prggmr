@@ -11,7 +11,7 @@ use \LogicException;
 /**
  * Added in v0.3.0
  * 
- * Complex signals are anything that is not a string or integer.
+ * Complex signals are anything that must be evaluted or run in a routine.
  */
 abstract class Complex extends Standard {
 
@@ -28,6 +28,27 @@ abstract class Complex extends Standard {
      * @var  object
      */
     protected $_event = null;
+
+    /**
+     * Amount of time to idle the engine.
+     *
+     * @var  integer|null
+     */
+    protected $_idle_time = null;
+
+    /**
+     * Array of signals to dispatch.
+     *
+     * @var  array|null
+     */
+    protected $_dispatch_signals = null;
+
+    /**
+     * Function to execute to idle the engine.
+     *
+     * @var  closure|null
+     */
+    protected $_idle_function = null;
 
     /**
      * Compares the event signal given aganist itself.
@@ -54,9 +75,10 @@ abstract class Complex extends Standard {
      * The goal of running routine calculations is to allow for complex event
      * processing.
      * 
-     * FALSE indicates the signal can do nothing.
+     * False indicates the signal can do nothing.
      * 
-     * ARRAY informs the engine to signal those events.
+     * True informs the engine to process this signal for idle or signal 
+     * dispatchment.
      * 
      * @param  array  $history  Event history
      * 
@@ -65,6 +87,42 @@ abstract class Complex extends Standard {
     public function routine($history = null)
     {
         return false;
+    }
+
+    /**
+     * Returns an idle time for the signal.
+     *
+     * @return  integer|null
+     */
+    final public function get_idle_time()
+    {
+        return $this->_idle_time;
+    }
+
+    /**
+     * Returns signals to dispatch.
+     *
+     * Signals can be returned as either a standard prggmr signal or the complex
+     * signal flag. 
+     *
+     * Signals can set the event's TTL by passing the signal as an array with 
+     * node index 1 as the event TTL.
+     *
+     * @return  array
+     */
+    final public function get_dispatch_signals()
+    {
+        return $this->_dispatch_signals;
+    }
+
+    /**
+     * Returns a function for the engine to run during idle.
+     *
+     * @return  null|closure
+     */
+    final public function get_idle_function()
+    {
+        return $this->_idle_function();
     }
 
     /**
