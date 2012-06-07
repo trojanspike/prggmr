@@ -115,9 +115,13 @@ class Uri extends \prggmr\signal\Complex {
             }
             $this->_vars = $vars;
         }
+        // skip regex if method is not allowed
+        if (!in_array($_SERVER['REQUEST_METHOD'], $method)) {
+            return $this;
+        }
         $this->_routes = [];
         if (is_array($uri)) {
-            if (is_array($uri[0]) || isset($uri[1]) && !is_array($uri[1])) {
+            if (is_array($uri[0])) {
                 foreach ($uri as $_route) {
                     $this->_routes[] = $this->_generate_regex($_route);
                 }
@@ -126,10 +130,6 @@ class Uri extends \prggmr\signal\Complex {
             }
         } else {
             $this->_routes[] = $this->_generate_regex($uri);
-        }
-        // skip regex check if method is not allowed
-        if (!in_array($_SERVER['REQUEST_METHOD'], $method)) {
-            return $this;
         }
         foreach ($this->_routes as $_route) {
             if (preg_match('@^' . $_route[0] . '$@', REQUEST_URI, $matches)) {
@@ -153,7 +153,11 @@ class Uri extends \prggmr\signal\Complex {
     {
         if (is_array($conditions)) {
             $uri = array_shift($conditions);
-            $conditions = $conditions[0];
+            if (isset($conditions[0])) {
+                $conditions = $conditions[0];
+            } else {
+                $conditions = [];
+            }
         } else {
             $uri = $conditions;
             $conditions = [];
