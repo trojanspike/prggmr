@@ -122,7 +122,7 @@ abstract class Complex extends Standard {
      */
     final public function get_idle_function(/* ... */)
     {
-        return $this->_idle_function();
+        return $this->_idle_function;
     }
 
     /**

@@ -161,14 +161,30 @@ class Engine {
     protected $_libraries = [];
 
     /**
+     * Throw exceptions encountered rather than a signal.
+     *
+     * @var  boolean
+     */
+    private $_engine_exceptions = null;
+
+    /**
+     * Maintain the event history.
+     *
+     * @var  boolean
+     */
+    private $_store_history = null;
+
+    /**
      * Starts the engine.
      * 
      * @return  void
      */
-    public function __construct()
+    public function __construct($event_history = ENGINE_EVENT_HISTORY, $engine_exceptions = ENGINE_EXCEPTIONS)
     {
+        $this->_engine_exceptions = (bool) $engine_exceptions;
+        $this->_store_history = (bool) $event_history;
         $this->flush();
-        if (ENGINE_EXCEPTIONS) {
+        if ($this->_engine_exceptions) {
             if (!class_exists('\prggmr\signal\integer\Range', false)){
                 require_once 'signal/integer/range.php';
             }
@@ -633,7 +649,7 @@ class Engine {
         }
         $event->set_signal($signal);
         // are we keeping the history
-        if (!ENGINE_EVENT_HISTORY) {
+        if (!$this->_store_history) {
             return $event;
         }
         // TODO : infinite loop detection algorithm
@@ -660,7 +676,7 @@ class Engine {
             $event->set_state(STATE_EXITED);
         }
         // are we keeping the history
-        if (!ENGINE_EVENT_HISTORY) {
+        if (!$this->_store_history) {
             return null;
         }
         if (count($this->_event_children) !== 0) {
@@ -765,7 +781,7 @@ class Engine {
             $handle->bind($event);
             // set event as running
             $event->set_state(STATE_RUNNING);
-            if (ENGINE_EXCEPTIONS) {
+            if ($this->_engine_exceptions) {
                 $result = $handle($vars);
             } else {
                 try {
@@ -828,7 +844,7 @@ class Engine {
      */
     public function event_analysis($output, $template = null)
     {
-        if (!ENGINE_EVENT_HISTORY) return false;
+        if (!$this->_store_history) return false;
         if (null === $template) {
             $template = 'html';
         }
@@ -1044,7 +1060,7 @@ class Engine {
      */
     public function erase_signal_history($signal)
     {
-        if (!ENGINE_EVENT_HISTORY || count($this->_event_history) == 0) {
+        if (!$this->_store_history || count($this->_event_history) == 0) {
             return false;
         }
         // recursivly check if any events are a child of the given signal
@@ -1068,7 +1084,20 @@ class Engine {
                 }
             }
         }
-    } 
+    }
+
+    /**
+     * Sets the flag for storing the event history.
+     * If disabling the history this does not clear the current.
+     *
+     * @param  boolean  $flag
+     *
+     * @return  void
+     */
+    public function save_event_history($flag)
+    {
+        $this->_store_history = (bool) $flag;
+    }
 }
 
 class EngineException extends \Exception {
