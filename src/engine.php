@@ -218,35 +218,13 @@ class Engine {
         }
         $this->signal(esig::LOOP_START);
         while($this->_routines()) {
-
             // check state
             if ($this->get_state() === STATE_HALTED) break;
-            
-            if (count($this->_routines[1]) !== 0) {
-                foreach ($this->_routines[1] as $_signal) {
-                    $this->_execute(
-
-                    )
+            if (count($this->_routines[0]) !== 0) {
+                foreach ($this->_routines[0] as $_routine) {
+                    $this->signal($_routine[0], $_routine[1], $_routine[2]);
                 }
             }
-            // directly execute given sig handlers
-            if (count($this->_routines[2]) != 0) {
-                foreach ($this->_routines[2] as $_node) {
-                    $this->_execute(
-                        $_node[0], $_node[1], $this->_event($_node[0], $_node[2]), $_node[0]->vars()
-                    );
-                }
-            }
-
-            // signal the given signals
-            if (count($this->_routines[1]) != 0) {
-                foreach ($this->_routines[1] as $_signals) {
-                    foreach ($_signals as $_node) {
-                        $this->signal($_node[0], $_node[1], $_node[2]);
-                    }
-                }
-            }
-
             // check for idle time
             if ($this->_routines[0] !== null) {
                 // idle for the given time in milliseconds
@@ -258,74 +236,79 @@ class Engine {
 
     /**
      * Runs complex signal routines for engine loop.
+     *
+     * The routines are stored within the engine using the following structure,
+     *
+     * [
+     *     # Signals to dispatch
+     *     0 => [],
+     *     # Idle Time
+     *     1 => [
+     *         # Time to idle
+     *         0 => (int|null)
+     *         # Timestamp when the engine should wake up
+     *         1 => int
+     *     ],
+     *     # Idle function
+     *     2 => (null|closure)
+     * ]
+     *
+     * The engine only allows for a single function to be executed as the 
+     * idle function and attempting to register two or more functions will
+     * result in a engine\Signal::IDLE_FUNCTION_OVERFLOW signal triggered.
      * 
      * @return  boolean|array
      */
     private function _routines()
     {
         $return = false;
-        $this->_routines = [null, [], null];
+        $this->_routines = [[], null, null];
         // allow for external shutdown signal before running anything
         if ($this->get_state() === STATE_HALTED) return false;
         foreach ($this->_storage[self::COMPLEX_STORAGE] as $_key => $_node) {
             $routine = $_node[0]->routine($this->_event_history);
             if (false != $routine) {
-                $signals = $routine->get_dispatch_signals();
-                $idle = $routine->get_idle_time();
-                $function = $routine->get_idle_function();
                 // Check signals
-                if (null !== $signals && is_array($signals)) {
+                $signals = $_node[0]->get_dispatch_signals();
+                if (null !== $signals && $signals instanceof signal\Routines) {
+                    $signals = $signals->get_signals();
                     foreach ($signals as $_signal) {
-                        // check for ttl
-                        if (is_array($_signal)) {
-                            $_sig = $_signal[0];
-                            $_ttl = $_signal[1];
-                        } else {
-                            $_sig = $_signal;
-                            $_ttl = null;
-                        }
-                        $_event = null;
-                        // check for routine signal
-                        if ($_sig === ENGINE_ROUTINE_SIGNAL) {
-                            $_sig = $_node[0];
-                        }
+                        list($_sig, $_vars, $_event) = $_signal;
                         // ensure it has not exhausted
                         if (false === $this->_has_routine_exhausted($_sig)) {
                             $return = true;
-                            // Routine signal
-                            if ($_sig === ENGINE_ROUTINE_SIGNAL) {
-                                // recurring signals will always get the same event
-                                // was the even registered with the signal at the handle?
+                            // recurring signals will always get the same event
+                            // was the event registered with the signal at the handle?
+                            if (null === $_event) {
                                 if (!isset($_node[2])) {
                                     // has this signal provided an event?
                                     if (null !== $_node[0]->event()) {
                                         $_event = $_node[0]->event();
-                                        // destroy reference
+                                        // destroy reference so we dont circle
                                         $this->_storage[self::COMPLEX_STORAGE][$_key][0]->event(false);
                                     } else {
-                                        $_event = new Event($_ttl);
+                                        $_event = new Event();
                                     }
                                     // store future reference
                                     $this->_storage[self::COMPLEX_STORAGE][$_key][2] = $_event;
                                 } else {
                                     $_event = $_node[2];
                                 }
-                                $this->_routines[1][] = $_node;
-                            // String, Int signals
-                            } else {
-                                $this->_routines[1][] = [$_sig, $_event, $_ttl];
                             }
+                            $this->_routines[0][] = [$_sig, $_vars, $_event];
                         }
                     }
                 }
                 // Idle Time
+                $idle = $_node[0]->get_idle_time();
                 if ($idle !== null && is_int($idle) || is_float($idle)) {
                     if (null === $this->_routines[0] || $this->_routines[0] > $idle) {
                         $return = true;
-                        $this->_routines[0] = $idle;
+                        $this->_routines[1] = [$idle, $idle + milliseconds()];
                     }
                 }
                 // Idle function
+                $function = $_node[0]->get_idle_function();
                 if ($function !== null) {
                     if ($this->_routines[2] !== null) {
                         $this->signal(esig::IDLE_FUNCTION_OVERFLOW, array($_node[0]));
@@ -740,7 +723,7 @@ class Engine {
     }
 
     /**
-     * Executes a queue. 
+     * Executes a queue.
      * 
      * This will monitor the event status and break on a HALT or ERROR state.
      * 

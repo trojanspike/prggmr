@@ -1,4 +1,7 @@
 [ 2.0.0 TBD ]
+- Routine signals now all dispatch through the signal method rather than calling
+  the _execute method directly
+- Added the signal\Routines class
 - Added the get_idle_time, get_dispatch_signals, get_idle_function to the 
   Complex signal class.
 - Engine routine now uses the get_idle_time, *_dispatch_signal and 
