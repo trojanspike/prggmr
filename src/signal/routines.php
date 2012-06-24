@@ -32,7 +32,7 @@ final class Routines {
      */
     public function add_signal($signal = null, $vars = null, $event = null) 
     {
-        $this->_signals = [$signal, $event];
+        $this->_signals = [$signal, $vars, $event];
     }
 
     /**
