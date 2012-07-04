@@ -231,7 +231,52 @@ function erase_signal_history($signal)
  * 
  * @return  object  prggmr\Engine
  */
-function init($event_history = null, $engine_exceptions = null) 
+function init($event_history = true, $engine_exceptions = true)
 {
     return \prggmr::init($event_history, $engine_exceptions);
+}
+
+/**
+ * Disables the exception handler.
+ *
+ * @param  boolean  $history  Erase any history of exceptions signaled.
+ *
+ * @return  void
+ */
+function disable_signaled_exceptions($history = false)
+{
+    return prggmr::instance()->disable_signaled_exceptions($history);
+}
+
+/**
+ * Enables the exception handler.
+ *
+ * @return  void
+ */
+function enable_signaled_exceptions()
+{
+    return prggmr::instance()->enable_signaled_exceptions();
+}
+
+/**
+ * Cleans out the event history.
+ *
+ * @return  void
+ */
+function erase_history()
+{
+    return prggmr::instance()->erase_history();
+}
+
+/**
+ * Sets the flag for storing the event history.
+ * If disabling the history this does not clear the current.
+ *
+ * @param  boolean  $flag
+ *
+ * @return  void
+ */
+public function save_event_history($flag)
+{
+    return prggmr::instance()->save_event_history($flag);
 }

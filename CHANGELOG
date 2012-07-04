@@ -1,5 +1,5 @@
 [ 2.0.0 TBD ]
-- Removed the ENGINE_EXCEPTIONS and ENVE_HISTORY constants
+- Removed the ENGINE_EXCEPTIONS and EVENT_HISTORY constants
 - Added the disable_signaled_exceptions, init, enable_signaled_exceptions and
   erase_history functions to both the API and engine.
 - Routine signals now all dispatch through the signal method rather than calling
