@@ -11,27 +11,6 @@ use \Closure,
     \prggmr\engine\Signals as esig;
 
 /**
- * Engine will throw exceptions rather than signals on errors.
- */
-if (!defined('ENGINE_EXCEPTIONS')) {
-    define('ENGINE_EXCEPTIONS', true);
-}
-
-/**
- * Maintain the event history
- */
-if (!defined('ENGINE_EVENT_HISTORY')) {
-    define('ENGINE_EVENT_HISTORY', true);
-}
-
-/**
- * Allow the engine to detect inifinite looping.
- */
-if (!defined('ENGINE_RECURSIVE_DETECTION')) {
-    define('ENGINE_RECURSIVE_DETECTION', false);
-}
-
-/**
  * Complex signal return to trigger the signal during routine calculation.
  */
 define('ENGINE_ROUTINE_SIGNAL', -0xF14E);
@@ -181,10 +160,14 @@ class Engine {
 
     /**
      * Starts the engine.
+     *
+     * @param  boolean  $event_history  Store a history of all events.
+     * @param  boolean  $engine_exceptions  Throw an exception when a error 
+     *                                      signal is triggered.
      * 
      * @return  void
      */
-    public function __construct($event_history = ENGINE_EVENT_HISTORY, $engine_exceptions = ENGINE_EXCEPTIONS)
+    public function __construct($event_history = true, $engine_exceptions = true)
     {
         $this->_engine_exceptions = (bool) $engine_exceptions;
         $this->_store_history = (bool) $event_history;
@@ -248,7 +231,18 @@ class Engine {
      */
     public function enable_signaled_exceptions()
     {
+        $this->_engine_exceptions = true;
         $this->_register_exception_handler();
+    }
+
+    /**
+     * Cleans out the event history.
+     *
+     * @return  void
+     */
+    public function erase_history()
+    {
+        $this->_event_history = [];
     }
 
     /**

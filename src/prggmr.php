@@ -6,7 +6,7 @@
  */
 
 // library version
-define('PRGGMR_VERSION', '1.2.4');
+define('PRGGMR_VERSION', '2.0.0-alpha');
 
 // The creator
 define('PRGGMR_MASTERMIND', 'Nickolas Whiting');
@@ -47,11 +47,28 @@ if (!defined('SIGNAL_ERRORS_EXCEPTIONS')) {
 }
 /**
  * The prggmr object works as the global instance used for managing the
- * global api.
+ * global engine instance.
  */
 final class prggmr extends \prggmr\Engine {
 
     use prggmr\Singleton;
+
+    /**
+     * Initialise the global engine instance.
+     *
+     * @param  boolean  $event_history  Store a history of all events.
+     * @param  boolean  $engine_exceptions  Throw an exception when a error 
+     *                                      signal is triggered.
+     * 
+     * @return  object  prggmr\Engine
+     */
+    final public static function init($event_history, $engine_exceptions) 
+    {
+        if (null === static::$_instance) {
+            static::$_instance = new self($event_history, $engine_exceptions);
+        }
+        return static::$_instance;
+    }
 
     /**
      * Returns the current version of prggmr.

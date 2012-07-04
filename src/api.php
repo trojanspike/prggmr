@@ -221,3 +221,17 @@ function erase_signal_history($signal)
 {
     return \prggmr::instance()->erase_signal_history($signal);
 }
+
+/**
+ * Initialize the prggmr global engine.
+ *
+ * @param  boolean  $event_history  Store a history of all events.
+ * @param  boolean  $engine_exceptions  Throw an exception when a error 
+ *                                      signal is triggered.
+ * 
+ * @return  object  prggmr\Engine
+ */
+function init($event_history = null, $engine_exceptions = null) 
+{
+    return \prggmr::init($event_history, $engine_exceptions);
+}
