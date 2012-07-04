@@ -1,0 +1,68 @@
+#!/bin/bash
+########################
+# Installs prggmr to the php include path
+########################
+PHPPATH=$(php -r "echo get_include_path();") 
+INSTALLPATH=""
+BINPATH="/usr/bin"
+echo ""
+echo "============================================================="
+echo "!! WARNING THIS WILL REPLACE YOUR EXISTING AN INSTALLATION !!"
+echo "============================================================="
+echo ""
+for x in $(echo $PHPPATH | tr ":" "\n")
+do
+    if [ "$x" != "." ]; then
+        INSTALL_PATH="$x"
+        break
+    fi
+done
+if [[ $INSTALL_PATH = "" ]]; then
+    echo "Could not find your PHP include path";
+    exit;
+fi
+SKIP=false
+while true; do
+    if [ $SKIP = false ]; then
+        read -p "Use $INSTALL_PATH for installation : " yn
+    else
+        yn="y" 
+    fi
+    case $yn in
+        [Yy]* )
+            install="$INSTALL_PATH/prggmr"
+            echo "Installing prggmr to $install"
+            if [ -f "$install" ]; then
+                echo "No current installation found"
+            else
+                echo "Removing current installation"
+                rm -rf "$install"
+            fi
+            mkdir $install
+            cp -Rf * "$install"
+            echo "Installing the executable prggmr file"
+            if [ -f "$BINPATH/prggmr" ]; then
+                echo "Removing current executable file"
+                rm "$BINPATH/prggmr"
+            fi
+            ln -s "$install/bin/prggmr" "$BINPATH"
+            prggmr -v
+            echo "Installed"
+            echo "Have fun with prggmr"
+            echo "Report bugs to https://github.com/nwhitingx/prggmr/issues"
+            break;;
+        [Nn]* )
+            read -p "Where do you want to install : " INSTALL_PATH
+            echo "And the prggmr executable (default=$BINPATH)"
+            read -p "Leave blank for default : " TMP_BIN
+            case $TMP_BIN in
+                * )
+                if [[ $TMP_BIN != "" ]]; then
+                    BINPATH="$TMP_BIN"
+                fi
+                SKIP=true
+                ;;
+            esac;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done

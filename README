@@ -125,25 +125,15 @@ And include the library
 require_once 'vendor/prggmr/prggmr/src/prggmr.php';
 ```
 
-### Global system installation
+### Installation to PHP_INCLUDE_PATH
 
-This method will install prggmr to your php include path.
+This method is recommended if you are building multiple applications on a server
 
-Download the latest release and navigate a terminal to the extract directory.
+Download the latest release and run the following command in the prggmr folder.
 
-    # cd into the prggmr library so you see the README, LICENSE etc..
-    $ cd path/to/prggmr/extraction
-    # Get include path
-    $ php -r "echo get_include_path();"
-    # My output .:/usr/local/lib/php
-    # Copy prggmr to lib
-    $ sudo cp -Rf * /usr/local/lib/php/prggmr/*
-    # Copy bin
-    $ sudo ln -ls /usr/local/lib/php/prggmr/bin/prggmr /usr/bin/
-    # Test
-    $ prggmr -v
-    # Result
-    $ prggmr version 1.2.3
+```ssh
+sudo ./install
+```
 
 And include the library
 
