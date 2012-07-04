@@ -175,6 +175,11 @@ class Engine {
     private $_store_history = null;
 
     /**
+     * Signal registered for the engine exception signals.
+     */
+    private $_engine_handle_signal = null;
+
+    /**
      * Starts the engine.
      * 
      * @return  void
@@ -185,21 +190,65 @@ class Engine {
         $this->_store_history = (bool) $event_history;
         $this->flush();
         if ($this->_engine_exceptions) {
-            if (!class_exists('\prggmr\signal\integer\Range', false)){
-                require_once 'signal/integer/range.php';
-            }
-            $this->handle(function(){
-                $args = func_get_args();
-                $type = end($args);
-                $message = null;
-                if ($args[0] instanceof \Exception) {
-                    $message = $args[0]->getMessage();
-                } else {
-                    $message = engine_code($type);
-                }
-                throw new EngineException($message, $type, $args);
-            }, new \prggmr\signal\integer\Range(0xE002, 0xE014), 0, null);
+           $this->_register_exception_handler();
         }
+    }
+
+    /**
+     * Registers the engine exceptions signal handler.
+     *
+     * @return  void
+     */
+    protected function _register_exception_handler()
+    {
+        if (!class_exists('\prggmr\signal\integer\Range', false)){
+            require_once 'signal/integer/range.php';
+        }
+        if (null === $this->_exception_handle_signal) {
+            $this->_engine_handle_signal = new \prggmr\signal\integer\Range(
+                0xE002, 0xE014
+            );
+        } else {
+            if ($this->_search_complex($this->_engine_handle_signal)[0] === self::SEARCH_FOUND) {
+                return true;
+            }
+        }
+        $this->handle(function(){
+            $args = func_get_args();
+            $type = end($args);
+            $message = null;
+            if ($args[0] instanceof \Exception) {
+                $message = $args[0]->getMessage();
+            } else {
+                $message = engine_code($type);
+            }
+            throw new EngineException($message, $type, $args);
+        }, $this->_engine_handle_signal, 0, null);
+    }
+
+    /**
+     * Disables the exception handler.
+     *
+     * @param  boolean  $history  Erase any history of exceptions signaled.
+     *
+     * @return  void
+     */
+    public function disable_signaled_exceptions($history = false)
+    {
+        $this->_engine_exceptions = false;
+        if (null !== $this->_engine_handle_signal) {
+            $this->delete_signal($this->_engine_handle_signal, $history);
+        }
+    }
+
+    /**
+     * Enables the exception handler.
+     *
+     * @return  void
+     */
+    public function enable_signaled_exceptions()
+    {
+        $this->_register_exception_handler();
     }
 
     /**
