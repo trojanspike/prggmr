@@ -1,3 +1,17 @@
+[ 2.0.0 TBD ]
+- Routine signals now all dispatch through the signal method rather than calling
+  the _execute method directly
+- Added the signal\Routines class
+- Added the get_idle_time, get_dispatch_signals, get_idle_function to the 
+  Complex signal class.
+- Engine routine now uses the get_idle_time, *_dispatch_signal and 
+  *_idle_function.
+- Engine now supports for complex signals to set a function to call to idle
+  the engine rather than just making a call to usleep.
+- Engine now allows for setting the engine_exceptions and event_history flags
+  on construction.
+  
+
 [ 1.2.4 TBD ]
 - Added pcntl signal library
 
