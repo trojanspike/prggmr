@@ -7,3 +7,4 @@
 $dir = dirname(realpath(__FILE__));
 require_once $dir.'/timeout.php';
 require_once $dir.'/interval.php';
+require_once $dir.'/api.php';

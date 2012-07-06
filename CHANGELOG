@@ -1,6 +1,8 @@
 [ 2.0.0 TBD ]
-- Added add_dispatch_signal, set_idle_time, set_idle_function to the Complex
-  signal object.
+- Removed the interval and timeout methods from prggmr's main API
+- Added the get_routine method to the Complex signal.
+- Added add_dispatch_signal, set_idle_time, set_idle_function to the Routine
+  object.
 - Removed the ENGINE_EXCEPTIONS and EVENT_HISTORY constants
 - Added the disable_signaled_exceptions, init, enable_signaled_exceptions and
   erase_history functions to both the API and engine.

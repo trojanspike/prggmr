@@ -7,7 +7,7 @@ namespace prggmr\signal\time;
  */
  
  /**
- * Time signal
+ * Timeout signal
  *
  * Trigger a signal based on a timeout.
  */
@@ -21,7 +21,7 @@ class Timeout extends \prggmr\signal\Complex {
     protected $_vars = null;
 
     /**
-     * Constructs a time signal.
+     * Constructs a timeout signal.
      *
      * @param  int  $time  Microseconds before signaling.
      *
@@ -37,13 +37,14 @@ class Timeout extends \prggmr\signal\Complex {
             );
         }
         $this->_info = $time + milliseconds();
+        parent::__construct();
     }
     
     /**
-     * Determines when the time signal should fire, otherwise returning
-     * the engine to idle until it will.
+     * Determines the time in the future that this signal should trigger and
+     * and sets the engines idle time until then. 
      * 
-     * @return  integer
+     * @return  void
      */
     public function routine($history = null)
     {
