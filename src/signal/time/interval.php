@@ -9,7 +9,7 @@ namespace prggmr\signal\time;
  /**
  * Time signal
  *
- * Signal event based on timed intervals.
+ * Trigger a signal based on timed intervals.
  */
 class Interval extends \prggmr\signal\time\Timeout {
 
@@ -29,7 +29,7 @@ class Interval extends \prggmr\signal\time\Timeout {
      *
      * @return  void
      */
-    public function __construct($time, $vars = null)
+    public function __construct($time)
     {
         parent::__construct($time, $vars);
         $this->_time = $time;
@@ -46,9 +46,9 @@ class Interval extends \prggmr\signal\time\Timeout {
         $current = milliseconds();
         $return = null;
         if ($current >= $this->_info) {
-            $this->_info = $this->_time + milliseconds();
-            $return = ENGINE_ROUTINE_SIGNAL;
+            $this->set_idle_time($this->_time + milliseconds());
+            $this->add_dispatch_signal($this);
         }
-        return [null, $return, $this->_info - $current];
+        return true;
     }
 }

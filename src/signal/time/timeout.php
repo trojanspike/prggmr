@@ -9,7 +9,7 @@ namespace prggmr\signal\time;
  /**
  * Time signal
  *
- * Signal event based on time.
+ * Trigger a signal based on a timeout.
  */
 class Timeout extends \prggmr\signal\Complex {
 
@@ -29,14 +29,13 @@ class Timeout extends \prggmr\signal\Complex {
      *
      * @return  void
      */
-    public function __construct($time, $vars = null)
+    public function __construct($time)
     {
         if (!is_int($time) || $time <= 0) {
             throw new \InvalidArgumentException(
                 "Invalid or negative timeout given."
             );
         }
-        $this->_vars = $vars;
         $this->_info = $time + milliseconds();
     }
     
@@ -51,9 +50,10 @@ class Timeout extends \prggmr\signal\Complex {
         $current = milliseconds();
         if (null === $this->_info) return false;
         if ($current >= $this->_info) {
-            $this->_info = null;
-            return [null, ENGINE_ROUTINE_SIGNAL, null];
+            $this->add_dispatch_signal($this);
+        } else {
+            $this->set_idle_time($this->_info - $current);
         }
-        return [null, null, $this->_info - $current];
+        return true;
     }
 }

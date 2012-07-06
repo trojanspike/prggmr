@@ -313,8 +313,10 @@ class Engine {
             if (false != $routine) {
                 // Check signals
                 $signals = $_node[0]->get_dispatch_signals();
-                if (null !== $signals && $signals instanceof signal\Routines) {
-                    $signals = $signals->get_signals();
+                if (null !== $signals) {
+                    if (!is_array($signals)) {
+                        $signals = [$signals];
+                    }
                     foreach ($signals as $_signal) {
                         list($_sig, $_vars, $_event) = $_signal;
                         // ensure it has not exhausted
@@ -344,7 +346,7 @@ class Engine {
                 }
                 // Idle Time
                 $idle = $_node[0]->get_idle_time();
-                if ($idle !== null && is_int($idle) || is_float($idle)) {
+                if ($idle !== null && (is_int($idle) || is_float($idle))) {
                     if (null === $this->_routines[0] || $this->_routines[0] > $idle) {
                         $return = true;
                         $this->_routines[1] = [$idle, $idle + milliseconds()];
@@ -879,7 +881,7 @@ class Engine {
             '%s/%s/%s.php',
             $path, 'templates', $template
         );
-        if (!file_exists($template_file) {
+        if (!file_exists($template_file)) {
             throw new \InvalidArgumentException(sprintf(
                 "Event analysis file %s does not exist",
                 $template_file

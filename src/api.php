@@ -276,7 +276,7 @@ function erase_history()
  *
  * @return  void
  */
-public function save_event_history($flag)
+function save_event_history($flag)
 {
     return prggmr::instance()->save_event_history($flag);
 }

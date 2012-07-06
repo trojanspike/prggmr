@@ -16,13 +16,6 @@ use \LogicException;
 abstract class Complex extends Standard {
 
     /**
-     * Vars assigned to the signal to pass the handler.
-     * 
-     * @var  array
-     */
-    protected $_vars = null;
-
-    /**
      * Custom event object for a signal.
      * 
      * @var  object
@@ -126,13 +119,45 @@ abstract class Complex extends Standard {
     }
 
     /**
-     * Returns any variables to provide the signal handler.
-     * 
-     * @return  array|null
+     * Sets the idle time for the signal.
+     *
+     * @return  void
      */
-    final public function vars(/* ... */)
+    final public function set_idle_time($time)
     {
-        return $this->_vars;
+        $this->_idle_time = $time;
+    }
+
+    /**
+     * Adds a new signal to dispatch during routine calcuations.
+     *
+     * @param  object|int|string  $signal  Signal to dispatch
+     * @param  object|null  $event  Event object or null
+     * @param  string|array|null  $vars  Variables to pass handlers.
+     *
+     * @return  void
+     */
+    final public function add_dispatch_signal($signal, $event = null, $vars = null)
+    {
+        if (!is_array($this->_dispatch_signals)) {
+            $this->_dispatch_signals = [];
+        }
+        $this->_dispatch_signals[] = [
+            $signal, $event, $vars
+        ];
+        return $this;
+    }
+
+    /**
+     * Sets a function for the engine to run during idle.
+     *
+     * @param  closure  $function  Function to run to idle.
+     * 
+     * @return  void
+     */
+    final public function set_idle_function($function)
+    {
+        $this->_idle_function = $function;
     }
 
     /**
